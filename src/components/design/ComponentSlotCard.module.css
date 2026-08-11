@@ -1,0 +1,64 @@
+.card {
+  background: var(--color-panel-dark);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.cycler {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.arrow {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.optionInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.optionName {
+  font-weight: 700;
+  text-align: center;
+}
+
+.index {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+.description {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.costDelta {
+  color: var(--color-green);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.lockedHint {
+  color: var(--color-text-disabled);
+  font-size: 0.75rem;
+}

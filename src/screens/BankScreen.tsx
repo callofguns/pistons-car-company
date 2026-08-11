@@ -6,6 +6,7 @@ import { computeAmortizedPayment } from '../core/economy'
 import { StatRow } from '../components/StatRow'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
+import bankStyles from './BankScreen.module.css'
 
 const CATEGORY_LABEL: Record<TransactionCategory, string> = {
   Sales: 'Sales',
@@ -81,10 +82,7 @@ export function BankScreen() {
         {LOAN_TIERS.map((tier) => {
           const payment = computeAmortizedPayment(tier.principal, tier.annualInterestRate, tier.termMonths)
           return (
-            <div
-              key={tier.id}
-              style={{ background: 'var(--color-panel-dark)', borderRadius: 'var(--radius)', padding: 16, width: 240, display: 'flex', flexDirection: 'column', gap: 8 }}
-            >
+            <div key={tier.id} className={bankStyles.loanCard}>
               <strong>{tier.displayName}</strong>
               <span>{plainCurrency(tier.principal)}</span>
               <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>

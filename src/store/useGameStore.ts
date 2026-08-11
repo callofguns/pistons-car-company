@@ -17,11 +17,14 @@ import {
   finalizeDesign as coreFinalizeDesign,
   previewCurrentStats as corePreviewCurrentStats,
   selectBody as coreSelectBody,
+  setComponentSelection as coreSetComponentSelection,
   setCustomPrice as coreSetCustomPrice,
+  setEnginePreset as coreSetEnginePreset,
   setEngineSpec as coreSetEngineSpec,
   setNameAndCategory as coreSetNameAndCategory,
   setOnSale as coreSetOnSale,
   setSalePrice as coreSetSalePrice,
+  toggleClassificationTag as coreToggleClassificationTag,
 } from '../core/vehicleService'
 import type { EngineSpec } from '../core/vehicles'
 
@@ -47,6 +50,9 @@ interface GameStore {
   beginNewDesign: () => void
   beginRestyling: (modelId: string) => void
   selectBody: (bodyId: string) => boolean
+  toggleClassificationTag: (tagId: string) => void
+  setComponentSelection: (slotId: string, optionId: string) => void
+  setEnginePreset: (presetId: string) => void
   setEngineSpec: (spec: EngineSpec) => void
   setNameAndCategory: (name: string, categoryTag: string) => void
   setCustomPrice: (price: number) => void
@@ -119,9 +125,24 @@ export const useGameStore = create<GameStore>((set, get) => {
       const { world, catalog } = get()
       const body = catalog.bodies.find((b) => b.id === bodyId)
       if (!body) return false
-      const ok = coreSelectBody(world.vehicles, body, world.bank)
+      const ok = coreSelectBody(world.vehicles, body, world.bank, world.time.currentDate.year)
       bump()
       return ok
+    },
+
+    toggleClassificationTag: (tagId) => {
+      coreToggleClassificationTag(get().world.vehicles, tagId)
+      bump()
+    },
+
+    setComponentSelection: (slotId, optionId) => {
+      coreSetComponentSelection(get().world.vehicles, slotId, optionId)
+      bump()
+    },
+
+    setEnginePreset: (presetId) => {
+      coreSetEnginePreset(get().world.vehicles, presetId)
+      bump()
     },
 
     setEngineSpec: (spec) => {

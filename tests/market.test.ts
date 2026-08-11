@@ -42,7 +42,7 @@ function buildModel(inventory: number) {
   const vehicles = createVehicleState()
 
   beginNewDesign(vehicles)
-  selectBody(vehicles, body, bank)
+  selectBody(vehicles, body, bank, 1974)
   setEngineSpec(vehicles, DEFAULT_ENGINE_SPEC)
   setNameAndCategory(vehicles, 'Test Model', 'TEST')
   const model = finalizeDesign(vehicles, [body], new TechModifiers(), today, 1_000_000)

@@ -22,8 +22,8 @@ export function ResearchScreen() {
   const nodes = nodesInCategory(CATALOG, selected)
 
   return (
-    <div className={styles.columns} style={{ padding: 'var(--space-5)' }}>
-      <div className={styles.column} style={{ maxWidth: 240 }}>
+    <div className={styles.columnsPage}>
+      <div className={`${styles.column} ${styles.columnNarrow}`}>
         {CATEGORIES.map((category) => {
           const categoryNodes = nodesInCategory(CATALOG, category)
           const researchedCount = categoryNodes.filter((n) => isResearched(research, n.id)).length

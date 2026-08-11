@@ -1,0 +1,98 @@
+import { describe, expect, it } from 'vitest'
+import {
+  createVehicleState,
+  beginNewDesign,
+  selectBody,
+  setEnginePreset,
+  toggleClassificationTag,
+} from '../src/core/vehicleService'
+import { createBank } from '../src/core/economy'
+import { findEnginePreset } from '../src/data/enginePresets'
+import { DESIGN_STEPS } from '../src/data/designSteps'
+import type { BodyStyleDefinition } from '../src/core/vehicles'
+
+const bigBody: BodyStyleDefinition = {
+  id: 'big-body',
+  displayName: 'Big Body',
+  carClass: 'SUV',
+  engineBayCapacityLiters: 7,
+  baseWeightKg: 2000,
+  productionEquipmentCost: 0,
+  baseUnitCost: 5000,
+  unlockYear: 1950,
+}
+
+const smallBody: BodyStyleDefinition = {
+  id: 'small-body',
+  displayName: 'Small Body',
+  carClass: 'Coupe',
+  engineBayCapacityLiters: 1.2,
+  baseWeightKg: 900,
+  productionEquipmentCost: 0,
+  baseUnitCost: 2500,
+  unlockYear: 1950,
+}
+
+describe('selectBody', () => {
+  it('seeds every component slot with a default option and a fitting, unlocked engine preset', () => {
+    const vehicles = createVehicleState()
+    const bank = createBank(1_000_000)
+    beginNewDesign(vehicles)
+
+    selectBody(vehicles, bigBody, bank, 1974)
+
+    const session = vehicles.currentSession!
+    const totalSlots = DESIGN_STEPS.flatMap((s) => s.slots).length
+    expect(Object.keys(session.componentSelections)).toHaveLength(totalSlots)
+
+    const preset = findEnginePreset(session.enginePresetId!)
+    expect(preset).toBeDefined()
+    expect(preset!.spec.displacementLiters).toBeLessThanOrEqual(bigBody.engineBayCapacityLiters)
+    expect(preset!.unlockYear).toBeLessThanOrEqual(1974)
+  })
+
+  it('re-picks a fitting engine preset when a bigger preset no longer fits a newly selected body', () => {
+    const vehicles = createVehicleState()
+    const bank = createBank(1_000_000)
+    beginNewDesign(vehicles)
+
+    selectBody(vehicles, bigBody, bank, 1974)
+    setEnginePreset(vehicles, 'muscle-v8') // 5.0L - fits the 7L body, would not fit the 1.2L one
+    expect(vehicles.currentSession!.engine.displacementLiters).toBe(5.0)
+
+    selectBody(vehicles, smallBody, bank, 1974)
+
+    expect(vehicles.currentSession!.engine.displacementLiters).toBeLessThanOrEqual(smallBody.engineBayCapacityLiters)
+    const preset = findEnginePreset(vehicles.currentSession!.enginePresetId!)
+    expect(preset!.spec.displacementLiters).toBeLessThanOrEqual(smallBody.engineBayCapacityLiters)
+  })
+
+  it('leaves an engine preset untouched when the newly selected body can still fit it', () => {
+    const vehicles = createVehicleState()
+    const bank = createBank(1_000_000)
+    beginNewDesign(vehicles)
+
+    selectBody(vehicles, bigBody, bank, 1974)
+    setEnginePreset(vehicles, 'standard-i4') // 1.6L - fits both bodies
+    selectBody(vehicles, bigBody, bank, 1974) // re-selecting the same body shouldn't reset it
+
+    expect(vehicles.currentSession!.enginePresetId).toBe('standard-i4')
+  })
+})
+
+describe('toggleClassificationTag', () => {
+  it('selects up to 2 tags, deselects an already-selected one, and ignores a 3rd', () => {
+    const vehicles = createVehicleState()
+    beginNewDesign(vehicles)
+
+    toggleClassificationTag(vehicles, 'medium')
+    toggleClassificationTag(vehicles, 'sport')
+    expect(vehicles.currentSession!.classificationTagIds).toEqual(['medium', 'sport'])
+
+    toggleClassificationTag(vehicles, 'luxury') // 3rd tag while 2 are already selected - ignored
+    expect(vehicles.currentSession!.classificationTagIds).toEqual(['medium', 'sport'])
+
+    toggleClassificationTag(vehicles, 'medium') // deselect
+    expect(vehicles.currentSession!.classificationTagIds).toEqual(['sport'])
+  })
+})

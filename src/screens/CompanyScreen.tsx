@@ -12,8 +12,8 @@ export function CompanyScreen() {
   const rumors = useGameStore((s) => s.world.rumors)
 
   return (
-    <div className={styles.columns} style={{ padding: 'var(--space-5)' }}>
-      <div className={styles.column} style={{ maxWidth: 380 }}>
+    <div className={styles.columnsPage}>
+      <div className={`${styles.column} ${styles.columnMedium}`}>
         <div style={{ fontSize: '4rem', textAlign: 'center' }}>🐎</div>
         <Heading style={{ textAlign: 'center' }}>{company.companyName}</Heading>
         <span style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>{company.homeCity.toUpperCase()}</span>

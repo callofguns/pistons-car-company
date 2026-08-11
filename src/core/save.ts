@@ -51,10 +51,10 @@ export interface SaveGameData {
   racingTeamName: string
 }
 
-// Bumped for the loans/bankruptcy fields added in the economic-system deepening pass. No
-// migration path - saves from an older schema are treated as absent and the player starts fresh
-// (acceptable pre-1.0; see isCompatibleSave).
-const CURRENT_SCHEMA_VERSION = 2
+// Bumped for the classificationTagIds/componentSelections/enginePresetId fields the car design
+// wizard rebuild added to CarModel. No migration path - saves from an older schema are treated as
+// absent and the player starts fresh (acceptable pre-1.0; see isCompatibleSave).
+const CURRENT_SCHEMA_VERSION = 3
 
 export function isCompatibleSave(data: SaveGameData): boolean {
   return data.schemaVersion === CURRENT_SCHEMA_VERSION

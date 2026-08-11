@@ -11,12 +11,13 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-width: 280px;
+  flex: none;
 }
 
 .titleColumn {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .menuLabel {
@@ -27,6 +28,7 @@
 .screenTitle {
   font-size: 1.1rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .pills {
@@ -48,4 +50,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.debtPill {
+  background: var(--color-red);
+  color: var(--color-text-primary);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* On a landscape phone every pixel of height matters - collapse the "Menu" label and shrink the
+   pill/icon-button chrome down to a single compact row instead of the desktop bar's roomier one.
+   Placed after every base rule it overrides - media queries don't add specificity, so an
+   unconditional rule appearing later in the file would otherwise win even while this matches. */
+@media (max-height: 560px) {
+  .menuLabel {
+    display: none;
+  }
+
+  .screenTitle {
+    font-size: 0.9rem;
+  }
+
+  .iconButton {
+    width: 32px;
+    height: 32px;
+  }
 }

@@ -1,0 +1,35 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  min-width: 110px;
+}
+
+.side:last-child {
+  text-align: right;
+}
+
+.label {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.value {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.earnings {
+  color: var(--color-green);
+  font-size: 0.85rem;
+}
+
+.slider {
+  flex: 1;
+  accent-color: var(--color-blue);
+}

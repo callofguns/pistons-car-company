@@ -26,12 +26,41 @@
   min-height: 0;
 }
 
+/* Modifier for screens that use .columns as their outermost element (Research, Company) instead
+   of nesting it inside .screen (Model Lineup) - carries the padding/scroll .screen would normally
+   provide, so those screens don't need to inline it themselves. */
+.columnsPage {
+  composes: columns;
+  padding: var(--space-5);
+  overflow-y: auto;
+}
+
 .column {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   min-width: 0;
+}
+
+/* Fixed sidebar widths, CSS-driven instead of inline so the max-height breakpoint below can
+   shrink them - a landscape phone can't spare 240-380px for a sidebar next to real content. */
+.columnNarrow {
+  max-width: 240px;
+}
+
+.columnMedium {
+  max-width: 380px;
+}
+
+@media (max-height: 560px) {
+  .columnNarrow {
+    max-width: 140px;
+  }
+
+  .columnMedium {
+    max-width: 200px;
+  }
 }
 
 .grid {

@@ -3,6 +3,7 @@ import { useGameStore } from './store/useGameStore'
 import { useSimulationLoop } from './store/useSimulationLoop'
 import { TopHud } from './components/TopHud'
 import { BankruptcyOverlay } from './components/BankruptcyOverlay'
+import { RotateDeviceGate } from './components/RotateDeviceGate'
 import { SCREENS } from './screens'
 
 export function App() {
@@ -13,12 +14,19 @@ export function App() {
   useGameStore((s) => s.revision)
   const isBankrupt = useGameStore((s) => s.world.company.isBankrupt)
 
-  if (isBankrupt) return <BankruptcyOverlay />
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <TopHud />
-      <ScreenComponent />
-    </div>
+    <>
+      {/* Rendered unconditionally ahead of everything else - purely CSS-gated (see the
+          component), so it covers the normal screen router and the bankruptcy overlay alike. */}
+      <RotateDeviceGate />
+      {isBankrupt ? (
+        <BankruptcyOverlay />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <TopHud />
+          <ScreenComponent />
+        </div>
+      )}
+    </>
   )
 }

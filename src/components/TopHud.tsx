@@ -49,11 +49,7 @@ export function TopHud() {
         {/* Cash itself stays off the persistent HUD by design, but a negative balance is a genuine
             emergency (it's what feeds the bankruptcy countdown) - this pill only appears then, so
             a player browsing other screens still gets a warning signal. */}
-        {bank.balance < 0 && (
-          <span style={{ background: 'var(--color-red)', color: 'var(--color-text-primary)', borderRadius: 'var(--radius)', padding: '6px 10px', fontSize: '0.9rem', fontWeight: 700 }}>
-            ⚠ IN DEBT
-          </span>
-        )}
+        {bank.balance < 0 && <span className={styles.debtPill}>⚠ IN DEBT</span>}
       </div>
 
       <div className={styles.right}>

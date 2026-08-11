@@ -52,7 +52,7 @@ export function BodySelectionScreen() {
         onClick={() => {
           if (selectBody(body.id)) {
             setError(false)
-            show('EngineDesign')
+            show('CarDesign')
           } else {
             setError(true)
           }

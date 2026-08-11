@@ -1,4 +1,5 @@
 import type { GameDate } from './gameDate'
+import type { DesignStats } from './designStats'
 
 /** The five body classes the player can design in, per the game brief. */
 export type CarClass = 'Sedan' | 'SUV' | 'Sports' | 'Coupe' | 'Truck'
@@ -56,6 +57,10 @@ export interface CarPerformanceStats {
   rating: number
   unitCost: number
   suggestedPrice: number
+  /** The 6 component-driven meters (Safety/Handling/Offroad/Comfort/Prestige/Attractiveness), 0-100 each. */
+  designStats: DesignStats
+  /** How well designStats matches the design's classification tags, 0-100; scales suggestedPrice. */
+  designFitPercent: number
 }
 
 /** A produced, sellable model in the player's lineup. Plain JSON-serializable data - no class instance, no engine object references (body is looked up by bodyStyleId when needed). */
@@ -65,6 +70,12 @@ export interface CarModel {
   bodyStyleId: string
   categoryTag: string
   engine: EngineSpec
+  /** Which named preset in src/data/enginePresets.ts produced `engine`, if any (null if never set). */
+  enginePresetId: string | null
+  /** The 2 classification tag ids chosen in the design wizard (e.g. ['medium', 'sport']). */
+  classificationTagIds: string[]
+  /** Every component slot's chosen option id, keyed by slot id (e.g. 'body-material': 'aluminum'). */
+  componentSelections: Record<string, string>
   stats: CarPerformanceStats
   issueDate: GameDate
   unitCost: number
@@ -85,10 +96,16 @@ export interface CarModel {
   marketingEfficiencyMultiplier: number
 }
 
-/** Transient wizard state for the Body Selection -> Engine Design -> Style & Pricing flow. Never saved - if the page reloads mid-design the player starts over. */
+/** Transient wizard state for the Body Selection -> Car Design (Classification -> Safety -> Engine
+ * -> ... -> Pricing) flow. Never saved - if the page reloads mid-design the player starts over. */
 export interface ModelDesignSession {
   selectedBodyId: string | null
   engine: EngineSpec
+  enginePresetId: string | null
+  classificationTagIds: string[]
+  /** Every component slot's chosen option id, keyed by slot id. Empty until vehicleService seeds
+   * defaults (each slot's first option) once a body is selected - see selectBody. */
+  componentSelections: Record<string, string>
   name: string
   categoryTag: string
   customPrice: number | null
@@ -100,6 +117,9 @@ export function createDesignSession(): ModelDesignSession {
   return {
     selectedBodyId: null,
     engine: { ...DEFAULT_ENGINE_SPEC },
+    enginePresetId: null,
+    classificationTagIds: [],
+    componentSelections: {},
     name: '',
     categoryTag: '',
     customPrice: null,

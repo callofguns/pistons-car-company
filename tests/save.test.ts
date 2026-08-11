@@ -58,7 +58,7 @@ describe('save/load round trip', () => {
     const vehicles = createVehicleState()
     const bank = createBank(1_000_000)
     beginNewDesign(vehicles)
-    selectBody(vehicles, body, bank)
+    selectBody(vehicles, body, bank, 1974)
     setEngineSpec(vehicles, DEFAULT_ENGINE_SPEC)
     setNameAndCategory(vehicles, 'Coupe B200', 'TEST')
     const model = finalizeDesign(vehicles, [body], new TechModifiers(), makeDate(1974, 1, 1), 100_000)

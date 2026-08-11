@@ -1,0 +1,114 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.backButton {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.breadcrumb {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.title {
+  margin: 0;
+}
+
+.costPrice {
+  margin-left: auto;
+  text-align: right;
+}
+
+.costPriceLabel {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+.costPriceValue {
+  color: var(--color-green);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+.slots {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.specSheet {
+  flex: 1;
+  min-width: 220px;
+}
+
+.meters {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.meter {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meterLabel {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.nameField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 420px;
+}
+
+.nameField input {
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  border: none;
+  background: var(--color-panel-dark);
+  color: var(--color-text-primary);
+  font-size: 1rem;
+}
+
+.comingSoon {
+  background: var(--color-panel-dark);
+  border: 1px dashed var(--color-text-disabled);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.continueButton {
+  width: 100%;
+}

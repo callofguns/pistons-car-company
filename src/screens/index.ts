@@ -3,8 +3,7 @@ import type { ScreenId } from '../store/screenId'
 import { MainMenuScreen } from './MainMenuScreen'
 import { OfficeHubScreen } from './OfficeHubScreen'
 import { BodySelectionScreen } from './BodySelectionScreen'
-import { EngineDesignScreen } from './EngineDesignScreen'
-import { StylePricingScreen } from './StylePricingScreen'
+import { CarDesignScreen } from './CarDesignScreen'
 import { ModelLineupScreen } from './ModelLineupScreen'
 import { SalesStatisticsScreen } from './SalesStatisticsScreen'
 import { ResearchScreen } from './ResearchScreen'
@@ -18,8 +17,7 @@ export const SCREENS: Record<ScreenId, ComponentType> = {
   MainMenu: MainMenuScreen,
   OfficeHub: OfficeHubScreen,
   BodySelection: BodySelectionScreen,
-  EngineDesign: EngineDesignScreen,
-  StylePricing: StylePricingScreen,
+  CarDesign: CarDesignScreen,
   ModelLineup: ModelLineupScreen,
   SalesStatistics: SalesStatisticsScreen,
   Research: ResearchScreen,
