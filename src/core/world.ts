@@ -9,7 +9,7 @@ import { onMarketingDayTick } from './marketing'
 import { onProductionDayTick } from './production'
 import { createRacingState, type RacingState } from './racing'
 import { onResearchDayTick, createResearchState, type ResearchState } from './research'
-import { createStaffState, onStaffDayTick, productionSpeedBonusPercent, type StaffState } from './staff'
+import { createStaffState, onStaffDayTick, onStaffMonthTick, productionSpeedBonusPercent, type StaffState } from './staff'
 import { createTimeState, tickTime, type TimeState } from './time'
 import { resolveBody, createVehicleState, type VehicleState } from './vehicleService'
 
@@ -50,11 +50,10 @@ export function createNewWorld(config: GameConfig): World {
   }
 }
 
-/** Fixed daily tick order: research unlocks feed design, staff sets capacity, production fills stock, marketing/market sell it, then the financial-risk checks (overdraft interest, bankruptcy) run last so they see the day's final balance. Mirrors SimulationRunner.cs's system order exactly, extended with the new financial-risk systems. */
+/** Fixed daily tick order: research unlocks feed design, staff sets capacity, production fills stock, marketing/market sell it, then the financial-risk checks (overdraft interest, bankruptcy) run last so they see the day's final balance. Mirrors SimulationRunner.cs's system order exactly, extended with the new financial-risk systems. HQ overhead and staff wages are billed once a month (see the day===1 block below), not prorated daily. */
 export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig, today: GameDate): void {
   onResearchDayTick(world.research, catalog.researchNodes, config.researchPointsPerDay)
-  onStaffDayTick(world.staff, world.bank, world.ledger, today)
-  payMandatory(world.bank, world.ledger, config.hqOverheadPerMonth / 30, 'HQOverhead', today)
+  onStaffDayTick(world.staff)
   onProductionDayTick(world.vehicles.models, world.bank, world.ledger, today, productionSpeedBonusPercent(world.staff))
   onMarketingDayTick(world.vehicles.models)
 
@@ -76,6 +75,8 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
 
   if (today.day === 1) {
     onLoanMonthTick(world.bank, world.ledger, today)
+    onStaffMonthTick(world.staff, world.bank, world.ledger, today)
+    payMandatory(world.bank, world.ledger, config.hqOverheadPerMonth, 'HQOverhead', today)
     onLedgerMonthTick(world.ledger)
   }
 

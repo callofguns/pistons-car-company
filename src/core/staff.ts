@@ -57,11 +57,8 @@ export function setBudgetLevel(staff: StaffState, level01: number): void {
   recompute(staff)
 }
 
-/** Wages are a mandatory expense - the company can't just skip payroll, so this can push the balance negative rather than silently failing when cash is short. */
-export function onStaffDayTick(staff: StaffState, bank: BankState, ledger: LedgerState, today: GameDate): void {
-  const dailyExpense = staff.monthlyExpense / 30
-  payMandatory(bank, ledger, dailyExpense, 'Staff', today)
-
+/** Staff XP/headcount growth only - wages are billed once a month, see onStaffMonthTick. */
+export function onStaffDayTick(staff: StaffState): void {
   staff.experienceProgress01 += XP_PER_DAY * (0.5 + staff.budgetLevel01)
   while (staff.experienceProgress01 >= 1 && staff.experienceLevel < MAX_STAFF_LEVEL) {
     staff.experienceProgress01 -= 1
@@ -75,6 +72,11 @@ export function onStaffDayTick(staff: StaffState, bank: BankState, ledger: Ledge
       ? 0
       : Math.round(((staff.headcount - staff.previousHeadcount) / staff.previousHeadcount) * 100)
   staff.previousHeadcount = staff.headcount
+}
+
+/** Call on month rollover (day === 1): wages are a mandatory expense - the company can't just skip payroll, so this can push the balance negative rather than silently failing when cash is short. */
+export function onStaffMonthTick(staff: StaffState, bank: BankState, ledger: LedgerState, today: GameDate): void {
+  payMandatory(bank, ledger, staff.monthlyExpense, 'Staff', today)
 }
 
 function recompute(staff: StaffState): void {

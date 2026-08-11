@@ -17,7 +17,7 @@ export interface GameConfig {
   racingUnlockYear: number
   autosaveOnMonthRollover: boolean
 
-  /** Flat monthly HQ maintenance cost, charged as a mandatory expense alongside staff wages. Placeholder until real HQ leveling (spec Section 4) replaces it. */
+  /** Flat monthly HQ maintenance cost, billed in full on the 1st of each month alongside staff wages (not prorated daily). Placeholder until real HQ leveling (spec Section 4) replaces it. */
   hqOverheadPerMonth: number
   /** Daily compounding interest rate charged while the balance is negative. */
   overdraftDailyInterestRate: number
