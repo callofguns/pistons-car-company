@@ -38,6 +38,7 @@ interface GameStore {
   tick: (deltaSeconds: number) => void
   saveNow: () => void
   startNewGame: () => void
+  setPaused: (paused: boolean) => void
 
   beginNewDesign: () => void
   beginRestyling: (modelId: string) => void
@@ -88,6 +89,10 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     saveNow: () => saveToStorage(buildSaveData(get().world)),
+
+    setPaused: (paused) => {
+      get().world.time.isPaused = paused
+    },
 
     startNewGame: () => {
       clearStorage()

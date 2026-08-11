@@ -4,14 +4,11 @@ import { ModelSalesRow } from '../components/ModelSalesRow'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
 
-const AD_BONUS_AMOUNT = 5_000_000
-
-/** The true home screen - no top HUD (matches the reference). Ad bonus is a placeholder cash grant, not a real ad SDK. */
+/** The true home screen - no top HUD (matches the reference). Also the only screen where game time advances - see useSimulationLoop. */
 export function OfficeHubScreen() {
   const show = useUiStore((s) => s.show)
   useGameStore((s) => s.revision)
   const models = useGameStore((s) => s.world.vehicles.models)
-  const claimAdBonus = useGameStore((s) => s.claimAdBonus)
   const beginNewDesign = useGameStore((s) => s.beginNewDesign)
 
   const topModels = [...models].sort((a, b) => b.lifetimeEarnings - a.lifetimeEarnings).slice(0, 4)
@@ -19,10 +16,6 @@ export function OfficeHubScreen() {
   return (
     <div className={styles.screen}>
       <Heading>OFFICE</Heading>
-
-      <Button variant="gold" onClick={() => claimAdBonus(AD_BONUS_AMOUNT)}>
-        BONUS FOR WATCHING ADS
-      </Button>
 
       <Heading style={{ fontSize: '1.1rem' }}>SALES</Heading>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minHeight: 100 }}>
