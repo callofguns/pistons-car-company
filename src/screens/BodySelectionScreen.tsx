@@ -8,9 +8,12 @@ import { MeterBar } from '../components/MeterBar'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
 
-/** Step 1 of the design wizard. Selecting CONTINUE charges the one-time tooling cost (first time only per body) and advances to Engine Design. */
+/** Step 1 of the design wizard - runs full-screen (see SCREENS_WITHOUT_HUD), so its own back
+ * button is what gets the player out, not the persistent top bar. Selecting CONTINUE charges the
+ * one-time tooling cost (first time only per body) and advances to Car Design. */
 export function BodySelectionScreen() {
   const show = useUiStore((s) => s.show)
+  const back = useUiStore((s) => s.back)
   useGameStore((s) => s.revision)
   const selectBody = useGameStore((s) => s.selectBody)
   const tooledBodyIds = useGameStore((s) => s.world.vehicles.tooledBodyIds)
@@ -23,7 +26,18 @@ export function BodySelectionScreen() {
   const alreadyTooled = tooledBodyIds.includes(body.id)
 
   return (
-    <div className={`${styles.screen} ${styles.centered} ${styles.narrow}`}>
+    <div
+      className={`${styles.screen} ${styles.centered} ${styles.narrow}`}
+      style={{ position: 'relative', justifyContent: 'center' }}
+    >
+      <Button
+        style={{ position: 'absolute', top: 'var(--space-4)', left: 'var(--space-4)', width: 44, height: 44, padding: 0 }}
+        onClick={back}
+        aria-label="Back"
+      >
+        ‹
+      </Button>
+
       <span style={{ color: 'var(--color-green)', fontSize: '1.1rem' }}>
         Production equipment cost: {alreadyTooled ? 'Owned' : compact(body.productionEquipmentCost)}
       </span>

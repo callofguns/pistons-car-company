@@ -1,10 +1,12 @@
 import { create } from 'zustand'
 import type { ScreenId } from './screenId'
 
-/** Main Menu is the title screen, before a session is really "in progress" from the player's
- * point of view - the persistent stat bar was asked to come back off of it specifically. Every
- * other screen, including Office Hub, keeps it always visible. */
-const SCREENS_WITHOUT_HUD = new Set<ScreenId>(['MainMenu'])
+/** Main Menu is the title screen, before a session is really "in progress" - the persistent stat
+ * bar was asked to come back off of it specifically. The whole car-building process (Body
+ * Selection through the design wizard) also runs full-screen without it, as its own focused,
+ * distraction-free flow - both screens own their own in-screen back navigation, so nothing is
+ * lost by dropping the bar there. Every other screen, including Office Hub, keeps it visible. */
+const SCREENS_WITHOUT_HUD = new Set<ScreenId>(['MainMenu', 'BodySelection', 'CarDesign'])
 
 export function screenWantsTopHud(screen: ScreenId): boolean {
   return !SCREENS_WITHOUT_HUD.has(screen)
