@@ -63,10 +63,11 @@ const DESIGN_STAT_LABELS: Record<DesignStatKey, string> = {
   attractiveness: 'Attractiveness',
 }
 
-/** Steps with no meaningful Cost Price yet (Classification hasn't touched a component; SafetyRating
- * and Finish are full-bleed interstitials) - everything else shows it, matching the reference's
- * persistent COST PRICE header on every customization screen. */
-const HIDES_COST_PRICE = new Set<WizardStepId>(['Classification', 'SafetyRating', 'Finish'])
+/** Steps with no meaningful Cost Price header (Classification hasn't touched a component;
+ * SafetyRating and Finish are full-bleed interstitials; Pricing already shows Cost Price as part
+ * of its own PriceSlider, so repeating it in the header would be redundant) - everything else
+ * shows it, matching the reference's persistent COST PRICE header on every customization screen. */
+const HIDES_COST_PRICE = new Set<WizardStepId>(['Classification', 'SafetyRating', 'Finish', 'Pricing'])
 
 function stepMeta(stepId: WizardStepId) {
   const meta = STEP_META[stepId]
