@@ -81,18 +81,26 @@ describe('selectBody', () => {
 })
 
 describe('toggleClassificationTag', () => {
-  it('selects up to 2 tags, deselects an already-selected one, and ignores a 3rd', () => {
+  it('selects one class tag and one type tag, deselects an already-selected one', () => {
     const vehicles = createVehicleState()
     beginNewDesign(vehicles)
 
-    toggleClassificationTag(vehicles, 'medium')
-    toggleClassificationTag(vehicles, 'sport')
-    expect(vehicles.currentSession!.classificationTagIds).toEqual(['medium', 'sport'])
-
-    toggleClassificationTag(vehicles, 'luxury') // 3rd tag while 2 are already selected - ignored
+    toggleClassificationTag(vehicles, 'medium') // class
+    toggleClassificationTag(vehicles, 'sport') // type
     expect(vehicles.currentSession!.classificationTagIds).toEqual(['medium', 'sport'])
 
     toggleClassificationTag(vehicles, 'medium') // deselect
     expect(vehicles.currentSession!.classificationTagIds).toEqual(['sport'])
+  })
+
+  it('picking a new tag in an already-filled category replaces that category\'s tag, not the other one', () => {
+    const vehicles = createVehicleState()
+    beginNewDesign(vehicles)
+
+    toggleClassificationTag(vehicles, 'medium') // class
+    toggleClassificationTag(vehicles, 'sport') // type
+    toggleClassificationTag(vehicles, 'luxury') // another class tag - should replace 'medium', not 'sport'
+
+    expect(vehicles.currentSession!.classificationTagIds).toEqual(['sport', 'luxury'])
   })
 })

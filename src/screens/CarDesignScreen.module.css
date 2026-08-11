@@ -57,6 +57,16 @@
   justify-content: center;
 }
 
+/* Classification runs its own two-column full-height layout (see ClassificationPicker) rather
+   than a small centered card, so it needs the opposite of .body's default centering: stretch to
+   fill the available width/height instead of shrinking to content size. */
+.classificationBody {
+  align-content: stretch;
+  align-items: stretch;
+  justify-content: stretch;
+  flex-wrap: nowrap;
+}
+
 .slots {
   flex: 1;
   min-width: 220px;

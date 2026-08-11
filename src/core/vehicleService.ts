@@ -104,15 +104,24 @@ export function selectBody(vehicles: VehicleState, body: BodyStyleDefinition, ba
   return true
 }
 
+/** Class and Type are two independent single-select slots, not a shared 2-of-7 pool: picking a
+ * new tag replaces whichever tag (if any) of the same category is already selected, rather than
+ * being rejected once 2 tags are picked regardless of category. */
 export function toggleClassificationTag(vehicles: VehicleState, tagId: string): void {
   if (!vehicles.currentSession) beginNewDesign(vehicles)
   const session = vehicles.currentSession!
+  const tag = findClassificationTag(tagId)
+  if (!tag) return
+
   if (session.classificationTagIds.includes(tagId)) {
     session.classificationTagIds = session.classificationTagIds.filter((id) => id !== tagId)
-  } else if (session.classificationTagIds.length < 2) {
-    session.classificationTagIds = [...session.classificationTagIds, tagId]
+    return
   }
-  // Already have 2 tags and this one isn't among them - ignore, matching the reference's 2-slot picker.
+
+  const withoutSameCategory = session.classificationTagIds.filter(
+    (id) => findClassificationTag(id)?.category !== tag.category,
+  )
+  session.classificationTagIds = [...withoutSameCategory, tagId]
 }
 
 export function setComponentSelection(vehicles: VehicleState, slotId: string, optionId: string): void {
