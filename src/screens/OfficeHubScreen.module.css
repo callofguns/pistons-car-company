@@ -1,0 +1,64 @@
+.hub {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.topLeft {
+  position: absolute;
+  top: var(--space-5);
+  left: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 260px;
+}
+
+.modelsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.empty {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.bottomLeft {
+  position: absolute;
+  bottom: var(--space-5);
+  left: var(--space-5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  max-width: 360px;
+}
+
+/* "Credit card" button - a deliberately elongated rectangle, not a full-width bar, set apart from
+   the rest of the nav cluster in the opposite corner. */
+.financeButton {
+  position: absolute;
+  bottom: var(--space-5);
+  right: var(--space-5);
+  width: 200px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: 1.05rem;
+}
+
+@media (max-height: 560px) {
+  .topLeft {
+    max-width: 200px;
+  }
+
+  .financeButton {
+    width: 160px;
+    height: 48px;
+    font-size: 0.9rem;
+  }
+}
