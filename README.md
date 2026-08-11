@@ -45,4 +45,6 @@ src/
 
 ## Deployment
 
-Pushing to `main` builds and deploys to GitHub Pages automatically via `.github/workflows/deploy.yml`. The live site: _(added once the repo is created and Pages is enabled)_.
+Pushing to `main` builds and deploys to GitHub Pages automatically via `.github/workflows/deploy.yml`.
+
+**Live site: https://callofguns.github.io/pistons-car-company/**
