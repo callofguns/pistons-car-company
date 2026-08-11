@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 import path from 'node:path'
 
 // Must match the GitHub repo name for project-page Pages URLs
@@ -10,7 +11,37 @@ const REPO_NAME = 'pistons-car-company'
 
 export default defineConfig({
   base: process.env.GITHUB_PAGES ? `/${REPO_NAME}/` : '/',
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      // The app is fully client-side (localStorage save, no backend calls at all), so the
+      // default generateSW strategy - precache the whole build output, serve from cache, revalidate
+      // in the background - covers 100% of it with no custom runtime-caching rules needed.
+      // apple-touch-icon.png is only referenced from index.html's <link>, not manifest.icons, so
+      // it needs to be listed explicitly to end up in the precache too.
+      includeAssets: ['apple-touch-icon.png'],
+      manifest: {
+        name: 'Pistons: Car Company Inc.',
+        short_name: 'Pistons',
+        description: 'A 2D car company tycoon game.',
+        start_url: '.',
+        scope: '.',
+        display: 'standalone',
+        // The actual fix for real orientation lock on Android - installed PWAs get this enforced
+        // natively by Chrome. iOS has no orientation-lock API in any context, PWA or not, so the
+        // in-app RotateDeviceGate CSS overlay remains the permanent fallback there regardless.
+        orientation: 'landscape',
+        background_color: '#0b0e19', // --color-background
+        theme_color: '#1a2136', // --color-panel-dark
+        icons: [
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+      },
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

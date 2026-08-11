@@ -4,6 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Pistons: Car Company Inc.</title>
+
+    <meta name="theme-color" content="#1a2136" />
+
+    <!-- iOS ignores manifest.json for "Add to Home Screen" behavior - these are what make it
+         open standalone (no browser chrome) with the right icon there. vite-plugin-pwa injects
+         the manifest link and service-worker registration itself at build time; it does not add
+         these Apple-specific tags, so they're explicit here. -->
+    <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Pistons" />
   </head>
   <body>
     <div id="root"></div>
