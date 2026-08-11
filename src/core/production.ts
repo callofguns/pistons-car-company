@@ -1,4 +1,6 @@
-import { canAfford, tryWithdraw, type BankState } from './economy'
+import { canAfford, tryWithdrawRecorded, type BankState } from './economy'
+import type { LedgerState } from './ledger'
+import type { GameDate } from './gameDate'
 import type { CarModel } from './vehicles'
 
 const BASE_UNITS_PER_DAY_FRACTION = 0.015 // a model can, at baseline, produce ~1.5% of its planned run per day
@@ -9,7 +11,13 @@ const BASE_UNITS_PER_DAY_FRACTION = 0.015 // a model can, at baseline, produce ~
  * models withdrawn from sale, so "Withdrawn from sale" stops selling without stopping the
  * factory. Direct port of ProductionService.cs.
  */
-export function onProductionDayTick(models: CarModel[], bank: BankState, productionSpeedBonusPercent: number): void {
+export function onProductionDayTick(
+  models: CarModel[],
+  bank: BankState,
+  ledger: LedgerState,
+  today: GameDate,
+  productionSpeedBonusPercent: number,
+): void {
   const speedMultiplier = 1 + productionSpeedBonusPercent / 100
 
   for (const model of models) {
@@ -24,7 +32,7 @@ export function onProductionDayTick(models: CarModel[], bank: BankState, product
     if (units <= 0) continue
 
     const cost = units * model.unitCost
-    if (!tryWithdraw(bank, cost)) continue
+    if (!tryWithdrawRecorded(bank, ledger, cost, 'Production', today)) continue
 
     model.inventory += units
     model.totalProduced += units

@@ -11,6 +11,10 @@ export interface CompanyState {
   autoReleasedCount: number
   totalCarsSoldAllModels: number
   lifetimeEarnings: number
+  /** Consecutive days the bank balance has been below the bankruptcy threshold - see economy.ts's checkBankruptcy. */
+  daysInsolvent: number
+  /** Soft-fail state: once true, App.tsx shows the bankruptcy overlay instead of the normal game. */
+  isBankrupt: boolean
 }
 
 export function createCompanyState(companyName: string, homeCity: string, populationServed: number): CompanyState {
@@ -23,6 +27,8 @@ export function createCompanyState(companyName: string, homeCity: string, popula
     autoReleasedCount: 0,
     totalCarsSoldAllModels: 0,
     lifetimeEarnings: 0,
+    daysInsolvent: 0,
+    isBankrupt: false,
   }
 }
 

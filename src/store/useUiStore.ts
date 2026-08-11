@@ -22,7 +22,7 @@ export const SCREEN_TITLES: Record<ScreenId, string> = {
   Promotion: 'Promotion',
   Company: 'Company',
   TeamCreation: 'Team Creation',
-  Bank: 'Game Bank',
+  Bank: 'Finance',
 }
 
 interface UiStore {

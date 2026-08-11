@@ -1,4 +1,5 @@
 import type { Catalog } from './catalog'
+import type { LoanState } from './economy'
 import type { GameConfig } from './gameConfig'
 import { makeDate } from './gameDate'
 import { createNewWorld, type World } from './world'
@@ -23,6 +24,7 @@ export interface SaveGameData {
   day: number
 
   cashBalance: number
+  loans: LoanState[]
 
   companyName: string
   homeCity: string
@@ -32,6 +34,8 @@ export interface SaveGameData {
   autoReleasedCount: number
   totalCarsSoldAllModels: number
   lifetimeEarnings: number
+  daysInsolvent: number
+  isBankrupt: boolean
 
   researchPoints: number
   researchNodes: ResearchNodeSaveEntry[]
@@ -47,7 +51,14 @@ export interface SaveGameData {
   racingTeamName: string
 }
 
-const CURRENT_SCHEMA_VERSION = 1
+// Bumped for the loans/bankruptcy fields added in the economic-system deepening pass. No
+// migration path - saves from an older schema are treated as absent and the player starts fresh
+// (acceptable pre-1.0; see isCompatibleSave).
+const CURRENT_SCHEMA_VERSION = 2
+
+export function isCompatibleSave(data: SaveGameData): boolean {
+  return data.schemaVersion === CURRENT_SCHEMA_VERSION
+}
 
 export function buildSaveData(world: World): SaveGameData {
   return {
@@ -59,6 +70,7 @@ export function buildSaveData(world: World): SaveGameData {
     day: world.time.currentDate.day,
 
     cashBalance: world.bank.balance,
+    loans: world.bank.loans,
 
     companyName: world.company.companyName,
     homeCity: world.company.homeCity,
@@ -68,6 +80,8 @@ export function buildSaveData(world: World): SaveGameData {
     autoReleasedCount: world.company.autoReleasedCount,
     totalCarsSoldAllModels: world.company.totalCarsSoldAllModels,
     lifetimeEarnings: world.company.lifetimeEarnings,
+    daysInsolvent: world.company.daysInsolvent,
+    isBankrupt: world.company.isBankrupt,
 
     researchPoints: world.research.points,
     researchNodes: Object.entries(world.research.nodeRuntime).map(([nodeId, r]) => ({
@@ -96,6 +110,7 @@ export function loadWorld(config: GameConfig, catalog: Catalog, data: SaveGameDa
 
   world.time.currentDate = makeDate(data.year, data.month, data.day)
   world.bank.balance = data.cashBalance
+  world.bank.loans = data.loans
 
   world.company.companyName = data.companyName
   world.company.homeCity = data.homeCity
@@ -105,6 +120,8 @@ export function loadWorld(config: GameConfig, catalog: Catalog, data: SaveGameDa
   world.company.autoReleasedCount = data.autoReleasedCount
   world.company.totalCarsSoldAllModels = data.totalCarsSoldAllModels
   world.company.lifetimeEarnings = data.lifetimeEarnings
+  world.company.daysInsolvent = data.daysInsolvent
+  world.company.isBankrupt = data.isBankrupt
 
   world.research.points = data.researchPoints
   for (const entry of data.researchNodes) {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { onMarketDayTick, createCompetitorState } from '../src/core/market'
 import { createBank } from '../src/core/economy'
+import { createLedgerState } from '../src/core/ledger'
 import { createCompanyState } from '../src/core/company'
 import { TechModifiers } from '../src/core/techModifiers'
 import { createVehicleState, beginNewDesign, selectBody, setEngineSpec, setNameAndCategory, finalizeDesign, resolveBody } from '../src/core/vehicleService'
@@ -33,8 +34,10 @@ const segment: MarketSegmentDefinition = {
   baseDemandPerDay: 100_000, // deliberately absurd, to try to oversell inventory
 }
 
+const TODAY = makeDate(1974, 1, 1)
+
 function buildModel(inventory: number) {
-  const today = makeDate(1974, 1, 1)
+  const today = TODAY
   const bank = createBank(1_000_000)
   const vehicles = createVehicleState()
 
@@ -55,7 +58,7 @@ describe('onMarketDayTick', () => {
     const company = createCompanyState('Test Co', 'Testville', 1_000_000)
     company.reputationPercent = 50
 
-    onMarketDayTick(vehicles.models, [segment], (m) => resolveBody([body], m), bank, company, createCompetitorState(100))
+    onMarketDayTick(vehicles.models, [segment], (m) => resolveBody([body], m), bank, createLedgerState(), TODAY, company, createCompetitorState(100))
 
     expect(model.totalSold).toBeLessThanOrEqual(5)
     expect(model.inventory).toBeGreaterThanOrEqual(0)
@@ -66,7 +69,7 @@ describe('onMarketDayTick', () => {
     const { vehicles, model, bank } = buildModel(0)
     const company = createCompanyState('Test Co', 'Testville', 1_000_000)
 
-    onMarketDayTick(vehicles.models, [segment], (m) => resolveBody([body], m), bank, company, createCompetitorState(100))
+    onMarketDayTick(vehicles.models, [segment], (m) => resolveBody([body], m), bank, createLedgerState(), TODAY, company, createCompetitorState(100))
 
     expect(model.totalSold).toBe(0)
   })
@@ -77,7 +80,7 @@ describe('onMarketDayTick', () => {
     const company = createCompanyState('Test Co', 'Testville', 1_000_000)
     company.reputationPercent = 15.5
 
-    onMarketDayTick(vehicles.models, [segment], (m) => resolveBody([body], m), bank, company, createCompetitorState(100))
+    onMarketDayTick(vehicles.models, [segment], (m) => resolveBody([body], m), bank, createLedgerState(), TODAY, company, createCompetitorState(100))
 
     expect(model.totalSold).toBeGreaterThan(0)
     expect(company.reputationPercent).toBeGreaterThan(15.5)
@@ -88,7 +91,7 @@ describe('onMarketDayTick', () => {
     const company = createCompanyState('Test Co', 'Testville', 1_000_000)
     company.reputationPercent = 15.5
 
-    onMarketDayTick(vehicles.models, [segment], (m) => resolveBody([body], m), bank, company, createCompetitorState(100))
+    onMarketDayTick(vehicles.models, [segment], (m) => resolveBody([body], m), bank, createLedgerState(), TODAY, company, createCompetitorState(100))
 
     expect(company.reputationPercent).toBe(15.5)
   })

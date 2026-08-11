@@ -1,4 +1,6 @@
-import { tryWithdraw, type BankState } from './economy'
+import { payMandatory, type BankState } from './economy'
+import type { LedgerState } from './ledger'
+import type { GameDate } from './gameDate'
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 
@@ -55,9 +57,10 @@ export function setBudgetLevel(staff: StaffState, level01: number): void {
   recompute(staff)
 }
 
-export function onStaffDayTick(staff: StaffState, bank: BankState): void {
+/** Wages are a mandatory expense - the company can't just skip payroll, so this can push the balance negative rather than silently failing when cash is short. */
+export function onStaffDayTick(staff: StaffState, bank: BankState, ledger: LedgerState, today: GameDate): void {
   const dailyExpense = staff.monthlyExpense / 30
-  tryWithdraw(bank, dailyExpense)
+  payMandatory(bank, ledger, dailyExpense, 'Staff', today)
 
   staff.experienceProgress01 += XP_PER_DAY * (0.5 + staff.budgetLevel01)
   while (staff.experienceProgress01 >= 1 && staff.experienceLevel < MAX_STAFF_LEVEL) {

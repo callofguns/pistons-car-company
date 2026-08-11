@@ -16,6 +16,15 @@ export interface GameConfig {
   startingCompetitorDailyVolume: number
   racingUnlockYear: number
   autosaveOnMonthRollover: boolean
+
+  /** Flat monthly HQ maintenance cost, charged as a mandatory expense alongside staff wages. Placeholder until real HQ leveling (spec Section 4) replaces it. */
+  hqOverheadPerMonth: number
+  /** Daily compounding interest rate charged while the balance is negative. */
+  overdraftDailyInterestRate: number
+  /** Balance below this triggers the bankruptcy countdown. */
+  bankruptcyBalanceThreshold: number
+  /** Consecutive days below the threshold before bankruptcy actually triggers. */
+  bankruptcyGraceDays: number
 }
 
 export const DEFAULT_GAME_CONFIG: GameConfig = {
@@ -32,4 +41,9 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
   startingCompetitorDailyVolume: 900,
   racingUnlockYear: 1978,
   autosaveOnMonthRollover: true,
+
+  hqOverheadPerMonth: 15_000,
+  overdraftDailyInterestRate: 0.003,
+  bankruptcyBalanceThreshold: -150_000,
+  bankruptcyGraceDays: 14,
 }

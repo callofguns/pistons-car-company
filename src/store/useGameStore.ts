@@ -1,9 +1,11 @@
 import { create } from 'zustand'
 import { CATALOG } from '../data/catalog'
+import { LOAN_TIERS } from '../data/loanTiers'
 import type { Catalog } from '../core/catalog'
 import { DEFAULT_GAME_CONFIG, type GameConfig } from '../core/gameConfig'
 import { createNewWorld, tickWorld, notifyResearchProgressed, type World } from '../core/world'
-import { buildSaveData, clearStorage, loadWorld, saveToStorage, tryLoadFromStorage } from '../core/save'
+import { buildSaveData, clearStorage, isCompatibleSave, loadWorld, saveToStorage, tryLoadFromStorage } from '../core/save'
+import { takeLoan as coreTakeLoan } from '../core/economy'
 import { startResearch as coreStartResearch } from '../core/research'
 import { maxProductionBatch, setBudgetLevel as coreSetBudgetLevel } from '../core/staff'
 import { startCampaign as coreStartCampaign } from '../core/marketing'
@@ -25,7 +27,9 @@ import type { EngineSpec } from '../core/vehicles'
 
 function bootstrapWorld(config: GameConfig, catalog: Catalog): World {
   const saved = tryLoadFromStorage()
-  return saved ? loadWorld(config, catalog, saved) : createNewWorld(config)
+  // A save from an older schema (e.g. pre-loans/bankruptcy) is treated as absent rather than
+  // partially restored - see save.ts's isCompatibleSave for why there's no migration path yet.
+  return saved && isCompatibleSave(saved) ? loadWorld(config, catalog, saved) : createNewWorld(config)
 }
 
 interface GameStore {
@@ -61,7 +65,7 @@ interface GameStore {
 
   registerTeam: (teamName: string) => boolean
 
-  claimAdBonus: (amount: number) => void
+  takeLoan: (tierId: string) => boolean
 }
 
 export const useGameStore = create<GameStore>((set, get) => {
@@ -203,9 +207,13 @@ export const useGameStore = create<GameStore>((set, get) => {
       return ok
     },
 
-    claimAdBonus: (amount) => {
-      get().world.bank.balance += amount
+    takeLoan: (tierId) => {
+      const tier = LOAN_TIERS.find((t) => t.id === tierId)
+      if (!tier) return false
+      const { world } = get()
+      coreTakeLoan(world.bank, world.ledger, tier.principal, tier.annualInterestRate, tier.termMonths, world.time.currentDate)
       bump()
+      return true
     },
   }
 })

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { buildSaveData, saveToStorage, tryLoadFromStorage, type KeyValueStorage } from '../src/core/save'
+import { buildSaveData, isCompatibleSave, saveToStorage, tryLoadFromStorage, type KeyValueStorage } from '../src/core/save'
 import { createNewWorld } from '../src/core/world'
+import { createBank } from '../src/core/economy'
 import { DEFAULT_GAME_CONFIG } from '../src/core/gameConfig'
 import { createVehicleState, beginNewDesign, selectBody, setEngineSpec, setNameAndCategory, finalizeDesign } from '../src/core/vehicleService'
 import { DEFAULT_ENGINE_SPEC } from '../src/core/vehicles'
@@ -42,12 +43,20 @@ describe('save/load round trip', () => {
     expect(loaded!.cashBalance).toBe(1_234_567.5)
     expect(loaded!.companyName).toBe('Helix')
     expect(loaded!.year).toBe(DEFAULT_GAME_CONFIG.startYear)
+    expect(isCompatibleSave(loaded!)).toBe(true)
+  })
+
+  it('treats a save from an old schema as incompatible', () => {
+    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    const data = buildSaveData(world)
+    data.schemaVersion = 1 // pre-loans/bankruptcy schema
+    expect(isCompatibleSave(data)).toBe(false)
   })
 
   it('round-trips the model list', () => {
     const storage = createMemoryStorage()
     const vehicles = createVehicleState()
-    const bank = { balance: 1_000_000 }
+    const bank = createBank(1_000_000)
     beginNewDesign(vehicles)
     selectBody(vehicles, body, bank)
     setEngineSpec(vehicles, DEFAULT_ENGINE_SPEC)

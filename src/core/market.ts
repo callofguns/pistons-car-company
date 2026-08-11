@@ -1,5 +1,7 @@
-import { deposit, type BankState } from './economy'
+import { depositRecorded, type BankState } from './economy'
 import { createRng } from './prng'
+import type { LedgerState } from './ledger'
+import type { GameDate } from './gameDate'
 import type { CompanyState } from './company'
 import type { BodyStyleDefinition, CarClass, CarModel } from './vehicles'
 
@@ -53,6 +55,8 @@ export function onMarketDayTick(
   segments: MarketSegmentDefinition[],
   resolveBody: (model: CarModel) => BodyStyleDefinition | undefined,
   bank: BankState,
+  ledger: LedgerState,
+  today: GameDate,
   company: CompanyState,
   competitors: CompetitorState,
 ): void {
@@ -98,7 +102,7 @@ export function onMarketDayTick(
       reliabilityWeightedByVolume += model.stats.reliabilityPercent * unitsSold
       soldTodayAcrossAllModels += unitsSold
 
-      deposit(bank, revenue)
+      depositRecorded(bank, ledger, revenue, 'Sales', today)
       company.totalCarsSoldAllModels += unitsSold
       company.lifetimeEarnings += revenue
     }
