@@ -1,4 +1,4 @@
-# Pistons: Car Company Inc. (Web)
+# Pistons: Car Company Inc.
 
 A 2D business tycoon / car company simulator, built as a static React + TypeScript web app. Start a car manufacturer with $250,000, design vehicles, run production, and sell into a live market — all in the browser, no backend required.
 
