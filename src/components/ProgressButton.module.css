@@ -1,0 +1,44 @@
+.button {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-panel-dark);
+  text-align: left;
+  cursor: pointer;
+  transition: filter 0.1s ease;
+}
+
+.button:hover {
+  filter: brightness(1.15);
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-blue);
+  opacity: 0.35;
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.label {
+  position: relative;
+  z-index: 1;
+}
+
+/* The selected category: brighter fill (fully lit, not dimmed) and a bordered outline so it reads
+   as "current" independent of how much progress it has. */
+.active {
+  color: var(--color-text-primary);
+  outline: 2px solid var(--color-blue);
+  outline-offset: -2px;
+}
+
+.active .fill {
+  opacity: 0.7;
+}

@@ -4,13 +4,14 @@ import { CATALOG } from '../data/catalog'
 import { nodesInCategory } from '../core/catalog'
 import { getNodeState, getProgress01, currentMoneyCost, isResearched, type ResearchCategory } from '../core/research'
 import { ResearchNodeCard } from '../components/ResearchNodeCard'
-import { MeterBar } from '../components/MeterBar'
-import { Button } from '../components/Primitives'
+import { ProgressButton } from '../components/ProgressButton'
 import styles from './screen.module.css'
 
 const CATEGORIES: ResearchCategory[] = ['Engine', 'Bodies', 'Undercarriage', 'Appearance', 'Interior', 'Safety']
 
-/** The tech tree: six category tabs on the left (each with a completion meter), a grid of research cards for the selected category on the right. */
+/** The tech tree: six category tabs on the left, each lighting up like a loading bar as that
+ * category's research completes, and a grid of research cards for the selected category on the
+ * right. */
 export function ResearchScreen() {
   useGameStore((s) => s.revision)
   const research = useGameStore((s) => s.world.research)
@@ -29,12 +30,13 @@ export function ResearchScreen() {
           const researchedCount = categoryNodes.filter((n) => isResearched(research, n.id)).length
           const progress = categoryNodes.length === 0 ? 0 : researchedCount / categoryNodes.length
           return (
-            <div key={category} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <Button variant={category === selected ? 'primary' : 'ghost'} onClick={() => setSelected(category)}>
-                {category}
-              </Button>
-              <MeterBar value01={progress} />
-            </div>
+            <ProgressButton
+              key={category}
+              label={category}
+              progress01={progress}
+              active={category === selected}
+              onClick={() => setSelected(category)}
+            />
           )
         })}
       </div>

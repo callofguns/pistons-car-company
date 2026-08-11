@@ -4,7 +4,7 @@ import { ModelSalesRow } from '../components/ModelSalesRow'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
 
-/** The true home screen - no top HUD (matches the reference). Also the only screen where game time advances - see useSimulationLoop. */
+/** The true home screen. Also the only screen where game time advances - see useSimulationLoop. */
 export function OfficeHubScreen() {
   const show = useUiStore((s) => s.show)
   useGameStore((s) => s.revision)

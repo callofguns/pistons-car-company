@@ -1,11 +1,12 @@
 import { create } from 'zustand'
 import type { ScreenId } from './screenId'
 
-/** Screens with no persistent top HUD bar - Main Menu and the Office Hub (the true home screen), matching the reference screenshots exactly (neither shows the reputation/population/date pill row). */
-const SCREENS_WITHOUT_HUD = new Set<ScreenId>(['MainMenu', 'OfficeHub'])
-
-export function screenWantsTopHud(screen: ScreenId): boolean {
-  return !SCREENS_WITHOUT_HUD.has(screen)
+/** The persistent top HUD (reputation/population/day/date pills) is shown on every screen, so
+ * the player's standing is always visible, not just while inside a sub-menu. Previously hidden on
+ * Main Menu and Office Hub to match the reference screenshots exactly, but always-visible is what
+ * was asked for. */
+export function screenWantsTopHud(_screen: ScreenId): boolean {
+  return true
 }
 
 /** Screen titles shown in the HUD's top-left, matching the reference ("BODY SELECTION", "SALES STATISTICS", etc.). */
