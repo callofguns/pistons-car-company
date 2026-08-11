@@ -1,0 +1,49 @@
+.card {
+  position: relative;
+  background: var(--color-panel-dark);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.title {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.channel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.channelDim {
+  opacity: 0.35;
+}
+
+.cost {
+  text-align: center;
+  color: var(--color-green);
+  font-weight: 600;
+  margin-top: var(--space-2);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: 1.1rem;
+  font-weight: 700;
+}

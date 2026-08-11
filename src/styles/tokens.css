@@ -1,0 +1,54 @@
+/* Flat palette carried over from the Unity port's BuildPalette.cs so both versions read as the
+   same product. Deliberately plain - no gradients, no shadows, no art - per the current focus on
+   correct layout and working buttons over visual polish. */
+:root {
+  --color-background: #0b0e19;
+  --color-panel-dark: #1a2136;
+  --color-panel-light: #253147;
+  --color-blue: #3c7af6;
+  --color-gold: #e8b329;
+  --color-red: #db3840;
+  --color-green: #4cbc6b;
+  --color-text-primary: #f6f8fc;
+  --color-text-secondary: #a5afc4;
+  --color-text-disabled: #656d80;
+
+  --radius: 4px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+input {
+  font-family: inherit;
+}

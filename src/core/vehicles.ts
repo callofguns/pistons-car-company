@@ -1,0 +1,108 @@
+import type { GameDate } from './gameDate'
+
+/** The five body classes the player can design in, per the game brief. */
+export type CarClass = 'Sedan' | 'SUV' | 'Sports' | 'Coupe' | 'Truck'
+
+export type Aspiration = 'NaturallyAspirated' | 'Turbocharged' | 'Supercharged'
+
+export type FuelType = 'Petrol' | 'Diesel' | 'Electric'
+
+/** Designer-authored body style content - the TS equivalent of a BodyStyleDefinition ScriptableObject, now just a plain object literal in src/data/bodies.ts. */
+export interface BodyStyleDefinition {
+  id: string
+  displayName: string
+  carClass: CarClass
+  /** Maximum engine displacement (litres) this body can accept. */
+  engineBayCapacityLiters: number
+  baseWeightKg: number
+  /** One-time tooling/equipment cost charged when this body is first selected for a new design. */
+  productionEquipmentCost: number
+  /** Per-unit manufacturing cost contributed by the body shell alone (before engine/options). */
+  baseUnitCost: number
+  unlockYear: number
+}
+
+/** Player-tunable engine configuration for a design in progress. */
+export interface EngineSpec {
+  displacementLiters: number
+  cylinders: number
+  aspiration: Aspiration
+  fuelType: FuelType
+  valveCount: number
+}
+
+export const DEFAULT_ENGINE_SPEC: EngineSpec = {
+  displacementLiters: 2.0,
+  cylinders: 4,
+  aspiration: 'NaturallyAspirated',
+  fuelType: 'Petrol',
+  valveCount: 8,
+}
+
+/** All derived numbers shown on the Model Lineup spec sheet. Pure output of calculateCarSpecs() - never hand-edited. */
+export interface CarPerformanceStats {
+  powerHp: number
+  torqueNm: number
+  torqueRpm: number
+  fuelConsumptionL100Km: number
+  reliabilityPercent: number
+  emissionsGKm: number
+  repairCost: number
+  weightKg: number
+  maxRpm: number
+  zeroToHundredSec: number
+  topSpeedKph: number
+  /** 1-10, shown as "Rating 6" in the reference. */
+  rating: number
+  unitCost: number
+  suggestedPrice: number
+}
+
+/** A produced, sellable model in the player's lineup. Plain JSON-serializable data - no class instance, no engine object references (body is looked up by bodyStyleId when needed). */
+export interface CarModel {
+  id: string
+  name: string
+  bodyStyleId: string
+  categoryTag: string
+  engine: EngineSpec
+  stats: CarPerformanceStats
+  issueDate: GameDate
+  unitCost: number
+  salePrice: number
+  /** Total units this production run targets; can be raised later via extendProductionRun. Drives "Models left to sell" = plannedProductionRun - totalSold. */
+  plannedProductionRun: number
+  inventory: number
+  totalProduced: number
+  totalSold: number
+  lifetimeEarnings: number
+  /** False when the player has hit "Withdrawn from sale" on Sales Statistics. */
+  isOnSale: boolean
+  currentDailySalesRatePercent: number
+  lastDayUnitsSold: number
+  lastDayRevenue: number
+  marketingActive: boolean
+  marketingDaysRemaining: number
+  marketingEfficiencyMultiplier: number
+}
+
+/** Transient wizard state for the Body Selection -> Engine Design -> Style & Pricing flow. Never saved - if the page reloads mid-design the player starts over. */
+export interface ModelDesignSession {
+  selectedBodyId: string | null
+  engine: EngineSpec
+  name: string
+  categoryTag: string
+  customPrice: number | null
+  /** The model being restyled, if this session originated from "Create Restyling"; null for a from-scratch design. */
+  sourceModelId: string | null
+}
+
+export function createDesignSession(): ModelDesignSession {
+  return {
+    selectedBodyId: null,
+    engine: { ...DEFAULT_ENGINE_SPEC },
+    name: '',
+    categoryTag: '',
+    customPrice: null,
+    sourceModelId: null,
+  }
+}

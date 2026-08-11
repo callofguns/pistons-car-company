@@ -1,0 +1,28 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.portrait {
+  width: 64px;
+  height: 64px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-panel-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+}
+
+.name {
+  font-weight: 700;
+  margin: 0 0 2px;
+}
+
+.message {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
