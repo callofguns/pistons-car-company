@@ -1,12 +1,13 @@
 import { create } from 'zustand'
 import type { ScreenId } from './screenId'
 
-/** The persistent top HUD (reputation/population/day/date pills) is shown on every screen, so
- * the player's standing is always visible, not just while inside a sub-menu. Previously hidden on
- * Main Menu and Office Hub to match the reference screenshots exactly, but always-visible is what
- * was asked for. */
-export function screenWantsTopHud(_screen: ScreenId): boolean {
-  return true
+/** Main Menu is the title screen, before a session is really "in progress" from the player's
+ * point of view - the persistent stat bar was asked to come back off of it specifically. Every
+ * other screen, including Office Hub, keeps it always visible. */
+const SCREENS_WITHOUT_HUD = new Set<ScreenId>(['MainMenu'])
+
+export function screenWantsTopHud(screen: ScreenId): boolean {
+  return !SCREENS_WITHOUT_HUD.has(screen)
 }
 
 /** Screen titles shown in the HUD's top-left, matching the reference ("BODY SELECTION", "SALES STATISTICS", etc.). */
