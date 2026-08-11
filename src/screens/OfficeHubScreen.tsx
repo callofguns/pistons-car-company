@@ -7,8 +7,9 @@ import styles from './OfficeHubScreen.module.css'
 
 /** The true home screen. Also the only screen where game time advances - see useSimulationLoop.
  * Corner-anchored layout: current models being sold + their sales graph top-left, every
- * navigation button (including starting a new design) clustered bottom-left, and Finance set
- * apart bottom-right as its own "credit card" button. */
+ * secondary navigation button laid out flat in a single row bottom-left, and Create Car set apart
+ * bottom-right as its own elongated primary-action button. Finance is still one tap away via the
+ * persistent top HUD's "$" button - it isn't duplicated here anymore. */
 export function OfficeHubScreen() {
   const show = useUiStore((s) => s.show)
   useGameStore((s) => s.revision)
@@ -31,15 +32,6 @@ export function OfficeHubScreen() {
       </div>
 
       <div className={styles.bottomLeft}>
-        <Button
-          variant="primary"
-          onClick={() => {
-            beginNewDesign()
-            show('BodySelection')
-          }}
-        >
-          CREATE CAR
-        </Button>
         <Button onClick={() => show('Research')}>R&D</Button>
         <Button onClick={() => show('Promotion')}>Promo</Button>
         <Button onClick={() => show('ModelLineup')}>Models</Button>
@@ -47,8 +39,15 @@ export function OfficeHubScreen() {
         <Button onClick={() => show('Employees')}>Staff</Button>
       </div>
 
-      <Button variant="gold" className={styles.financeButton} onClick={() => show('Bank')}>
-        💳 FINANCE
+      <Button
+        variant="primary"
+        className={styles.createCarButton}
+        onClick={() => {
+          beginNewDesign()
+          show('BodySelection')
+        }}
+      >
+        + CREATE CAR
       </Button>
     </div>
   )
