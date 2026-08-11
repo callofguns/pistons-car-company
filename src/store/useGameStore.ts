@@ -45,7 +45,10 @@ interface GameStore {
   tick: (deltaSeconds: number) => void
   saveNow: () => void
   startNewGame: () => void
-  setPaused: (paused: boolean) => void
+  /** 'paused' stops the clock outright; 'normal'/'fast' resume at speedMultiplier 1x/3x. Persists
+   * across screen changes as world.time.manuallyPaused - see useSimulationLoop for how this
+   * combines with the screen-based auto-pause gate. */
+  setPlaybackSpeed: (speed: 'paused' | 'normal' | 'fast') => void
 
   beginNewDesign: () => void
   beginRestyling: (modelId: string) => void
@@ -100,8 +103,11 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     saveNow: () => saveToStorage(buildSaveData(get().world)),
 
-    setPaused: (paused) => {
-      get().world.time.isPaused = paused
+    setPlaybackSpeed: (speed) => {
+      const time = get().world.time
+      time.manuallyPaused = speed === 'paused'
+      time.speedMultiplier = speed === 'fast' ? 3 : 1
+      bump()
     },
 
     startNewGame: () => {

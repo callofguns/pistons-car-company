@@ -14,6 +14,13 @@ const DASHBOARD_SCREEN: ScreenId = 'OfficeHub'
  * Update() loop. Call this once at the app root. Uses store.getState()/tick() directly rather
  * than a subscribed value so the effect only runs once and re-renders are driven entirely by the
  * store's own `revision` bump inside tick(), not by this hook re-running.
+ *
+ * The effective pause state is recomputed fresh every frame from two independent gates - which
+ * screen is active, and the player's own manuallyPaused preference (set via the TopHud playback
+ * buttons) - rather than only reacting to screen-change events. That avoids the two gates fighting
+ * over world.time.isPaused through separate code paths: e.g. the player pausing on Office Hub,
+ * navigating away and back, and finding the clock silently resumed because the screen-change
+ * handler overwrote their choice.
  */
 export function useSimulationLoop(): void {
   useEffect(() => {
@@ -21,6 +28,10 @@ export function useSimulationLoop(): void {
     let lastTimestampMs: number | null = null
 
     const frame = (timestampMs: number) => {
+      const { world } = useGameStore.getState()
+      const screen = useUiStore.getState().currentScreen
+      world.time.isPaused = screen !== DASHBOARD_SCREEN || world.time.manuallyPaused
+
       if (lastTimestampMs !== null) {
         const deltaSeconds = Math.min(MAX_DELTA_SECONDS, (timestampMs - lastTimestampMs) / 1000)
         useGameStore.getState().tick(deltaSeconds)
@@ -31,12 +42,6 @@ export function useSimulationLoop(): void {
 
     animationFrameId = requestAnimationFrame(frame)
 
-    const syncPauseWithScreen = (screen: ScreenId) => {
-      useGameStore.getState().setPaused(screen !== DASHBOARD_SCREEN)
-    }
-    syncPauseWithScreen(useUiStore.getState().currentScreen)
-    const unsubscribeUiStore = useUiStore.subscribe((state) => syncPauseWithScreen(state.currentScreen))
-
     const saveOnExit = () => useGameStore.getState().saveNow()
     const saveOnHidden = () => {
       if (document.visibilityState === 'hidden') saveOnExit()
@@ -46,7 +51,6 @@ export function useSimulationLoop(): void {
 
     return () => {
       cancelAnimationFrame(animationFrameId)
-      unsubscribeUiStore()
       window.removeEventListener('beforeunload', saveOnExit)
       document.removeEventListener('visibilitychange', saveOnHidden)
     }

@@ -29,15 +29,20 @@ export interface GameConfig {
 
 export const DEFAULT_GAME_CONFIG: GameConfig = {
   startingCapital: 250_000,
-  startYear: 1974,
-  startMonth: 9,
+  startYear: 1970,
+  startMonth: 1,
   startDay: 1,
   defaultCompanyName: 'Helix',
   defaultHomeCity: 'Rome',
   secondsPerDay: 2,
   startingResearchPoints: 245,
   researchPointsPerDay: 4,
-  startingPopulation: 448_600,
+  // Deliberately tiny - the player explicitly chose to start with almost no reach rather than a
+  // pre-established 448.6K audience. Sales demand in market.ts scales with this directly, and its
+  // organic-growth formula rounds to zero below ~8,000, so this stays near-flat until something
+  // else (marketing, reputation-driven growth if that's ever added) moves it - a known, accepted
+  // consequence, not a bug.
+  startingPopulation: 100,
   startingCompetitorDailyVolume: 900,
   racingUnlockYear: 1978,
   autosaveOnMonthRollover: true,

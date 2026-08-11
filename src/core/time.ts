@@ -5,12 +5,25 @@ export interface TimeState {
   currentDate: GameDate
   secondsPerDay: number
   speedMultiplier: number
+  /** The effective "should the clock be ticking right now" flag tickTime actually reads - driven
+   * every frame by useSimulationLoop from two independent gates: which screen is active (only
+   * OfficeHub ticks) and manuallyPaused below. Don't set this directly from UI code. */
   isPaused: boolean
+  /** The player's own Pause/Play/Fast preference, via the TopHud playback buttons - persists
+   * across screen changes, unlike isPaused itself which the screen-gate can also force true. */
+  manuallyPaused: boolean
   accumulatedSeconds: number
 }
 
 export function createTimeState(startDate: GameDate, secondsPerDay: number): TimeState {
-  return { currentDate: startDate, secondsPerDay, speedMultiplier: 1, isPaused: false, accumulatedSeconds: 0 }
+  return {
+    currentDate: startDate,
+    secondsPerDay,
+    speedMultiplier: 1,
+    isPaused: false,
+    manuallyPaused: false,
+    accumulatedSeconds: 0,
+  }
 }
 
 /** Advances the clock by deltaSeconds of real time, calling onDayAdvanced once per in-game day crossed (in order). Returns how many days elapsed. */

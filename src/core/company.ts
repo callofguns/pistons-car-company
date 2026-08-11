@@ -21,7 +21,7 @@ export function createCompanyState(companyName: string, homeCity: string, popula
   return {
     companyName,
     homeCity,
-    reputationPercent: 15.5,
+    reputationPercent: 0,
     marketSharePercent: 4,
     populationServed,
     autoReleasedCount: 0,

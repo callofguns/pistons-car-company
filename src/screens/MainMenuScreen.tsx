@@ -13,7 +13,7 @@ export function MainMenuScreen() {
 
   return (
     <div className={`${styles.screen} ${menuStyles.menu}`}>
-      <Heading className={menuStyles.header}>CARCOMPANY TYCOON</Heading>
+      <Heading className={menuStyles.header}>Pistons: Car Company Inc</Heading>
 
       <div className={menuStyles.buttons}>
         <Button variant="primary" onClick={() => show('OfficeHub')}>

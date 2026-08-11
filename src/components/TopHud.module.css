@@ -52,6 +52,13 @@
   justify-content: center;
 }
 
+/* Highlights whichever of Pause/Play/Fast reflects the player's current choice. Compound selector
+   (not just .playbackActive alone) so its specificity beats primitives.module.css's .button
+   background regardless of which stylesheet the bundler happens to place later. */
+.iconButton.playbackActive {
+  background: var(--color-blue);
+}
+
 .debtPill {
   background: var(--color-red);
   color: var(--color-text-primary);
