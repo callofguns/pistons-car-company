@@ -232,6 +232,7 @@ export function finalizeDesign(
     marketingActive: false,
     marketingDaysRemaining: 0,
     marketingEfficiencyMultiplier: 1,
+    isDebutModel: vehicles.models.length === 0,
   }
 
   vehicles.models.push(model)

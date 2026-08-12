@@ -94,6 +94,12 @@ export interface CarModel {
   marketingActive: boolean
   marketingDaysRemaining: number
   marketingEfficiencyMultiplier: number
+  /** True for exactly one model - whichever a company finalizes first. A brand-new company's
+   * starting reach is deliberately tiny (see gameConfig.ts's startingPopulation), which leaves the
+   * population-gated demand formula in market.ts with almost nothing to work with - without a
+   * debut boost the very first car could sit unsold indefinitely and the company could never earn
+   * the sales that grow its reach in the first place. See onMarketDayTick for how it tapers off. */
+  isDebutModel: boolean
 }
 
 /** Transient wizard state for the Body Selection -> Car Design (Classification -> Safety -> Engine

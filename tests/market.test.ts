@@ -34,6 +34,14 @@ const segment: MarketSegmentDefinition = {
   baseDemandPerDay: 100_000, // deliberately absurd, to try to oversell inventory
 }
 
+// A tiny-reach segment matching a brand-new company's deliberately near-zero starting population
+// (see gameConfig.ts's startingPopulation) - baseDemandPerDay is realistic (not the absurd value
+// above), so without a debut boost, demand rounds to 0 and nothing sells.
+const tinyReachSegment: MarketSegmentDefinition = {
+  ...segment,
+  baseDemandPerDay: 50,
+}
+
 const TODAY = makeDate(1974, 1, 1)
 
 function buildModel(inventory: number) {
@@ -94,5 +102,43 @@ describe('onMarketDayTick', () => {
     onMarketDayTick(vehicles.models, [segment], (m) => resolveBody([body], m), bank, createLedgerState(), TODAY, company, createCompetitorState(100))
 
     expect(company.reputationPercent).toBe(15.5)
+  })
+
+  it('sells a debut model even at a brand-new company\'s near-zero starting population', () => {
+    const { vehicles, model, bank } = buildModel(1000)
+    expect(model.isDebutModel).toBe(true)
+    const company = createCompanyState('Test Co', 'Testville', 100) // matches DEFAULT_GAME_CONFIG.startingPopulation
+
+    onMarketDayTick(vehicles.models, [tinyReachSegment], (m) => resolveBody([body], m), bank, createLedgerState(), TODAY, company, createCompetitorState(100))
+
+    expect(model.totalSold).toBeGreaterThan(0)
+  })
+
+  it('does not give a second, non-debut model the same boost', () => {
+    const { vehicles, model, bank } = buildModel(1000)
+    model.isDebutModel = false
+    const company = createCompanyState('Test Co', 'Testville', 100)
+
+    onMarketDayTick(vehicles.models, [tinyReachSegment], (m) => resolveBody([body], m), bank, createLedgerState(), TODAY, company, createCompetitorState(100))
+
+    expect(model.totalSold).toBe(0)
+  })
+
+  it('grows population served from actual sales (word of mouth)', () => {
+    const { vehicles, bank } = buildModel(1000)
+    const company = createCompanyState('Test Co', 'Testville', 100)
+
+    onMarketDayTick(vehicles.models, [tinyReachSegment], (m) => resolveBody([body], m), bank, createLedgerState(), TODAY, company, createCompetitorState(100))
+
+    expect(company.populationServed).toBeGreaterThan(100)
+  })
+
+  it('leaves population served unchanged when nothing sells', () => {
+    const { vehicles, bank } = buildModel(0)
+    const company = createCompanyState('Test Co', 'Testville', 100)
+
+    onMarketDayTick(vehicles.models, [tinyReachSegment], (m) => resolveBody([body], m), bank, createLedgerState(), TODAY, company, createCompetitorState(100))
+
+    expect(company.populationServed).toBe(100)
   })
 })

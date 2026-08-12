@@ -38,10 +38,11 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
   startingResearchPoints: 245,
   researchPointsPerDay: 4,
   // Deliberately tiny - the player explicitly chose to start with almost no reach rather than a
-  // pre-established 448.6K audience. Sales demand in market.ts scales with this directly, and its
-  // organic-growth formula rounds to zero below ~8,000, so this stays near-flat until something
-  // else (marketing, reputation-driven growth if that's ever added) moves it - a known, accepted
-  // consequence, not a bug.
+  // pre-established 448.6K audience. Sales demand in market.ts scales with this directly. It no
+  // longer just sits flat forever, though: onMarketDayTick grows it via word-of-mouth from actual
+  // sales, and a company's debut model gets a flat demand bonus precisely so it can rack up those
+  // first sales despite starting with next to no reach - see market.ts's DEBUT_BONUS_UNITS_PER_DAY
+  // and WORD_OF_MOUTH_REACH_PER_UNIT_SOLD.
   startingPopulation: 100,
   startingCompetitorDailyVolume: 900,
   racingUnlockYear: 1978,

@@ -9,6 +9,25 @@ const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const inverseLerp = (a: number, b: number, v: number) => clamp01((v - a) / (b - a))
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
+/** Flat extra daily demand for a company's debut model, independent of population - the ordinary
+ * formula multiplies demand by populationServed/500_000 per segment, which is deliberately near
+ * nothing at the tiny starting population (see gameConfig.ts), so without this a first car could
+ * sell nothing and a fresh company could never earn the sales that grow its reach. Represents
+ * early curiosity about the new company that doesn't depend on reach it doesn't have yet. */
+const DEBUT_BONUS_UNITS_PER_DAY = 8
+/** The debut boost applies until the model has sold this many units total, then it's just another
+ * model living on the (by then much larger) reach its own sales have built. */
+const DEBUT_BONUS_SALES_CAP = 150
+
+/** How many new people a single unit sold brings into the company's reach, via word of mouth -
+ * this is the "something else" gameConfig.ts's startingPopulation comment predicted might one day
+ * move populationServed off its deliberately tiny starting value. Tapers via POPULATION_CEILING so
+ * a mature company doesn't grow forever - that ceiling sits comfortably above the point where every
+ * market segment's own demand term is already saturated (scoreAppeal's /500_000 clamp), so nothing
+ * downstream even notices reach beyond it. */
+const WORD_OF_MOUTH_REACH_PER_UNIT_SOLD = 50
+const POPULATION_CEILING = 5_000_000
+
 /** A buyer segment (Economy, Family, Luxury, Sports, Utility). MarketSimulator scores every on-sale model against each segment's preferences to decide daily demand. */
 export interface MarketSegmentDefinition {
   id: string
@@ -87,6 +106,10 @@ export function onMarketDayTick(
         clamp01(segmentPopulation / 500_000)
     }
 
+    if (model.isDebutModel && model.totalSold < DEBUT_BONUS_SALES_CAP) {
+      demand += DEBUT_BONUS_UNITS_PER_DAY
+    }
+
     const unitsSold = Math.min(model.inventory, Math.round(demand))
     model.currentDailySalesRatePercent = model.inventory <= 0 ? 0 : (100 * unitsSold) / model.inventory
     model.lastDayUnitsSold = unitsSold
@@ -121,7 +144,13 @@ export function onMarketDayTick(
     company.reputationPercent = lerp(company.reputationPercent, targetReputation, 0.02)
   }
 
-  company.populationServed += Math.round(company.populationServed * 0.00006) // slow organic population growth
+  // Word of mouth: every unit actually sold brings new people into the company's reach, tapering
+  // off as populationServed approaches POPULATION_CEILING. Selling nothing today grows nothing -
+  // matches the deliberate choice to start a new company with almost no reach (gameConfig.ts).
+  if (soldTodayAcrossAllModels > 0) {
+    const headroom = clamp01(1 - company.populationServed / POPULATION_CEILING)
+    company.populationServed += soldTodayAcrossAllModels * WORD_OF_MOUTH_REACH_PER_UNIT_SOLD * headroom
+  }
 }
 
 /** 0-1 fit score: how well a model's price/power/reliability/economy matches a segment's preferences. */
