@@ -3,24 +3,6 @@ import { useUiStore } from './useUiStore'
 import { useGameStore } from './useGameStore'
 import { TUTORIAL_STEPS, type TutorialStep } from '../data/tutorialSteps'
 
-const SEEN_KEY = 'pistons-tutorial-seen'
-
-function hasSeenTutorial(): boolean {
-  try {
-    return localStorage.getItem(SEEN_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-
-function markTutorialSeen(): void {
-  try {
-    localStorage.setItem(SEEN_KEY, '1')
-  } catch {
-    // Private-browsing/storage-disabled - the tutorial just replays next time, which is fine.
-  }
-}
-
 interface TutorialStore {
   active: boolean
   dismissedIds: Set<string>
@@ -32,29 +14,23 @@ interface TutorialStore {
   start: () => void
   /** Marks one step's card as read so TutorialOverlay moves on to the next matching step. */
   dismiss: (stepId: string) => void
-  /** Ends the tour, whether the player explicitly skipped it or just read the final card - both
-   * mean "don't auto-start this again" so they share this one bit of bookkeeping. */
+  /** Ends the tour early, whether from the "Skip tutorial" link or reading the final card. */
   skip: () => void
   reportWizardStep: (stepId: string | null) => void
 }
 
 /**
  * Drives the guided tour (TutorialOverlay + tutorialSteps.ts). Deliberately separate from
- * useUiStore/useGameStore - it only tracks which coach cards have been read, not game state,
- * and its "has this player ever seen the tutorial" flag lives in localStorage rather than the
- * save schema so it survives "+ NEW GAME" wiping the save.
+ * useUiStore/useGameStore - it only tracks which coach cards have been read this session, not
+ * game state. Every "+ NEW GAME" starts it fresh (see MainMenuScreen), so there's no persisted
+ * "has this player seen it before" flag to manage here.
  */
 export const useTutorialStore = create<TutorialStore>((set) => ({
   active: false,
   dismissedIds: new Set(),
   wizardStepId: null,
 
-  start: () => {
-    // Starting it (whether auto-triggered on a player's very first game or replayed manually from
-    // the Main Menu) is the right moment to stop auto-triggering it again later.
-    markTutorialSeen()
-    set({ active: true, dismissedIds: new Set() })
-  },
+  start: () => set({ active: true, dismissedIds: new Set() }),
 
   dismiss: (stepId) =>
     set((s) => {
@@ -63,15 +39,10 @@ export const useTutorialStore = create<TutorialStore>((set) => ({
       return { dismissedIds: next }
     }),
 
-  skip: () => {
-    markTutorialSeen()
-    set({ active: false })
-  },
+  skip: () => set({ active: false }),
 
   reportWizardStep: (stepId) => set({ wizardStepId: stepId }),
 }))
-
-export { hasSeenTutorial, markTutorialSeen }
 
 interface ActiveTutorialStep {
   step: TutorialStep

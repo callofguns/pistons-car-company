@@ -1,12 +1,12 @@
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
-import { hasSeenTutorial, useTutorialStore } from '../store/useTutorialStore'
+import { useTutorialStore } from '../store/useTutorialStore'
 import { APP_VERSION } from '../version'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
 import menuStyles from './MainMenuScreen.module.css'
 
-/** CONTINUE resumes whatever was loaded at startup (a save, or a fresh $250,000 game). "+" wipes the save and starts over immediately - no scene-reload subtlety needed on the web like the Unity port had.
+/** CONTINUE resumes whatever was loaded at startup (a save, or a fresh $250,000 game). "+" wipes the save, starts the guided tutorial, and starts over immediately - no scene-reload subtlety needed on the web like the Unity port had.
  * Header pinned to the top, buttons centered in the space below it, version number tucked into the bottom-right corner. */
 export function MainMenuScreen() {
   const show = useUiStore((s) => s.show)
@@ -24,24 +24,14 @@ export function MainMenuScreen() {
         <Button
           onClick={() => {
             startNewGame()
-            // A player's very first game auto-starts the guided tour; hasSeenTutorial() reflects
-            // that even mid-click since startNewGame() doesn't touch it - anyone who's replayed
-            // or dismissed it before just gets a normal fresh game.
-            if (!hasSeenTutorial()) startTutorial()
+            startTutorial()
             show('OfficeHub')
           }}
         >
           + NEW GAME
         </Button>
-        <Button
-          variant="ghost"
-          onClick={() => {
-            startNewGame()
-            startTutorial()
-            show('OfficeHub')
-          }}
-        >
-          TUTORIAL
+        <Button variant="ghost" onClick={() => console.log('[MainMenu] News - not implemented yet.')}>
+          NEWS
         </Button>
         <Button variant="ghost" onClick={() => console.log('[MainMenu] Language - not implemented yet.')}>
           LANGUAGE
