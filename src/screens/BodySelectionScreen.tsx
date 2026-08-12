@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
+import { useActiveTutorialStep } from '../store/useTutorialStore'
 import { CATALOG } from '../data/catalog'
 import { compact } from '../core/numberFormat'
 import { CarCarousel } from '../components/CarCarousel'
 import { MeterBar } from '../components/MeterBar'
+import { TutorialCard } from '../components/TutorialCard'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
 
@@ -20,6 +22,7 @@ export function BodySelectionScreen() {
 
   const [index, setIndex] = useState(0)
   const [error, setError] = useState(false)
+  const tutorialStep = useActiveTutorialStep()
 
   const bodies = CATALOG.bodies
   const body = bodies[index]
@@ -37,6 +40,8 @@ export function BodySelectionScreen() {
       >
         ‹
       </Button>
+
+      {tutorialStep && <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />}
 
       <span style={{ color: 'var(--color-green)', fontSize: '1.1rem' }}>
         Production equipment cost: {alreadyTooled ? 'Owned' : compact(body.productionEquipmentCost)}

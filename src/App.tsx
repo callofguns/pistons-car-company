@@ -4,6 +4,7 @@ import { useSimulationLoop } from './store/useSimulationLoop'
 import { TopHud } from './components/TopHud'
 import { BankruptcyOverlay } from './components/BankruptcyOverlay'
 import { RotateDeviceGate } from './components/RotateDeviceGate'
+import { TutorialOverlay } from './components/TutorialOverlay'
 import { SCREENS } from './screens'
 
 export function App() {
@@ -25,6 +26,7 @@ export function App() {
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <TopHud />
           <ScreenComponent />
+          <TutorialOverlay />
         </div>
       )}
     </>

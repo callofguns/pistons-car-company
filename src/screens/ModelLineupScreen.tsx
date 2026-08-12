@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
+import { useActiveTutorialStep } from '../store/useTutorialStore'
 import { grouped, plainCurrency, compact } from '../core/numberFormat'
 import { formatDate } from '../core/gameDate'
 import { CarCarousel } from '../components/CarCarousel'
 import { StatRow } from '../components/StatRow'
+import { TutorialCard } from '../components/TutorialCard'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
 
@@ -28,6 +30,8 @@ export function ModelLineupScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload])
 
+  const tutorialStep = useActiveTutorialStep()
+
   if (models.length === 0) {
     return (
       <div className={styles.screen}>
@@ -41,6 +45,7 @@ export function ModelLineupScreen() {
 
   return (
     <div className={styles.screen}>
+      {tutorialStep && <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />}
       <CarCarousel
         indexOneBased={index + 1}
         total={models.length}

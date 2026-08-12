@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
+import { useActiveTutorialStep, useTutorialStore } from '../store/useTutorialStore'
 import { CATALOG } from '../data/catalog'
 import { findDesignStep, type ComponentSlot } from '../data/designSteps'
 import { ENGINE_PRESETS } from '../data/enginePresets'
@@ -14,6 +15,7 @@ import { ComponentSlotCard } from '../components/design/ComponentSlotCard'
 import { ClassificationPicker } from '../components/design/ClassificationPicker'
 import { RatingResult } from '../components/design/RatingResult'
 import { PriceSlider } from '../components/design/PriceSlider'
+import { TutorialCard } from '../components/TutorialCard'
 import styles from './screen.module.css'
 import wizardStyles from './CarDesignScreen.module.css'
 
@@ -116,6 +118,17 @@ export function CarDesignScreen() {
   const [name, setName] = useState(() => generateDefaultName(body?.carClass))
   const [price, setPrice] = useState<number | null>(null)
 
+  // stepId is local state, so TutorialOverlay (rendered at the App level) can't see it directly -
+  // report it into useTutorialStore instead. Cleared on unmount so leaving this screen doesn't
+  // leave a stale wizard sub-step matching a step that no longer applies.
+  const reportWizardStep = useTutorialStore((s) => s.reportWizardStep)
+  useEffect(() => {
+    reportWizardStep(session ? WIZARD_STEPS[stepIndex] : null)
+    return () => reportWizardStep(null)
+  }, [session, stepIndex, reportWizardStep])
+
+  const tutorialStep = useActiveTutorialStep()
+
   if (!session || !body) {
     return (
       <div className={styles.screen}>
@@ -172,6 +185,8 @@ export function CarDesignScreen() {
           </div>
         )}
       </div>
+
+      {tutorialStep && <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />}
 
       {stepId === 'Classification' && (
         <div className={wizardStyles.body}>

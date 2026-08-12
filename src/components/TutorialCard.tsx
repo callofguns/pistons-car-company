@@ -1,0 +1,46 @@
+import type { TutorialStep } from '../data/tutorialSteps'
+import { TUTORIAL_STEPS } from '../data/tutorialSteps'
+import { Button } from './Primitives'
+import styles from './TutorialCard.module.css'
+
+interface TutorialCardProps {
+  step: TutorialStep
+  onNext: () => void
+  onSkip: () => void
+}
+
+/** The coach-card presentation only, shared by TutorialOverlay (a fixed/centered overlay - the
+ * right fit for Office Hub, whose real content lives in the four screen corners and leaves a dead
+ * center) and the wizard screens (BodySelection, CarDesign, ModelLineup), which embed this
+ * directly in their own layout flow instead - those screens are already packed edge to edge on a
+ * short landscape phone, so a floating overlay there would sit on top of the Continue button
+ * rather than beside it. */
+export function TutorialCard({ step, onNext, onSkip }: TutorialCardProps) {
+  const stepNumber = TUTORIAL_STEPS.findIndex((s) => s.id === step.id) + 1
+  const isLastStep = stepNumber === TUTORIAL_STEPS.length
+
+  return (
+    <div className={styles.card}>
+      <div className={styles.portrait} aria-hidden="true">
+        🧭
+      </div>
+      <div className={styles.body}>
+        <div className={styles.headerRow}>
+          <span className={styles.title}>{step.title}</span>
+          <span className={styles.progress}>
+            {stepNumber}/{TUTORIAL_STEPS.length}
+          </span>
+        </div>
+        <p className={styles.message}>{step.message}</p>
+        <div className={styles.actions}>
+          <button className={styles.skipLink} onClick={onSkip}>
+            Skip tutorial
+          </button>
+          <Button variant="primary" onClick={onNext}>
+            {isLastStep ? 'Got it' : 'Next'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,77 @@
+.card {
+  pointer-events: auto;
+  display: flex;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 420px;
+  /* Centers itself whether it's inside a flex overlay wrapper (TutorialOverlay) or embedded
+     directly as a flex-column child on a wizard screen (BodySelection, CarDesign, ModelLineup). */
+  margin: 0 auto;
+  flex: none;
+  background: var(--color-panel-dark);
+  border: 1px solid var(--color-panel-light);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.portrait {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-panel-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.headerRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.title {
+  font-weight: 700;
+}
+
+.progress {
+  color: var(--color-text-disabled);
+  font-size: 0.75rem;
+  flex: none;
+}
+
+.message {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.skipLink {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-disabled);
+  font-size: 0.8rem;
+  text-decoration: underline;
+}
+
+.skipLink:hover {
+  color: var(--color-text-secondary);
+}

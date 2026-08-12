@@ -1,5 +1,6 @@
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
+import { hasSeenTutorial, useTutorialStore } from '../store/useTutorialStore'
 import { APP_VERSION } from '../version'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
@@ -10,6 +11,7 @@ import menuStyles from './MainMenuScreen.module.css'
 export function MainMenuScreen() {
   const show = useUiStore((s) => s.show)
   const startNewGame = useGameStore((s) => s.startNewGame)
+  const startTutorial = useTutorialStore((s) => s.start)
 
   return (
     <div className={`${styles.screen} ${menuStyles.menu}`}>
@@ -22,13 +24,24 @@ export function MainMenuScreen() {
         <Button
           onClick={() => {
             startNewGame()
+            // A player's very first game auto-starts the guided tour; hasSeenTutorial() reflects
+            // that even mid-click since startNewGame() doesn't touch it - anyone who's replayed
+            // or dismissed it before just gets a normal fresh game.
+            if (!hasSeenTutorial()) startTutorial()
             show('OfficeHub')
           }}
         >
           + NEW GAME
         </Button>
-        <Button variant="ghost" onClick={() => console.log('[MainMenu] News - not implemented yet.')}>
-          NEWS
+        <Button
+          variant="ghost"
+          onClick={() => {
+            startNewGame()
+            startTutorial()
+            show('OfficeHub')
+          }}
+        >
+          TUTORIAL
         </Button>
         <Button variant="ghost" onClick={() => console.log('[MainMenu] Language - not implemented yet.')}>
           LANGUAGE

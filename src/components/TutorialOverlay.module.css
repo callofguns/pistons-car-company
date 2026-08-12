@@ -1,0 +1,12 @@
+.wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Never intercepts clicks on the real screen underneath - only the card itself (see
+     TutorialCard.module.css) opts back in. */
+  pointer-events: none;
+  padding: var(--space-5);
+}
