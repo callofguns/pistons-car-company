@@ -71,6 +71,6 @@
 }
 
 .tagCardSelected {
-  background: var(--color-blue);
-  border-color: var(--color-blue);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
 }

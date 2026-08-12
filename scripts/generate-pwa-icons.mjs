@@ -1,7 +1,7 @@
-// Generates flat, placeholder PWA icons - a simple steering-wheel mark in --color-blue on
-// --color-panel-dark, matching the app's stated "no gradients, no shadows, no art yet" visual
-// philosophy (see src/styles/tokens.css). Pure Node (zlib for the PNG's DEFLATE stream, no image
-// library), so it's cheap to re-run once real branding art exists. Run with:
+// Generates flat, placeholder PWA icons - a simple steering-wheel mark in --color-accent on
+// --color-panel-dark, matching the app's mid-century dealership-brochure palette (see
+// src/styles/tokens.css). Pure Node (zlib for the PNG's DEFLATE stream, no image library), so
+// it's cheap to re-run once real branding art exists. Run with:
 //   node scripts/generate-pwa-icons.mjs
 import { deflateSync } from 'node:zlib'
 import { writeFileSync, mkdirSync } from 'node:fs'
@@ -12,8 +12,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const outDir = path.resolve(__dirname, '../public')
 mkdirSync(outDir, { recursive: true })
 
-const BACKGROUND = hex('#1a2136') // --color-panel-dark
-const MARK = hex('#3c7af6') // --color-blue
+const BACKGROUND = hex('#262320') // --color-panel-dark
+const MARK = hex('#c8102e') // --color-accent
 
 function hex(s) {
   const n = parseInt(s.slice(1), 16)

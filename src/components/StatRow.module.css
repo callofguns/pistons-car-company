@@ -34,4 +34,4 @@
 }
 
 .positive { color: var(--color-green); }
-.negative { color: var(--color-red); }
+.negative { color: var(--color-danger); }

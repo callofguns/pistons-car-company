@@ -1,11 +1,13 @@
 .panel {
   background: var(--color-panel-dark);
+  border: 1px solid var(--color-panel-light);
   border-radius: var(--radius);
   padding: var(--space-4);
 }
 
 .panelLight {
   background: var(--color-panel-light);
+  border-color: var(--color-panel-lighter);
 }
 
 .row {
@@ -24,11 +26,33 @@
 .gap3 { gap: var(--space-3); }
 .gap4 { gap: var(--space-4); }
 
+/* The one signature element repeated on every screen: a brass bevel rule under every title,
+   sized to the title's own text rather than a fixed bar - see the design-direction brief this
+   came from ("chrome-bevel double-rule under every screen title"). inline-block makes the rule
+   track the rendered text width/position correctly regardless of whether the heading itself is
+   left-aligned, centered by a flex parent, or has text-align:center set directly on it. */
 .heading {
+  display: inline-block;
+  position: relative;
   margin: 0;
-  font-size: 1.5rem;
+  padding-bottom: var(--space-2);
+  font-family: var(--font-display);
   font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
   color: var(--color-text-primary);
+}
+
+.heading::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  border-radius: 1px;
+  background: linear-gradient(to bottom, #f0dfa0 0%, var(--color-trim) 45%, #7a5f18 100%);
 }
 
 .button {
@@ -36,29 +60,42 @@
   border-radius: var(--radius);
   padding: var(--space-3) var(--space-4);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--color-text-primary);
   background: var(--color-panel-light);
-  transition: filter 0.1s ease;
+  transition: filter var(--transition-fast), transform var(--transition-fast);
 }
 
 .button:hover:not(:disabled) {
-  filter: brightness(1.15);
+  filter: brightness(1.18);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .primary {
-  background: var(--color-blue);
+  background: var(--color-accent);
+  font-weight: 700;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  filter: none;
 }
 
 .danger {
-  background: var(--color-red);
+  background: var(--color-danger);
+  font-weight: 700;
 }
 
 .gold {
-  background: var(--color-gold);
-  color: #14151b;
+  background: var(--color-trim);
+  color: var(--color-background);
+  font-weight: 700;
 }
 
 .ghost {
   background: var(--color-panel-dark);
+  border: 1px solid var(--color-panel-light);
 }

@@ -10,7 +10,7 @@ export function HudPill({ icon, value }: HudPillProps) {
   return (
     <div className={styles.pill}>
       <span>{icon}</span>
-      <span>{value}</span>
+      <span className={styles.value}>{value}</span>
     </div>
   )
 }

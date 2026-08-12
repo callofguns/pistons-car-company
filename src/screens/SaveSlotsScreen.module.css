@@ -49,7 +49,7 @@
 }
 
 .confirm {
-  color: var(--color-gold);
+  color: var(--color-trim);
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -66,12 +66,12 @@
 
 .deleteButton:hover {
   filter: brightness(1.15);
-  color: var(--color-red);
+  color: var(--color-danger);
 }
 
 .deleteConfirming {
-  background: var(--color-red);
-  border-color: var(--color-red);
+  background: var(--color-danger);
+  border-color: var(--color-danger);
   color: var(--color-text-primary);
   font-weight: 700;
 }

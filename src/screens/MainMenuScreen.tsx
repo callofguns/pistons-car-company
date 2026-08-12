@@ -1,4 +1,5 @@
 import { useUiStore } from '../store/useUiStore'
+import { DEFAULT_GAME_CONFIG } from '../core/gameConfig'
 import { APP_VERSION } from '../version'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
@@ -14,7 +15,10 @@ export function MainMenuScreen() {
 
   return (
     <div className={`${styles.screen} ${menuStyles.menu}`}>
-      <Heading className={menuStyles.header}>Pistons: Car Company Inc</Heading>
+      <div className={menuStyles.plate}>
+        <span className={menuStyles.eyebrow}>Est. {DEFAULT_GAME_CONFIG.startYear}</span>
+        <Heading className={menuStyles.header}>Pistons: Car Company Inc</Heading>
+      </div>
 
       <div className={menuStyles.buttons}>
         <Button variant="primary" onClick={() => show('SaveSlots')}>

@@ -17,7 +17,7 @@
 }
 
 .warning {
-  color: var(--color-red);
+  color: var(--color-danger);
 }
 
 .name {
@@ -31,5 +31,5 @@
   font-size: 0.85rem;
 }
 
-.science { color: var(--color-blue); }
+.science { color: var(--color-accent); }
 .money { color: var(--color-green); }

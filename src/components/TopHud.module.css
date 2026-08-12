@@ -1,10 +1,24 @@
 .bar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-3) var(--space-5);
   background: var(--color-panel-dark);
   border-bottom: 1px solid var(--color-panel-light);
+}
+
+/* The same brass bevel used under every Heading, run edge-to-edge here since the bar itself (not
+   a piece of text within it) is the thing being trimmed - this is the one persistent strip of
+   chrome the player sees on every screen but Office Hub's own title card. */
+.bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: linear-gradient(to bottom, #f0dfa0 0%, var(--color-trim) 45%, #7a5f18 100%);
 }
 
 .left {
@@ -26,8 +40,10 @@
 }
 
 .screenTitle {
-  font-size: 1.1rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
   font-weight: 700;
+  letter-spacing: 0.02em;
   white-space: nowrap;
 }
 
@@ -56,11 +72,11 @@
    (not just .playbackActive alone) so its specificity beats primitives.module.css's .button
    background regardless of which stylesheet the bundler happens to place later. */
 .iconButton.playbackActive {
-  background: var(--color-blue);
+  background: var(--color-accent);
 }
 
 .debtPill {
-  background: var(--color-red);
+  background: var(--color-danger);
   color: var(--color-text-primary);
   border-radius: var(--radius);
   padding: 6px 10px;

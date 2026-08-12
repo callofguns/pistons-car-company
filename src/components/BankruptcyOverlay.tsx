@@ -24,7 +24,7 @@ export function BankruptcyOverlay() {
       }}
     >
       <span style={{ fontSize: '3rem' }}>💸</span>
-      <Heading style={{ fontSize: '2rem', color: 'var(--color-red)' }}>Company Bankrupt</Heading>
+      <Heading style={{ fontSize: '2rem', color: 'var(--color-danger)' }}>Company Bankrupt</Heading>
       <p style={{ color: 'var(--color-text-secondary)', maxWidth: 480 }}>
         The balance stayed too deep in debt for too long, and the company has run out of road. Time to start a new
         one.

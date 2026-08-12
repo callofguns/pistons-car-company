@@ -20,7 +20,7 @@
 .fill {
   position: absolute;
   inset: 0;
-  background: var(--color-blue);
+  background: var(--color-accent);
   opacity: 0.35;
   transform-origin: left;
   transition: transform 0.3s ease;
@@ -35,7 +35,7 @@
    as "current" independent of how much progress it has. */
 .active {
   color: var(--color-text-primary);
-  outline: 2px solid var(--color-blue);
+  outline: 2px solid var(--color-accent);
   outline-offset: -2px;
 }
 

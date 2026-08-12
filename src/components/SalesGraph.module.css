@@ -27,7 +27,7 @@
 
 .bar {
   width: 100%;
-  background: var(--color-blue);
+  background: var(--color-accent);
   border-radius: 2px 2px 0 0;
 }
 

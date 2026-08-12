@@ -12,7 +12,7 @@ export function ModelSalesRow({ model, onClick }: ModelSalesRowProps) {
   return (
     <Row gap={3} style={{ background: 'var(--color-panel-light)', borderRadius: 'var(--radius)', padding: '8px 12px' }}>
       <span style={{ flex: 1, fontWeight: 600 }}>{model.name}</span>
-      <span style={{ color: 'var(--color-gold)' }}>{compact(model.lifetimeEarnings)}</span>
+      <span style={{ color: 'var(--color-trim)' }}>{compact(model.lifetimeEarnings)}</span>
       <Button onClick={onClick} aria-label={`View ${model.name} sales`}>
         ›
       </Button>

@@ -9,7 +9,7 @@
 .fill {
   position: absolute;
   inset: 0;
-  background: var(--color-blue);
+  background: var(--color-accent);
   transform-origin: left;
 }
 

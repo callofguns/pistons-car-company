@@ -8,8 +8,8 @@ import styles from './TutorialOverlay.module.css'
  * overlay can safely sit in. Every other tutorial screen packs content edge to edge on a short
  * landscape phone, so those embed a TutorialCard directly in their own layout flow instead (see
  * BodySelectionScreen, CarDesignScreen, ModelLineupScreen) rather than risk this floating on top
- * of their Continue button. Rendered once here, alongside RotateDeviceGate, so App.tsx doesn't
- * need to know which screen is active.
+ * of their Continue button. Rendered once here so App.tsx doesn't need to know which screen is
+ * active.
  */
 export function TutorialOverlay() {
   const active = useActiveTutorialStep()

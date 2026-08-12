@@ -21,6 +21,12 @@ export default defineConfig({
       // apple-touch-icon.png is only referenced from index.html's <link>, not manifest.icons, so
       // it needs to be listed explicitly to end up in the precache too.
       includeAssets: ['apple-touch-icon.png'],
+      workbox: {
+        // vite-plugin-pwa's default glob doesn't include font files, which would otherwise leave
+        // the self-hosted Fraunces/Work Sans faces (tokens.css) uncached - offline would silently
+        // fall back to system fonts instead of actually failing, easy to miss without this.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+      },
       manifest: {
         name: 'Pistons: Car Company Inc.',
         short_name: 'Pistons',
@@ -30,10 +36,10 @@ export default defineConfig({
         display: 'standalone',
         // The actual fix for real orientation lock on Android - installed PWAs get this enforced
         // natively by Chrome. iOS has no orientation-lock API in any context, PWA or not, so the
-        // in-app RotateDeviceGate CSS overlay remains the permanent fallback there regardless.
+        // in-app forced-landscape CSS (tokens.css) remains the permanent fallback there regardless.
         orientation: 'landscape',
-        background_color: '#0b0e19', // --color-background
-        theme_color: '#1a2136', // --color-panel-dark
+        background_color: '#1c1a17', // --color-background
+        theme_color: '#262320', // --color-panel-dark
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },

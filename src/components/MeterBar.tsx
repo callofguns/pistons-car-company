@@ -15,7 +15,7 @@ export function MeterBar({ value01, displayValue, radial }: MeterBarProps) {
       <div
         className={`${styles.track} ${styles.radial}`}
         style={{
-          background: `conic-gradient(var(--color-blue) ${clamped * 360}deg, var(--color-panel-dark) 0deg)`,
+          background: `conic-gradient(var(--color-accent) ${clamped * 360}deg, var(--color-panel-dark) 0deg)`,
         }}
       >
         <span className={styles.value}>{displayValue}</span>

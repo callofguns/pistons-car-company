@@ -23,7 +23,7 @@ export function SteppedSlider({ value01, onChange, displayText, step = 0.05 }: S
         step={0.01}
         value={value01}
         onChange={(e) => onChange(clamp(Number(e.target.value)))}
-        style={{ flex: 1, accentColor: 'var(--color-blue)' }}
+        style={{ flex: 1, accentColor: 'var(--color-accent)' }}
       />
       <Button onClick={() => onChange(clamp(value01 + step))} aria-label="Increase">
         +

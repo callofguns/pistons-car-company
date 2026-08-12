@@ -1,19 +1,33 @@
-/* Flat palette carried over from the Unity port's BuildPalette.cs so both versions read as the
-   same product. Deliberately plain - no gradients, no shadows, no art - per the current focus on
-   correct layout and working buttons over visual polish. */
-:root {
-  --color-background: #0b0e19;
-  --color-panel-dark: #1a2136;
-  --color-panel-light: #253147;
-  --color-blue: #3c7af6;
-  --color-gold: #e8b329;
-  --color-red: #db3840;
-  --color-green: #4cbc6b;
-  --color-text-primary: #f6f8fc;
-  --color-text-secondary: #a5afc4;
-  --color-text-disabled: #656d80;
+/* Self-hosted (not CDN-linked) so the PWA's offline precache still covers every asset - see
+   vite-plugin-pwa's config. Only the weights actually used, latin subset only (English-only app). */
+@import '@fontsource/fraunces/latin-600.css';
+@import '@fontsource/fraunces/latin-700.css';
+@import '@fontsource/work-sans/latin-400.css';
+@import '@fontsource/work-sans/latin-500.css';
+@import '@fontsource/work-sans/latin-700.css';
 
-  --radius: 4px;
+/* Mid-century dealership brochure palette: asphalt showroom floor, enamel-red badge accent, brass
+   trim. Chosen over the previous flat SaaS-dashboard dark theme to read as a specific product
+   ("running a car company") rather than a generic app shell - see the design-direction options
+   this was picked from. Named for what each token IS in that world (trim, danger) rather than its
+   literal hue, since the hue is exactly what a future re-theme would change. */
+:root {
+  --color-background: #1c1a17;
+  --color-panel-dark: #262320;
+  --color-panel-light: #322e29;
+  --color-panel-lighter: #3d3830;
+
+  --color-accent: #c8102e; /* enamel racing red - primary actions, brand */
+  --color-accent-hover: #e0263f;
+  --color-trim: #c9a227; /* brass/chrome trim - currency, secondary accent, the heading bevel */
+  --color-danger: #d9730d; /* burnt-orange warning - deliberately not red, so it never reads as "primary action" */
+  --color-green: #7a9d5c;
+
+  --color-text-primary: #f2ede4;
+  --color-text-secondary: #b3a99a;
+  --color-text-disabled: #6f665a;
+
+  --radius: 3px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -21,13 +35,21 @@
   --space-5: 24px;
   --space-6: 32px;
 
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Bold serif badge lettering for every screen title (Heading) - used with restraint, nowhere
+     else. Work Sans carries everything else, including numbers (tabular figures where it matters:
+     HudPill, StatRow) rather than switching to a separate monospace face. */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-sans: 'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --transition-fast: 0.12s ease;
+  --transition-medium: 0.2s ease;
 }
 
-/* Landscape phones (~330-390px tall after browser chrome) are the primary mobile target - see
-   RotateDeviceGate for the portrait lock. Height is the scarce resource there, not width, so this
-   single breakpoint compresses the whole app's spacing scale in one place rather than needing a
-   media query in every component that uses --space-*. */
+/* Landscape phones (~330-390px tall after browser chrome) are the primary mobile target - see the
+   forced-landscape rule further down for how that's guaranteed on a phone held upright. Height is
+   the scarce resource there, not width, so this single breakpoint compresses the whole app's
+   spacing scale in one place rather than needing a media query in every component that uses
+   --space-*. */
 @media (max-height: 560px) {
   :root {
     --space-1: 2px;
@@ -36,6 +58,18 @@
     --space-4: 8px;
     --space-5: 12px;
     --space-6: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0s;
+    --transition-medium: 0s;
+  }
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -71,4 +105,38 @@ button:disabled {
 
 input {
   font-family: inherit;
+}
+
+/* No focus outline existed anywhere before this - a real functional gap for keyboard/switch
+   navigation, not just visual polish. One rule, everywhere, in the trim color so it reads as
+   "selected" rather than an error state. */
+:focus-visible {
+  outline: 2px solid var(--color-trim);
+  outline-offset: 2px;
+}
+
+/* Forces the whole app to render landscape-shaped even on a phone held upright, instead of
+   showing a "please rotate" prompt: App.tsx's screen.orientation.lock() call only ever works in
+   fullscreen or an installed Android PWA, so for the common case (a normal mobile browser tab, or
+   iOS Safari which has no lock API at all) this CSS rotation is what actually guarantees it.
+   Targets #root specifically rather than body/html - #root has its own independent height:100vh
+   above, so transforming body while leaving #root's sizing alone made #root compute its size
+   against the real (untransformed) viewport and go stale relative to its now-rotated parent.
+   #root instead goes position:fixed (so its layout no longer depends on body at all), gets the
+   viewport's width/height swapped onto it directly (100vh becomes the width Pistons' landscape
+   layout expects to work with), and only then rotates -90deg around its own top-left corner into
+   the position a portrait screen's top-left corner sits in, so it exactly refills the real
+   viewport. A phone turned to true landscape stops matching the media query and this no-ops
+   entirely - nothing to undo. Same max-width guard as the spacing breakpoint above, so a desktop
+   window resized tall and narrow is left alone. */
+@media (orientation: portrait) and (max-width: 560px) {
+  #root {
+    position: fixed;
+    top: 100%;
+    left: 0;
+    width: 100vh;
+    height: 100vw;
+    transform: rotate(-90deg);
+    transform-origin: left top;
+  }
 }

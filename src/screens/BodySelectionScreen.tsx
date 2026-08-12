@@ -63,7 +63,7 @@ export function BodySelectionScreen() {
         <MeterBar value01={Math.min(1, body.engineBayCapacityLiters / 12)} displayValue={`${body.engineBayCapacityLiters} L.`} />
       </div>
 
-      {error && <span style={{ color: 'var(--color-red)' }}>Not enough cash for this body's tooling.</span>}
+      {error && <span style={{ color: 'var(--color-danger)' }}>Not enough cash for this body's tooling.</span>}
 
       <Button
         variant="primary"

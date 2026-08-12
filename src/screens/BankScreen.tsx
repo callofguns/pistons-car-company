@@ -42,7 +42,7 @@ export function BankScreen() {
 
       <StatRow label="Cash balance" value={plainCurrency(bank.balance)} />
       {bank.balance < 0 && (
-        <span style={{ color: 'var(--color-red)' }}>
+        <span style={{ color: 'var(--color-danger)' }}>
           Balance is negative - overdraft interest is accruing daily until this recovers.
         </span>
       )}
@@ -71,7 +71,7 @@ export function BankScreen() {
       ))}
       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
         <span style={{ color: 'var(--color-text-secondary)' }}>Net profit</span>
-        <span style={{ fontWeight: 700, color: netProfit >= 0 ? 'var(--color-green)' : 'var(--color-red)' }}>
+        <span style={{ fontWeight: 700, color: netProfit >= 0 ? 'var(--color-green)' : 'var(--color-danger)' }}>
           {netProfit >= 0 ? '+' : ''}
           {compact(netProfit)}
         </span>
