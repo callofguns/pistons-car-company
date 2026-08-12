@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
-import { listSlots, type SaveGameData } from '../core/save'
+import { clearStorage, listSlots, type SaveGameData } from '../core/save'
 import { formatDate, makeDate } from '../core/gameDate'
 import { compact } from '../core/numberFormat'
 import { Button, Heading } from '../components/Primitives'
@@ -20,11 +20,13 @@ function asNewGamePayload(payload: unknown): NewGamePayload | null {
 }
 
 /**
- * Doubles as the "Continue" slot picker (Main Menu, no payload) and the "every slot's full"
- * fallback from Company Naming (payload.mode === 'new') - same list of slots either way, just a
- * different meaning for tapping one. Continue mode leaves empty slots inert (nothing to resume);
- * new-game mode requires a second tap on an occupied slot before it overwrites, so a stray tap
- * can't destroy a save.
+ * Doubles as the main "Saves" hub reached from Main Menu (no payload - browse/resume/delete/start
+ * new) and the "every slot's full" fallback from Company Naming (payload.mode === 'new' - pick a
+ * slot to overwrite). Browse mode leaves empty slots inert to tap (there's a dedicated + NEW GAME
+ * button for that instead, which reuses Company Naming's own empty-slot-or-overwrite logic);
+ * new-game mode requires a second tap on an occupied slot before it overwrites. Deleting a slot
+ * works the same second-tap-to-confirm way, and is only offered in browse mode - the overwrite
+ * flow already has its own "are you sure" via the second tap on the slot itself.
  */
 export function SaveSlotsScreen() {
   const back = useUiStore((s) => s.back)
@@ -35,6 +37,7 @@ export function SaveSlotsScreen() {
 
   const newGame = asNewGamePayload(payload)
   const [confirmingIndex, setConfirmingIndex] = useState<number | null>(null)
+  const [deletingIndex, setDeletingIndex] = useState<number | null>(null)
 
   const slots = listSlots()
 
@@ -53,6 +56,15 @@ export function SaveSlotsScreen() {
     if (loadSlot(index)) show('OfficeHub')
   }
 
+  const handleDeleteClick = (index: number) => {
+    if (deletingIndex === index) {
+      clearStorage(undefined, index)
+      setDeletingIndex(null)
+    } else {
+      setDeletingIndex(index)
+    }
+  }
+
   return (
     <div className={`${styles.screen} ${styles.centered} ${styles.narrow}`} style={{ position: 'relative' }}>
       <Button
@@ -63,7 +75,7 @@ export function SaveSlotsScreen() {
         ‹
       </Button>
 
-      <Heading>{newGame ? 'CHOOSE A SLOT TO OVERWRITE' : 'SELECT SAVE'}</Heading>
+      <Heading>{newGame ? 'CHOOSE A SLOT TO OVERWRITE' : 'SAVES'}</Heading>
       {newGame && (
         <span style={{ color: 'var(--color-text-secondary)' }}>
           Every slot is full - pick one to start "{newGame.pendingCompanyName}" in. This can't be undone.
@@ -74,28 +86,41 @@ export function SaveSlotsScreen() {
         {slots.map((data, index) => {
           const empty = data === null
           return (
-            <button
-              key={index}
-              type="button"
-              className={slotStyles.slot}
-              disabled={!newGame && empty}
-              onClick={() => handleSlotClick(index, data)}
-            >
-              {empty ? (
-                <span className={slotStyles.empty}>Empty Slot</span>
-              ) : (
-                <>
-                  <span className={slotStyles.name}>{data.companyName}</span>
-                  <span className={slotStyles.meta}>
-                    {formatDate(makeDate(data.year, data.month, data.day))} · {compact(data.cashBalance)}
-                  </span>
-                  {confirmingIndex === index && <span className={slotStyles.confirm}>Tap again to overwrite</span>}
-                </>
+            <div key={index} className={slotStyles.row}>
+              <button
+                type="button"
+                className={slotStyles.slot}
+                disabled={!newGame && empty}
+                onClick={() => handleSlotClick(index, data)}
+              >
+                {empty ? (
+                  <span className={slotStyles.empty}>Empty Slot</span>
+                ) : (
+                  <>
+                    <span className={slotStyles.name}>{data.companyName}</span>
+                    <span className={slotStyles.meta}>
+                      {formatDate(makeDate(data.year, data.month, data.day))} · {compact(data.cashBalance)}
+                    </span>
+                    {confirmingIndex === index && <span className={slotStyles.confirm}>Tap again to overwrite</span>}
+                  </>
+                )}
+              </button>
+              {!newGame && !empty && (
+                <button
+                  type="button"
+                  className={`${slotStyles.deleteButton} ${deletingIndex === index ? slotStyles.deleteConfirming : ''}`}
+                  onClick={() => handleDeleteClick(index)}
+                  aria-label={deletingIndex === index ? `Confirm delete ${data.companyName}` : `Delete ${data.companyName}`}
+                >
+                  {deletingIndex === index ? '✓' : '🗑'}
+                </button>
               )}
-            </button>
+            </div>
           )
         })}
       </div>
+
+      {!newGame && <Button onClick={() => show('CompanyNaming')}>+ NEW GAME</Button>}
     </div>
   )
 }
