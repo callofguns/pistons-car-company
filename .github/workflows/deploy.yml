@@ -1,8 +1,14 @@
 name: Deploy to GitHub Pages
 
 on:
+  # Deploy only fires on a version tag (v1.2.3-alpha, ...) - i.e. only once a change has been
+  # explicitly tagged as a release, not on every commit to main. Ordinary commits/pushes to main
+  # just accumulate there untouched; nothing reaches the live site until a tag lands. This lets
+  # several changes get committed and bug-tested locally (`npm run preview`) before any of them
+  # actually go live together. workflow_dispatch stays as a manual escape hatch for redeploying
+  # the current tag without cutting a new one (e.g. Pages itself needs a nudge).
   push:
-    branches: [main]
+    tags: ['v*']
   workflow_dispatch:
 
 permissions:
