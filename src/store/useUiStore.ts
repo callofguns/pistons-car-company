@@ -6,7 +6,7 @@ import type { ScreenId } from './screenId'
  * Selection through the design wizard) also runs full-screen without it, as its own focused,
  * distraction-free flow - both screens own their own in-screen back navigation, so nothing is
  * lost by dropping the bar there. Every other screen, including Office Hub, keeps it visible. */
-const SCREENS_WITHOUT_HUD = new Set<ScreenId>(['MainMenu', 'BodySelection', 'CarDesign'])
+const SCREENS_WITHOUT_HUD = new Set<ScreenId>(['MainMenu', 'CompanyNaming', 'SaveSlots', 'BodySelection', 'CarDesign'])
 
 export function screenWantsTopHud(screen: ScreenId): boolean {
   return !SCREENS_WITHOUT_HUD.has(screen)
@@ -15,6 +15,8 @@ export function screenWantsTopHud(screen: ScreenId): boolean {
 /** Screen titles shown in the HUD's top-left, matching the reference ("BODY SELECTION", "SALES STATISTICS", etc.). */
 export const SCREEN_TITLES: Record<ScreenId, string> = {
   MainMenu: 'Main Menu',
+  CompanyNaming: 'New Company',
+  SaveSlots: 'Save Slots',
   OfficeHub: 'Office',
   BodySelection: 'Body Selection',
   CarDesign: 'Car Design',

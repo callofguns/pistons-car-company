@@ -33,14 +33,14 @@ export interface World {
   racing: RacingState
 }
 
-export function createNewWorld(config: GameConfig): World {
+export function createNewWorld(config: GameConfig, companyName?: string): World {
   const startDate = makeDate(config.startYear, config.startMonth, config.startDay)
 
   return {
     time: createTimeState(startDate, config.secondsPerDay),
     bank: createBank(config.startingCapital),
     ledger: createLedgerState(),
-    company: createCompanyState(config.defaultCompanyName, config.defaultHomeCity, config.startingPopulation),
+    company: createCompanyState(companyName ?? config.defaultCompanyName, config.defaultHomeCity, config.startingPopulation),
     rumors: createRumorState(),
     research: createResearchState(config.startingResearchPoints),
     staff: createStaffState(),

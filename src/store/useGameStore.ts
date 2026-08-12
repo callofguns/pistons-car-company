@@ -4,7 +4,14 @@ import { LOAN_TIERS } from '../data/loanTiers'
 import type { Catalog } from '../core/catalog'
 import { DEFAULT_GAME_CONFIG, type GameConfig } from '../core/gameConfig'
 import { createNewWorld, tickWorld, notifyResearchProgressed, type World } from '../core/world'
-import { buildSaveData, clearStorage, isCompatibleSave, loadWorld, saveToStorage, tryLoadFromStorage } from '../core/save'
+import {
+  buildSaveData,
+  isCompatibleSave,
+  loadWorld,
+  migrateLegacySaveIfNeeded,
+  saveToStorage,
+  tryLoadFromStorage,
+} from '../core/save'
 import { takeLoan as coreTakeLoan } from '../core/economy'
 import { startResearch as coreStartResearch } from '../core/research'
 import { maxProductionBatch, setBudgetLevel as coreSetBudgetLevel } from '../core/staff'
@@ -28,23 +35,30 @@ import {
 } from '../core/vehicleService'
 import type { EngineSpec } from '../core/vehicles'
 
-function bootstrapWorld(config: GameConfig, catalog: Catalog): World {
-  const saved = tryLoadFromStorage()
-  // A save from an older schema (e.g. pre-loans/bankruptcy) is treated as absent rather than
-  // partially restored - see save.ts's isCompatibleSave for why there's no migration path yet.
-  return saved && isCompatibleSave(saved) ? loadWorld(config, catalog, saved) : createNewWorld(config)
-}
-
 interface GameStore {
   config: GameConfig
   catalog: Catalog
   world: World
   /** Bumped on every mutation - the store's equivalent of GameEvents; components subscribe to this (or a value derived from it) to know when to re-read `world`. */
   revision: number
+  /** Which save slot `world` came from/belongs to - null until the player has actually started or
+   * loaded a game (Main Menu boots with a blank, unsaved world nobody can reach without going
+   * through Company Naming or Save Slots first). saveNow() and the autosave tick both write here,
+   * so this is what makes "which slot am I even playing" unambiguous. */
+  activeSlotIndex: number | null
 
   tick: (deltaSeconds: number) => void
   saveNow: () => void
-  startNewGame: () => void
+  /** Starts a brand-new company in the given slot (overwriting whatever was there) and makes it
+   * the active game. Used by the Company Naming / Save Slots screens. */
+  startNewGameInSlot: (slotIndex: number, companyName: string) => void
+  /** Loads a slot's save into play. Returns false (and leaves the current game untouched) if that
+   * slot turns out to be empty or incompatible - shouldn't happen from the Save Slots screen,
+   * which only offers slots listSlots() already confirmed are loadable, but this stays safe either way. */
+  loadSlot: (slotIndex: number) => boolean
+  /** BankruptcyOverlay's "+ START NEW GAME" - restarts fresh in the same slot under the same
+   * company name, rather than sending a mid-run player back through the naming/slot-picker flow. */
+  restartAfterBankruptcy: () => void
   /** 'paused' stops the clock outright; 'normal'/'fast' resume at speedMultiplier 1x/3x. Persists
    * across screen changes as world.time.manuallyPaused - see useSimulationLoop for how this
    * combines with the screen-based auto-pause gate. */
@@ -81,38 +95,67 @@ export const useGameStore = create<GameStore>((set, get) => {
   const config = DEFAULT_GAME_CONFIG
   const catalog = CATALOG
 
+  // Runs once, before anything (Main Menu's Continue-button check, Save Slots' listing) reads
+  // slot data - see save.ts's migrateLegacySaveIfNeeded for why.
+  migrateLegacySaveIfNeeded()
+
   const bump = () => set((s) => ({ revision: s.revision + 1 }))
   const findModel = (world: World, modelId: string) => world.vehicles.models.find((m) => m.id === modelId)
 
   return {
     config,
     catalog,
-    world: bootstrapWorld(config, catalog),
+    // Blank and unsaved until the player actually starts or loads a game - Main Menu boots to
+    // the title screen regardless of what's in `world`, so there's nothing to accidentally show.
+    world: createNewWorld(config),
     revision: 0,
+    activeSlotIndex: null,
 
     tick: (deltaSeconds) => {
-      const { world, catalog, config } = get()
+      const { world, catalog, config, activeSlotIndex } = get()
       const daysElapsed = tickWorld(world, catalog, config, deltaSeconds)
       if (daysElapsed > 0) {
-        if (world.time.currentDate.day === 1 && config.autosaveOnMonthRollover) {
-          saveToStorage(buildSaveData(world))
+        if (world.time.currentDate.day === 1 && config.autosaveOnMonthRollover && activeSlotIndex !== null) {
+          saveToStorage(buildSaveData(world), undefined, activeSlotIndex)
         }
         bump()
       }
     },
 
-    saveNow: () => saveToStorage(buildSaveData(get().world)),
+    saveNow: () => {
+      const { world, activeSlotIndex } = get()
+      if (activeSlotIndex === null) return // nothing to save into yet
+      saveToStorage(buildSaveData(world), undefined, activeSlotIndex)
+    },
+
+    startNewGameInSlot: (slotIndex, companyName) => {
+      const world = createNewWorld(get().config, companyName)
+      saveToStorage(buildSaveData(world), undefined, slotIndex)
+      set((s) => ({ world, activeSlotIndex: slotIndex, revision: s.revision + 1 }))
+    },
+
+    loadSlot: (slotIndex) => {
+      const { config, catalog } = get()
+      const data = tryLoadFromStorage(undefined, slotIndex)
+      if (!data || !isCompatibleSave(data)) return false
+      const world = loadWorld(config, catalog, data)
+      set((s) => ({ world, activeSlotIndex: slotIndex, revision: s.revision + 1 }))
+      return true
+    },
+
+    restartAfterBankruptcy: () => {
+      const { config, world, activeSlotIndex } = get()
+      const freshWorld = createNewWorld(config, world.company.companyName)
+      const slot = activeSlotIndex ?? 0
+      saveToStorage(buildSaveData(freshWorld), undefined, slot)
+      set((s) => ({ world: freshWorld, activeSlotIndex: slot, revision: s.revision + 1 }))
+    },
 
     setPlaybackSpeed: (speed) => {
       const time = get().world.time
       time.manuallyPaused = speed === 'paused'
       time.speedMultiplier = speed === 'fast' ? 3 : 1
       bump()
-    },
-
-    startNewGame: () => {
-      clearStorage()
-      set({ world: createNewWorld(get().config), revision: get().revision + 1 })
     },
 
     beginNewDesign: () => {

@@ -1,35 +1,31 @@
 import { useUiStore } from '../store/useUiStore'
-import { useGameStore } from '../store/useGameStore'
-import { useTutorialStore } from '../store/useTutorialStore'
+import { listSlots } from '../core/save'
 import { APP_VERSION } from '../version'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
 import menuStyles from './MainMenuScreen.module.css'
 
-/** CONTINUE resumes whatever was loaded at startup (a save, or a fresh $250,000 game). "+" wipes the save, starts the guided tutorial, and starts over immediately - no scene-reload subtlety needed on the web like the Unity port had.
- * Header pinned to the top, buttons centered in the space below it, version number tucked into the bottom-right corner. */
+/** CONTINUE opens the Save Slots screen to pick which company to resume - hidden entirely if no
+ * slot has anything in it yet (a first-time player has nothing to continue). "+" starts the
+ * Company Naming -> (usually) straight into a fresh game flow; only falls through to Save Slots
+ * itself if every slot is already taken. Header pinned to the top, buttons centered in the space
+ * below it, version number tucked into the bottom-right corner. */
 export function MainMenuScreen() {
   const show = useUiStore((s) => s.show)
-  const startNewGame = useGameStore((s) => s.startNewGame)
-  const startTutorial = useTutorialStore((s) => s.start)
+
+  const hasAnySave = listSlots().some((slot) => slot !== null)
 
   return (
     <div className={`${styles.screen} ${menuStyles.menu}`}>
       <Heading className={menuStyles.header}>Pistons: Car Company Inc</Heading>
 
       <div className={menuStyles.buttons}>
-        <Button variant="primary" onClick={() => show('OfficeHub')}>
-          ▶ CONTINUE
-        </Button>
-        <Button
-          onClick={() => {
-            startNewGame()
-            startTutorial()
-            show('OfficeHub')
-          }}
-        >
-          + NEW GAME
-        </Button>
+        {hasAnySave && (
+          <Button variant="primary" onClick={() => show('SaveSlots')}>
+            ▶ CONTINUE
+          </Button>
+        )}
+        <Button onClick={() => show('CompanyNaming')}>+ NEW GAME</Button>
         <Button variant="ghost" onClick={() => console.log('[MainMenu] News - not implemented yet.')}>
           NEWS
         </Button>

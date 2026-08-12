@@ -157,26 +157,40 @@ export interface KeyValueStorage {
   removeItem(key: string): void
 }
 
-const STORAGE_KEY = 'pistons.save.v1'
+/** How many concurrent companies a player can have going at once - shown as 3 slots on the Save
+ * Slots screen. Picked as a small, fixed number rather than unlimited slots so that screen (and
+ * "which slot does a new game land in") stays a simple, fully-visible list instead of needing its
+ * own scrolling/management UI. */
+export const SAVE_SLOT_COUNT = 3
+
+const LEGACY_STORAGE_KEY = 'pistons.save.v1'
+const slotKey = (slotIndex: number) => `pistons.save.v1.slot${slotIndex}`
 
 function defaultStorage(): KeyValueStorage | undefined {
   return typeof localStorage !== 'undefined' ? localStorage : undefined
 }
 
-export function saveToStorage(data: SaveGameData, storage: KeyValueStorage | undefined = defaultStorage()): void {
+export function saveToStorage(
+  data: SaveGameData,
+  storage: KeyValueStorage | undefined = defaultStorage(),
+  slotIndex = 0,
+): void {
   if (!storage) return
   data.savedAtUnixMs = Date.now()
   try {
-    storage.setItem(STORAGE_KEY, JSON.stringify(data))
+    storage.setItem(slotKey(slotIndex), JSON.stringify(data))
   } catch (e) {
     console.error('[save] Failed to write save data:', e)
   }
 }
 
-export function tryLoadFromStorage(storage: KeyValueStorage | undefined = defaultStorage()): SaveGameData | null {
+export function tryLoadFromStorage(
+  storage: KeyValueStorage | undefined = defaultStorage(),
+  slotIndex = 0,
+): SaveGameData | null {
   if (!storage) return null
   try {
-    const raw = storage.getItem(STORAGE_KEY)
+    const raw = storage.getItem(slotKey(slotIndex))
     if (!raw) return null
     return JSON.parse(raw) as SaveGameData
   } catch (e) {
@@ -185,7 +199,30 @@ export function tryLoadFromStorage(storage: KeyValueStorage | undefined = defaul
   }
 }
 
-export function clearStorage(storage: KeyValueStorage | undefined = defaultStorage()): void {
+export function clearStorage(storage: KeyValueStorage | undefined = defaultStorage(), slotIndex = 0): void {
   if (!storage) return
-  storage.removeItem(STORAGE_KEY)
+  storage.removeItem(slotKey(slotIndex))
+}
+
+/** Every slot's save data in order, or null for a slot that's empty, corrupt, or from an
+ * incompatible schema (treated the same as empty - see isCompatibleSave). Read fresh from storage
+ * each call rather than cached, since it's cheap and this only runs on menu-ish screens. */
+export function listSlots(storage: KeyValueStorage | undefined = defaultStorage()): (SaveGameData | null)[] {
+  return Array.from({ length: SAVE_SLOT_COUNT }, (_, i) => {
+    const data = tryLoadFromStorage(storage, i)
+    return data && isCompatibleSave(data) ? data : null
+  })
+}
+
+/** One-time upgrade for anyone with a save from before slots existed: if slot 0 is still empty and
+ * the old fixed-key save is there, it becomes slot 0 instead of silently vanishing. No-op for a
+ * player who's never saved, or who's already on the slot system (slot 0 already occupied, or the
+ * legacy key already cleared). Call once at store bootstrap, before anything reads slot data. */
+export function migrateLegacySaveIfNeeded(storage: KeyValueStorage | undefined = defaultStorage()): void {
+  if (!storage) return
+  if (storage.getItem(slotKey(0))) return
+  const legacy = storage.getItem(LEGACY_STORAGE_KEY)
+  if (!legacy) return
+  storage.setItem(slotKey(0), legacy)
+  storage.removeItem(LEGACY_STORAGE_KEY)
 }
