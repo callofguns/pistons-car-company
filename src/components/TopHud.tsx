@@ -20,21 +20,27 @@ export function TopHud() {
   useGameStore((s) => s.revision)
   const world = useGameStore((s) => s.world)
   const setPlaybackSpeed = useGameStore((s) => s.setPlaybackSpeed)
+  const saveNow = useGameStore((s) => s.saveNow)
 
   if (!screenWantsTopHud(currentScreen)) return null
 
   const { company, time, bank } = world
 
+  // Exits the current session back to the title screen (Continue/New Game/...), from anywhere -
+  // not just Office Hub, which is why it's not called "home" in code even though the icon still
+  // reads that way to the player. Saves first so Continue on Main Menu picks this session back up
+  // exactly where it left off, same as if the tab had just been closed here. goHome() clears
+  // history/payload outright, so nothing stale is left for the CarDesign/BodySelection screens'
+  // own back buttons to wander back into later.
+  const goToMainMenu = () => {
+    saveNow()
+    goHome('MainMenu')
+  }
+
   return (
     <div className={styles.bar}>
       <div className={styles.left}>
-        {/* Always jumps straight to Office Hub - it used to fall back to back() off Office Hub,
-            which walked the raw navigation history one hop at a time instead. That stack can hold
-            a stale screen (e.g. the just-finalized Car Design wizard, which renders as "No design
-            in progress" once its session is spent) so a single "back" step didn't reliably get the
-            player home. goHome() also clears history/payload outright, so this can't leave stale
-            state behind for a later back() to trip over either. */}
-        <Button className={styles.iconButton} onClick={() => goHome('OfficeHub')} aria-label="Home">
+        <Button className={styles.iconButton} onClick={goToMainMenu} aria-label="Main Menu">
           🏠
         </Button>
         <div className={styles.titleColumn}>
