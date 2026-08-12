@@ -174,7 +174,7 @@ export function CarDesignScreen() {
       </div>
 
       {stepId === 'Classification' && (
-        <div className={`${wizardStyles.body} ${wizardStyles.classificationBody}`}>
+        <div className={wizardStyles.body}>
           <ClassificationPicker selectedTagIds={session.classificationTagIds} onToggle={toggleClassificationTag} />
         </div>
       )}
