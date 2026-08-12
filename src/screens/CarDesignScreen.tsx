@@ -101,6 +101,7 @@ function generateDefaultName(carClass: string | undefined): string {
 export function CarDesignScreen() {
   const show = useUiStore((s) => s.show)
   const back = useUiStore((s) => s.back)
+  const goHome = useUiStore((s) => s.goHome)
   useGameStore((s) => s.revision)
   const session = useGameStore((s) => s.world.vehicles.currentSession)
   const currentYear = useGameStore((s) => s.world.time.currentDate.year)
@@ -130,9 +131,16 @@ export function CarDesignScreen() {
   const tutorialStep = useActiveTutorialStep()
 
   if (!session || !body) {
+    // Shouldn't normally be reachable (this screen only shows once selectBody has set up a
+    // session) but stray navigation - e.g. a back-stack entry left over from a prior design that
+    // already finished - could still land here with nothing to show. A dead end with no way
+    // forward isn't acceptable, so this offers a real way out rather than just inert text.
     return (
-      <div className={styles.screen}>
+      <div className={`${styles.screen} ${styles.centered} ${styles.narrow}`}>
         <span className={styles.empty}>No design in progress - go back and pick a body first.</span>
+        <Button variant="primary" style={{ width: '100%' }} onClick={() => goHome('OfficeHub')}>
+          ‹ BACK TO OFFICE
+        </Button>
       </div>
     )
   }
