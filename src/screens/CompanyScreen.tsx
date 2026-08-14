@@ -16,7 +16,9 @@ export function CompanyScreen() {
       <div className={`${styles.column} ${styles.columnMedium}`}>
         <div style={{ fontSize: '4rem', textAlign: 'center' }}>🐎</div>
         <Heading style={{ textAlign: 'center' }}>{company.companyName}</Heading>
-        <span style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>{company.homeCity.toUpperCase()}</span>
+        <span style={{ textAlign: 'center', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
+          {company.homeCity}
+        </span>
 
         <StatRow label="Auto released" value={String(company.autoReleasedCount)} />
         <StatRow label="Total sold" value={compact(company.totalCarsSoldAllModels)} />

@@ -45,6 +45,11 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   white-space: nowrap;
+  /* CSS transform instead of baking .toUpperCase() into the string itself - keeps SCREEN_TITLES
+     holding the real display string (soon to be a translation key's resolved value) rather than
+     an already-mangled one, and locale-safe casing is the browser's job, not string.prototype's
+     (the classic Turkish-i trap; harmless for EN/ES/FR specifically, but no reason to hand-roll it). */
+  text-transform: uppercase;
 }
 
 .pills {

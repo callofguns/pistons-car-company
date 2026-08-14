@@ -45,7 +45,7 @@ export function TopHud() {
         </Button>
         <div className={styles.titleColumn}>
           <span className={styles.menuLabel}>Menu</span>
-          <span className={styles.screenTitle}>{SCREEN_TITLES[currentScreen].toUpperCase()}</span>
+          <span className={styles.screenTitle}>{SCREEN_TITLES[currentScreen]}</span>
         </div>
       </div>
 

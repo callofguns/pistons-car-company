@@ -184,7 +184,7 @@ export function CarDesignScreen() {
         </Button>
         <div>
           <span className={wizardStyles.breadcrumb}>{meta.breadcrumb}</span>
-          <Heading className={wizardStyles.title}>{meta.title.toUpperCase()}</Heading>
+          <Heading className={wizardStyles.title}>{meta.title}</Heading>
         </div>
         {stats && !HIDES_COST_PRICE.has(stepId) && (
           <div className={wizardStyles.costPrice}>

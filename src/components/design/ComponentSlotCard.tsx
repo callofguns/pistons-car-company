@@ -37,7 +37,7 @@ export function ComponentSlotCard({ slot, selectedOptionId, currentYear, onSelec
           ‹
         </Button>
         <div className={styles.optionInfo}>
-          <span className={styles.optionName}>{option.label.toUpperCase()}</span>
+          <span className={styles.optionName}>{option.label}</span>
           <span className={styles.index}>
             {index + 1}/{unlocked.length}
           </span>

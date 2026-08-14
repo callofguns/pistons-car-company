@@ -57,7 +57,7 @@ export function BodySelectionScreen() {
       </div>
 
       <Heading>{body.displayName}</Heading>
-      <span style={{ color: 'var(--color-text-secondary)' }}>{body.carClass.toUpperCase()}</span>
+      <span style={{ color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>{body.carClass}</span>
 
       <div style={{ width: '100%' }}>
         <MeterBar value01={Math.min(1, body.engineBayCapacityLiters / 12)} displayValue={`${body.engineBayCapacityLiters} L.`} />

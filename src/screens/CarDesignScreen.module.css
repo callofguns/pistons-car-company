@@ -22,6 +22,10 @@
 
 .title {
   margin: 0;
+  /* Was meta.title.toUpperCase() baked into the string - moved to CSS so the underlying title
+     stays the real display string (a translation key's resolved value, post-i18n) rather than an
+     already-uppercased one. */
+  text-transform: uppercase;
 }
 
 .costPrice {
