@@ -67,6 +67,8 @@ export function BodySelectionScreen() {
 
       <Button
         variant="primary"
+        data-tutorial-target="body-continue"
+        className={tutorialStep?.step.targetId === 'body-continue' ? 'tutorial-target-highlight' : undefined}
         style={{ width: '100%' }}
         onClick={() => {
           if (selectBody(body.id)) {

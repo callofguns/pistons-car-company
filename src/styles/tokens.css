@@ -115,6 +115,30 @@ input {
   outline-offset: 2px;
 }
 
+/* The tutorial's "click this one" spotlight - a plain (non-module) class name so any screen's
+   Button can opt into it just by adding the literal string, without every screen needing its own
+   copy of the animation. Only ever applied to the exact button a guided step wants pressed (see
+   tutorialSteps.ts's targetId/TutorialCard) - a trim-colored ring that pulses outward, on top of
+   the button's own z-index so it isn't clipped by a sibling. prefers-reduced-motion already turns
+   all animation-duration to ~0 globally above, so this needs no separate guard. */
+.tutorial-target-highlight {
+  position: relative;
+  z-index: 2;
+  animation: tutorial-pulse 1.6s ease-out infinite;
+}
+
+@keyframes tutorial-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(201, 162, 39, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(201, 162, 39, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(201, 162, 39, 0);
+  }
+}
+
 /* Forces the whole app to render landscape-shaped even on a phone held upright, instead of
    showing a "please rotate" prompt: App.tsx's screen.orientation.lock() call only ever works in
    fullscreen or an installed Android PWA, so for the common case (a normal mobile browser tab, or

@@ -36,9 +36,17 @@ export function TutorialCard({ step, onNext, onSkip }: TutorialCardProps) {
           <button className={styles.skipLink} onClick={onSkip}>
             Skip tutorial
           </button>
-          <Button variant="primary" onClick={onNext}>
-            {isLastStep ? 'Got it' : 'Next'}
-          </Button>
+          {/* Action-gated steps (step.targetId set) drop the Next button entirely - progress only
+             comes from actually pressing the highlighted button out on the screen, which stops
+             this step matching on its own (see useActiveTutorialStep). Next stays only for
+             narrative steps with no single button to point at. */}
+          {step.targetId ? (
+            <span className={styles.hint}>👉 Tap the highlighted button</span>
+          ) : (
+            <Button variant="primary" onClick={onNext}>
+              {isLastStep ? 'Got it' : 'Next'}
+            </Button>
+          )}
         </div>
       </div>
     </div>

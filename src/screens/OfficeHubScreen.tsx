@@ -1,5 +1,6 @@
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
+import { useActiveTutorialStep } from '../store/useTutorialStore'
 import { ModelSalesRow } from '../components/ModelSalesRow'
 import { SalesGraph } from '../components/SalesGraph'
 import { Button, Heading } from '../components/Primitives'
@@ -15,6 +16,7 @@ export function OfficeHubScreen() {
   useGameStore((s) => s.revision)
   const models = useGameStore((s) => s.world.vehicles.models)
   const beginNewDesign = useGameStore((s) => s.beginNewDesign)
+  const tutorialStep = useActiveTutorialStep()
 
   const topModels = [...models].sort((a, b) => b.lifetimeEarnings - a.lifetimeEarnings).slice(0, 4)
 
@@ -41,7 +43,8 @@ export function OfficeHubScreen() {
 
       <Button
         variant="primary"
-        className={styles.createCarButton}
+        data-tutorial-target="office-create-car"
+        className={`${styles.createCarButton} ${tutorialStep?.step.targetId === 'office-create-car' ? 'tutorial-target-highlight' : ''}`}
         onClick={() => {
           beginNewDesign()
           show('BodySelection')

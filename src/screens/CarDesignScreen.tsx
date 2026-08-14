@@ -276,7 +276,15 @@ export function CarDesignScreen() {
         </div>
       )}
 
-      <Button variant="primary" className={wizardStyles.continueButton} onClick={handleContinue} disabled={!canContinue}>
+      <Button
+        variant="primary"
+        data-tutorial-target="wizard-continue"
+        className={`${wizardStyles.continueButton} ${
+          canContinue && tutorialStep?.step.targetId === 'wizard-continue' ? 'tutorial-target-highlight' : ''
+        }`}
+        onClick={handleContinue}
+        disabled={!canContinue}
+      >
         {stepId === 'Pricing' ? '✓ FINISH' : '✓ CONTINUE'}
       </Button>
     </div>

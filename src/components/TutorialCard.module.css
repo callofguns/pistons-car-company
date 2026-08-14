@@ -75,3 +75,12 @@
 .skipLink:hover {
   color: var(--color-text-secondary);
 }
+
+/* Stands in for the Next button on action-gated steps - same slot in the layout, but not
+   clickable, since the only way past that step is the highlighted button out on the screen. */
+.hint {
+  color: var(--color-trim);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
