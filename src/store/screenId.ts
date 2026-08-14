@@ -14,3 +14,4 @@ export type ScreenId =
   | 'Company'
   | 'TeamCreation'
   | 'Bank'
+  | 'Language'

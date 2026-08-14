@@ -6,7 +6,16 @@ import type { ScreenId } from './screenId'
  * Selection through the design wizard) also runs full-screen without it, as its own focused,
  * distraction-free flow - both screens own their own in-screen back navigation, so nothing is
  * lost by dropping the bar there. Every other screen, including Office Hub, keeps it visible. */
-const SCREENS_WITHOUT_HUD = new Set<ScreenId>(['MainMenu', 'CompanyNaming', 'SaveSlots', 'BodySelection', 'CarDesign'])
+const SCREENS_WITHOUT_HUD = new Set<ScreenId>([
+  'MainMenu',
+  'CompanyNaming',
+  'SaveSlots',
+  'BodySelection',
+  'CarDesign',
+  // Reachable from the Main Menu, where world is a blank unsaved createNewWorld() - the HUD would
+  // otherwise render stats (company name, cash, date) for a company that doesn't exist.
+  'Language',
+])
 
 export function screenWantsTopHud(screen: ScreenId): boolean {
   return !SCREENS_WITHOUT_HUD.has(screen)
@@ -28,6 +37,9 @@ export const SCREEN_TITLES: Record<ScreenId, string> = {
   Company: 'Company',
   TeamCreation: 'Team Creation',
   Bank: 'Finance',
+  // Not actually shown - Language is in SCREENS_WITHOUT_HUD - but SCREEN_TITLES is a
+  // Record<ScreenId, string>, so every screen needs an entry regardless.
+  Language: 'Language',
 }
 
 interface UiStore {

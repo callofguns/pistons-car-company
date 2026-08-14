@@ -1,5 +1,8 @@
 /* Self-hosted (not CDN-linked) so the PWA's offline precache still covers every asset - see
-   vite-plugin-pwa's config. Only the weights actually used, latin subset only (English-only app). */
+   vite-plugin-pwa's config. Only the weights actually used, latin subset only - covers English,
+   Spanish, and French (the app's shipped locales, see src/i18n/locale.ts) in full, including
+   accented characters (é è ê ç ñ í ó ú ü ¿ ¡). A future non-Latin locale (e.g. anything CJK) would
+   need a different subset and likely a different display face entirely. */
 @import '@fontsource/fraunces/latin-600.css';
 @import '@fontsource/fraunces/latin-700.css';
 @import '@fontsource/work-sans/latin-400.css';

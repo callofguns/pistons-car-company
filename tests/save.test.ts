@@ -7,7 +7,6 @@ import {
   saveToStorage,
   tryLoadFromStorage,
   SAVE_SLOT_COUNT,
-  type KeyValueStorage,
 } from '../src/core/save'
 import { createNewWorld } from '../src/core/world'
 import { createBank } from '../src/core/economy'
@@ -17,15 +16,7 @@ import { DEFAULT_ENGINE_SPEC } from '../src/core/vehicles'
 import { TechModifiers } from '../src/core/techModifiers'
 import { makeDate } from '../src/core/gameDate'
 import type { BodyStyleDefinition } from '../src/core/vehicles'
-
-function createMemoryStorage(): KeyValueStorage {
-  const map = new Map<string, string>()
-  return {
-    getItem: (key) => map.get(key) ?? null,
-    setItem: (key, value) => void map.set(key, value),
-    removeItem: (key) => void map.delete(key),
-  }
-}
+import { createMemoryStorage } from './helpers/memoryStorage'
 
 const body: BodyStyleDefinition = {
   id: 'test-body',

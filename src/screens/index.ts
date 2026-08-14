@@ -14,6 +14,7 @@ import { PromotionScreen } from './PromotionScreen'
 import { CompanyScreen } from './CompanyScreen'
 import { TeamCreationScreen } from './TeamCreationScreen'
 import { BankScreen } from './BankScreen'
+import { LanguageScreen } from './LanguageScreen'
 
 export const SCREENS: Record<ScreenId, ComponentType> = {
   MainMenu: MainMenuScreen,
@@ -30,4 +31,5 @@ export const SCREENS: Record<ScreenId, ComponentType> = {
   Company: CompanyScreen,
   TeamCreation: TeamCreationScreen,
   Bank: BankScreen,
+  Language: LanguageScreen,
 }

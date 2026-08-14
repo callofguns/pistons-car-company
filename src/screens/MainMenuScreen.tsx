@@ -55,7 +55,7 @@ export function MainMenuScreen() {
         <Button variant="ghost" onClick={() => console.log('[MainMenu] News - not implemented yet.')}>
           NEWS
         </Button>
-        <Button variant="ghost" onClick={() => console.log('[MainMenu] Language - not implemented yet.')}>
+        <Button variant="ghost" onClick={() => show('Language')}>
           LANGUAGE
         </Button>
       </div>
