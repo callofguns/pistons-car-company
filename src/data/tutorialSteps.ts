@@ -1,5 +1,6 @@
 import type { ScreenId } from '../store/screenId'
 import type { World } from '../core/world'
+import type { MessageKey } from '../i18n/keys'
 
 /** Ids the tutorial can point at, matched against a `data-tutorial-target` attribute on the real
  * button the step wants the player to press. One shared id per physical button rather than per
@@ -23,8 +24,12 @@ export interface TutorialStep {
    * this step matching - not from a generic "Next" tap. Omit for purely narrative steps with no
    * single button to point at. */
   targetId?: TutorialTargetId
-  title: string
-  message: string
+  /** Message keys, not raw strings - TutorialCard resolves these through the current locale via
+   * t(). Small table (13 entries), no test builds a fixture literal of this type, so explicit
+   * fields (rather than PR 3's id-derived pattern for the bigger data tables) are the right
+   * tradeoff here - a typo'd key is a compile error instead of needing a walking test. */
+  titleKey: MessageKey
+  messageKey: MessageKey
 }
 
 /**
@@ -38,104 +43,96 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 'office-welcome',
     screen: 'OfficeHub',
-    title: 'Welcome to Pistons',
-    message:
-      "I'll show you around, then help you design your first car. The Office is home base - you'll return here between every decision.",
+    titleKey: 'tutorial.officeWelcome.title',
+    messageKey: 'tutorial.officeWelcome.message',
   },
   {
     id: 'office-sales',
     screen: 'OfficeHub',
-    title: 'Sales panel',
-    message: "This tracks your top-selling models and recent sales trends. It's empty for now - that changes once you've got a car on the lot.",
+    titleKey: 'tutorial.officeSales.title',
+    messageKey: 'tutorial.officeSales.message',
   },
   {
     id: 'office-nav',
     screen: 'OfficeHub',
-    title: 'Getting around',
-    message:
-      'R&D unlocks new parts, Promo runs ad campaigns, Models reviews everything you sell, Racing is a later-game team, and Staff manages your workforce and their wages.',
+    titleKey: 'tutorial.officeNav.title',
+    messageKey: 'tutorial.officeNav.message',
   },
   {
     id: 'office-hud',
     screen: 'OfficeHub',
-    title: 'The top bar',
-    message:
-      'Reputation, population served, cash balance, and the date - always visible. ▶/⏸/⏩ control time itself: sales and bills only happen while unpaused.',
+    titleKey: 'tutorial.officeHud.title',
+    messageKey: 'tutorial.officeHud.message',
   },
   {
     id: 'office-create-car',
     screen: 'OfficeHub',
     targetId: 'office-create-car',
-    title: 'Time to build',
-    message: 'Tap the highlighted + CREATE CAR button to start designing your first vehicle.',
+    titleKey: 'tutorial.officeCreateCar.title',
+    messageKey: 'tutorial.officeCreateCar.message',
   },
   {
     id: 'body-selection',
     screen: 'BodySelection',
-    title: 'Choose a body',
-    message:
-      "Swipe through the available bodies with the arrows. Each has its own class, engine bay size, and a one-time production tooling cost the first time you use it.",
+    titleKey: 'tutorial.bodySelection.title',
+    messageKey: 'tutorial.bodySelection.message',
   },
   {
     id: 'body-continue',
     screen: 'BodySelection',
     targetId: 'body-continue',
-    title: 'Lock it in',
-    message: 'Happy with one? Tap the highlighted ✓ CONTINUE button to start designing it.',
+    titleKey: 'tutorial.bodyContinue.title',
+    messageKey: 'tutorial.bodyContinue.message',
   },
   {
     id: 'wizard-classification',
     screen: 'CarDesign',
     wizardStepId: 'Classification',
     targetId: 'wizard-continue',
-    title: 'Classification',
-    message:
-      'Pick one Class (Budget through Luxury) and one Type (Off-Road, Sport, or Track) - together they decide which buyers your car appeals to. Then tap the highlighted CONTINUE button.',
+    titleKey: 'tutorial.wizardClassification.title',
+    messageKey: 'tutorial.wizardClassification.message',
   },
   {
     id: 'wizard-safety',
     screen: 'CarDesign',
     wizardStepId: 'Safety',
-    title: 'Component steps',
-    message:
-      "Every part step works the same way: pricier parts cost more but improve your stats. This one is Safety - the rest of the wizard (Transmission, Tires, Interior, and so on) follows the same pattern.",
+    titleKey: 'tutorial.wizardSafety.title',
+    messageKey: 'tutorial.wizardSafety.message',
   },
   {
     id: 'wizard-safety-rating',
     screen: 'CarDesign',
     wizardStepId: 'SafetyRating',
-    title: 'Safety rating',
-    message: "Your star rating from the parts you just picked. More stars means safer cars and happier buyers.",
+    titleKey: 'tutorial.wizardSafetyRating.title',
+    messageKey: 'tutorial.wizardSafetyRating.message',
   },
   {
     id: 'wizard-engine',
     screen: 'CarDesign',
     wizardStepId: 'Engine',
-    title: 'Engine',
-    message: 'Pick an engine preset and watch the spec sheet - Power, Torque, Fuel Consumption, Reliability, and Weight all shape how this car sells.',
+    titleKey: 'tutorial.wizardEngine.title',
+    messageKey: 'tutorial.wizardEngine.message',
   },
   {
     id: 'wizard-finish',
     screen: 'CarDesign',
     wizardStepId: 'Finish',
     targetId: 'wizard-continue',
-    title: 'Name it',
-    message: "Give your car a name (or keep the one I generated for you), then tap the highlighted CONTINUE button.",
+    titleKey: 'tutorial.wizardFinish.title',
+    messageKey: 'tutorial.wizardFinish.message',
   },
   {
     id: 'wizard-pricing',
     screen: 'CarDesign',
     wizardStepId: 'Pricing',
     targetId: 'wizard-continue',
-    title: 'Set a price',
-    message:
-      'Price above your Cost Price to turn a profit. The suggested price balances margin against what buyers in your segment expect - then tap the highlighted ✓ FINISH button to put it into production.',
+    titleKey: 'tutorial.wizardPricing.title',
+    messageKey: 'tutorial.wizardPricing.message',
   },
   {
     id: 'lineup-finale',
     screen: 'ModelLineup',
-    title: "You're on the lot",
-    message:
-      "🎉 Your first car is in production and will start selling back at the Office. From here you can review its specs, adjust the price, or start a restyle any time. Good luck out there.",
+    titleKey: 'tutorial.lineupFinale.title',
+    messageKey: 'tutorial.lineupFinale.message',
   },
 ]

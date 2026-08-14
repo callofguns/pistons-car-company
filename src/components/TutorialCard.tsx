@@ -28,12 +28,12 @@ export function TutorialCard({ step, onNext, onSkip }: TutorialCardProps) {
       </div>
       <div className={styles.body}>
         <div className={styles.headerRow}>
-          <span className={styles.title}>{step.title}</span>
+          <span className={styles.title}>{t(step.titleKey)}</span>
           <span className={styles.progress}>
             {stepNumber}/{TUTORIAL_STEPS.length}
           </span>
         </div>
-        <p className={styles.message}>{step.message}</p>
+        <p className={styles.message}>{t(step.messageKey)}</p>
         <div className={styles.actions}>
           <button className={styles.skipLink} onClick={onSkip}>
             {t('common.skipTutorial')}

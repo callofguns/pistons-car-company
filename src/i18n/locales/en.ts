@@ -501,6 +501,50 @@ export const en = {
   'data.fuelType.Diesel': 'Diesel',
   'data.fuelType.Electric': 'Electric',
 
+  // tutorial script (PR 4) - explicit titleKey/messageKey fields on TutorialStep (small table, 13
+  // entries, no test fixtures construct this type - see data/tutorialSteps.ts). Messages that
+  // reference a highlighted button's own text (e.g. "+ CREATE CAR") bake in that button's
+  // translated wording directly, same maintenance relationship the English original already had
+  // between this file and the screens - not solved by this migration, not made worse by it either.
+  'tutorial.officeWelcome.title': 'Welcome to Pistons',
+  'tutorial.officeWelcome.message':
+    "I'll show you around, then help you design your first car. The Office is home base - you'll return here between every decision.",
+  'tutorial.officeSales.title': 'Sales panel',
+  'tutorial.officeSales.message':
+    "This tracks your top-selling models and recent sales trends. It's empty for now - that changes once you've got a car on the lot.",
+  'tutorial.officeNav.title': 'Getting around',
+  'tutorial.officeNav.message':
+    'R&D unlocks new parts, Promo runs ad campaigns, Models reviews everything you sell, Racing is a later-game team, and Staff manages your workforce and their wages.',
+  'tutorial.officeHud.title': 'The top bar',
+  'tutorial.officeHud.message':
+    'Reputation, population served, cash balance, and the date - always visible. ▶/⏸/⏩ control time itself: sales and bills only happen while unpaused.',
+  'tutorial.officeCreateCar.title': 'Time to build',
+  'tutorial.officeCreateCar.message': 'Tap the highlighted + CREATE CAR button to start designing your first vehicle.',
+  'tutorial.bodySelection.title': 'Choose a body',
+  'tutorial.bodySelection.message':
+    'Swipe through the available bodies with the arrows. Each has its own class, engine bay size, and a one-time production tooling cost the first time you use it.',
+  'tutorial.bodyContinue.title': 'Lock it in',
+  'tutorial.bodyContinue.message': 'Happy with one? Tap the highlighted ✓ CONTINUE button to start designing it.',
+  'tutorial.wizardClassification.title': 'Classification',
+  'tutorial.wizardClassification.message':
+    'Pick one Class (Budget through Luxury) and one Type (Off-Road, Sport, or Track) - together they decide which buyers your car appeals to. Then tap the highlighted CONTINUE button.',
+  'tutorial.wizardSafety.title': 'Component steps',
+  'tutorial.wizardSafety.message':
+    'Every part step works the same way: pricier parts cost more but improve your stats. This one is Safety - the rest of the wizard (Transmission, Tires, Interior, and so on) follows the same pattern.',
+  'tutorial.wizardSafetyRating.title': 'Safety rating',
+  'tutorial.wizardSafetyRating.message': 'Your star rating from the parts you just picked. More stars means safer cars and happier buyers.',
+  'tutorial.wizardEngine.title': 'Engine',
+  'tutorial.wizardEngine.message':
+    'Pick an engine preset and watch the spec sheet - Power, Torque, Fuel Consumption, Reliability, and Weight all shape how this car sells.',
+  'tutorial.wizardFinish.title': 'Name it',
+  'tutorial.wizardFinish.message': 'Give your car a name (or keep the one I generated for you), then tap the highlighted CONTINUE button.',
+  'tutorial.wizardPricing.title': 'Set a price',
+  'tutorial.wizardPricing.message':
+    'Price above your Cost Price to turn a profit. The suggested price balances margin against what buyers in your segment expect - then tap the highlighted ✓ FINISH button to put it into production.',
+  'tutorial.lineupFinale.title': "You're on the lot",
+  'tutorial.lineupFinale.message':
+    '🎉 Your first car is in production and will start selling back at the Office. From here you can review its specs, adjust the price, or start a restyle any time. Good luck out there.',
+
   // screen.<id>.title - the persistent top bar's title (see TopHud.tsx); a Record<ScreenId,
   // MessageKey> in useUiStore.ts maps every screen id to one of these.
   'screen.mainMenu.title': 'Main Menu',

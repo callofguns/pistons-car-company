@@ -415,6 +415,47 @@ export const es: LocaleCatalog = {
   'data.fuelType.Diesel': 'Diésel',
   'data.fuelType.Electric': 'Eléctrico',
 
+  'tutorial.officeWelcome.title': 'Bienvenido a Pistons',
+  'tutorial.officeWelcome.message':
+    'Te enseñaré todo y luego te ayudaré a diseñar tu primer coche. La Oficina es tu base - volverás aquí entre cada decisión.',
+  'tutorial.officeSales.title': 'Panel de ventas',
+  'tutorial.officeSales.message':
+    'Aquí ves tus modelos más vendidos y las tendencias recientes. Está vacío por ahora - eso cambia en cuanto tengas un coche a la venta.',
+  'tutorial.officeNav.title': 'Cómo moverte',
+  'tutorial.officeNav.message':
+    'I+D desbloquea nuevas piezas, Promo lanza campañas publicitarias, Modelos repasa todo lo que vendes, Competición es un equipo de fase avanzada, y Personal gestiona tu plantilla y sus salarios.',
+  'tutorial.officeHud.title': 'La barra superior',
+  'tutorial.officeHud.message':
+    'Reputación, población atendida, saldo en caja y la fecha - siempre visibles. ▶/⏸/⏩ controlan el tiempo: las ventas y los gastos solo ocurren sin pausar.',
+  'tutorial.officeCreateCar.title': 'Hora de construir',
+  'tutorial.officeCreateCar.message': 'Toca el botón resaltado + CREAR COCHE para empezar a diseñar tu primer vehículo.',
+  'tutorial.bodySelection.title': 'Elige una carrocería',
+  'tutorial.bodySelection.message':
+    'Recorre las carrocerías disponibles con las flechas. Cada una tiene su propia clase, tamaño de compartimento del motor y un coste único de utillaje de producción la primera vez que la uses.',
+  'tutorial.bodyContinue.title': 'Confírmala',
+  'tutorial.bodyContinue.message': '¿Contento con una? Toca el botón resaltado ✓ CONTINUAR para empezar a diseñarla.',
+  'tutorial.wizardClassification.title': 'Clasificación',
+  'tutorial.wizardClassification.message':
+    'Elige una Clase (de Económico a Lujo) y un Tipo (Todoterreno, Deportivo o Circuito) - juntos deciden a qué compradores atrae tu coche. Luego toca el botón resaltado CONTINUAR.',
+  'tutorial.wizardSafety.title': 'Pasos de componentes',
+  'tutorial.wizardSafety.message':
+    'Cada paso de piezas funciona igual: las piezas más caras cuestan más pero mejoran tus estadísticas. Este es Seguridad - el resto del asistente (Transmisión, Neumáticos, Interior, etc.) sigue el mismo patrón.',
+  'tutorial.wizardSafetyRating.title': 'Valoración de seguridad',
+  'tutorial.wizardSafetyRating.message':
+    'Tu puntuación de estrellas según las piezas que elegiste. Más estrellas significa coches más seguros y compradores más contentos.',
+  'tutorial.wizardEngine.title': 'Motor',
+  'tutorial.wizardEngine.message':
+    'Elige un motor preconfigurado y observa la ficha técnica - Potencia, Par, Consumo, Fiabilidad y Peso determinan cómo se vende este coche.',
+  'tutorial.wizardFinish.title': 'Ponle nombre',
+  'tutorial.wizardFinish.message':
+    'Dale un nombre a tu coche (o conserva el que generé) y luego toca el botón resaltado CONTINUAR.',
+  'tutorial.wizardPricing.title': 'Fija un precio',
+  'tutorial.wizardPricing.message':
+    'Ponlo por encima de tu Precio de coste para obtener beneficio. El precio sugerido equilibra el margen con lo que esperan los compradores de tu segmento - luego toca el botón resaltado ✓ FINALIZAR para ponerlo en producción.',
+  'tutorial.lineupFinale.title': 'Ya estás en el mercado',
+  'tutorial.lineupFinale.message':
+    '🎉 Tu primer coche está en producción y empezará a venderse desde la Oficina. Desde aquí puedes revisar sus datos, ajustar el precio o iniciar un restyling cuando quieras. ¡Buena suerte!',
+
   'screen.mainMenu.title': 'Menú principal',
   'screen.companyNaming.title': 'Nueva empresa',
   'screen.saveSlots.title': 'Partidas guardadas',
