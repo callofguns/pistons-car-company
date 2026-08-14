@@ -1,14 +1,13 @@
 name: Deploy to GitHub Pages
 
 on:
-  # Deploy only fires on a version tag (v1.2.3-alpha, ...) - i.e. only once a change has been
-  # explicitly tagged as a release, not on every commit to main. Ordinary commits/pushes to main
-  # just accumulate there untouched; nothing reaches the live site until a tag lands. This lets
-  # several changes get committed and bug-tested locally (`npm run preview`) before any of them
-  # actually go live together. workflow_dispatch stays as a manual escape hatch for redeploying
-  # the current tag without cutting a new one (e.g. Pages itself needs a nudge).
+  # Deploy fires on every push to main - pre-beta, changes should reach the live site as soon as
+  # they're pushed rather than waiting on an explicit release tag. Switch this back to
+  # `tags: ['v*']` once the game is fully playable and in beta, to gate live deploys behind
+  # explicit "tag this as a release" moments again. workflow_dispatch stays as a manual escape
+  # hatch for redeploying without a new push (e.g. Pages itself needs a nudge).
   push:
-    tags: ['v*']
+    branches: [main]
   workflow_dispatch:
 
 permissions:
