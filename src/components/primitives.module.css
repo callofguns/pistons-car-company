@@ -64,6 +64,11 @@
   color: var(--color-text-primary);
   background: var(--color-panel-light);
   transition: filter var(--transition-fast), transform var(--transition-fast);
+  /* Cheap insurance against a translated label running long in a tight spot the button's specific
+     screen didn't otherwise account for: worst case becomes a wrapped label, not a
+     horizontally-scrolled screen. */
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .button:hover:not(:disabled) {

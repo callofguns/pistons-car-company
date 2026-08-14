@@ -29,6 +29,9 @@ export const en = {
   'common.fastForward': 'Fast forward',
   'common.previous': 'Previous',
   'common.next': 'Next',
+  'common.decrease': 'Decrease',
+  'common.increase': 'Increase',
+  'common.viewModelSales': 'View {modelName} sales',
   'common.continue': '✓ CONTINUE',
 
   // company naming (step 1 of + NEW GAME)

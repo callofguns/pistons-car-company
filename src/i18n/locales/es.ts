@@ -13,6 +13,9 @@ export const es: LocaleCatalog = {
   'common.fastForward': 'Avance rápido',
   'common.previous': 'Anterior',
   'common.next': 'Siguiente',
+  'common.decrease': 'Disminuir',
+  'common.increase': 'Aumentar',
+  'common.viewModelSales': 'Ver ventas de {modelName}',
   'common.continue': '✓ CONTINUAR',
 
   'companyNaming.heading': 'NOMBRE DE TU EMPRESA:',

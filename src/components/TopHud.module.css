@@ -50,6 +50,13 @@
      an already-mangled one, and locale-safe casing is the browser's job, not string.prototype's
      (the classic Turkish-i trap; harmless for EN/ES/FR specifically, but no reason to hand-roll it). */
   text-transform: uppercase;
+  /* Insurance against a translated title ("SALES STATISTICS" -> "ESTADÍSTICAS DE VENTAS") running
+     longer than English - clips with an ellipsis instead of pushing .pills/.right off-screen or
+     forcing a horizontal scrollbar. .titleColumn's min-width:0 is what lets this actually shrink
+     inside its flex row. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 44vw;
 }
 
 .pills {

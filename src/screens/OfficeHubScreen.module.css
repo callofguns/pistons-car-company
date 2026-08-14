@@ -67,18 +67,24 @@
 }
 
 /* Deliberately elongated rectangle, not a full-width bar, set apart from the rest of the nav
-   cluster in the opposite corner as the primary call to action. */
+   cluster in the opposite corner as the primary call to action. min-width instead of a fixed
+   width - "+ CREATE CAR" (12 chars) vs "+ CRÉER UNE VOITURE" (19 chars) needs room to grow, and
+   since this is anchored by `right`, growing wider extends leftward into space that's already
+   empty, same free-growth reasoning as .bottomLeft's grid above. */
 .createCarButton {
   position: absolute;
   bottom: var(--space-5);
   right: var(--space-5);
-  width: 200px;
+  min-width: 200px;
+  width: auto;
+  padding: 0 var(--space-4);
   height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
   font-size: 1.05rem;
+  white-space: nowrap;
 }
 
 @media (max-height: 560px) {
@@ -87,7 +93,7 @@
   }
 
   .createCarButton {
-    width: 160px;
+    min-width: 160px;
     height: 48px;
     font-size: 0.9rem;
   }
