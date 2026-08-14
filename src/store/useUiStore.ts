@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { ScreenId } from './screenId'
+import type { MessageKey } from '../i18n/keys'
 
 /** Main Menu is the title screen, before a session is really "in progress" - the persistent stat
  * bar was asked to come back off of it specifically. The whole car-building process (Body
@@ -24,26 +25,29 @@ export function screenWantsTopHud(screen: ScreenId): boolean {
   return !SCREENS_WITHOUT_HUD.has(screen)
 }
 
-/** Screen titles shown in the HUD's top-left, matching the reference ("BODY SELECTION", "SALES STATISTICS", etc.). */
-export const SCREEN_TITLES: Record<ScreenId, string> = {
-  MainMenu: 'Main Menu',
-  CompanyNaming: 'New Company',
-  SaveSlots: 'Save Slots',
-  OfficeHub: 'Office',
-  BodySelection: 'Body Selection',
-  CarDesign: 'Car Design',
-  ModelLineup: 'Model Lineup',
-  SalesStatistics: 'Sales Statistics',
-  Research: 'Research',
-  Employees: 'Employees',
-  Promotion: 'Promotion',
-  Company: 'Company',
-  TeamCreation: 'Team Creation',
-  Bank: 'Finance',
-  // Not actually shown - both are in SCREENS_WITHOUT_HUD - but SCREEN_TITLES is a
-  // Record<ScreenId, string>, so every screen needs an entry regardless.
-  Language: 'Language',
-  News: 'News',
+/** Screen titles shown in the HUD's top-left, matching the reference ("BODY SELECTION", "SALES
+ * STATISTICS", etc.) - message keys, not raw strings, so TopHud renders them through the current
+ * locale via t(). A Record<ScreenId, MessageKey>, same as SCREENS in screens/index.ts, so adding a
+ * new screen without an entry here is a compile error. */
+export const SCREEN_TITLE_KEYS: Record<ScreenId, MessageKey> = {
+  MainMenu: 'screen.mainMenu.title',
+  CompanyNaming: 'screen.companyNaming.title',
+  SaveSlots: 'screen.saveSlots.title',
+  OfficeHub: 'screen.officeHub.title',
+  BodySelection: 'screen.bodySelection.title',
+  CarDesign: 'screen.carDesign.title',
+  ModelLineup: 'screen.modelLineup.title',
+  SalesStatistics: 'screen.salesStatistics.title',
+  Research: 'screen.research.title',
+  Employees: 'screen.employees.title',
+  Promotion: 'screen.promotion.title',
+  Company: 'screen.company.title',
+  TeamCreation: 'screen.teamCreation.title',
+  Bank: 'screen.bank.title',
+  // Not actually shown - both are in SCREENS_WITHOUT_HUD - but this is a
+  // Record<ScreenId, MessageKey>, so every screen needs an entry regardless.
+  Language: 'language.screenTitle',
+  News: 'news.screenTitle',
 }
 
 interface UiStore {

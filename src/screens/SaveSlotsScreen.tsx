@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { clearStorage, listSlots, type SaveGameData } from '../core/save'
-import { formatDate, makeDate } from '../core/gameDate'
-import { compact } from '../core/numberFormat'
+import { makeDate } from '../core/gameDate'
+import { useT } from '../i18n/useT'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
 import slotStyles from './SaveSlotsScreen.module.css'
@@ -34,6 +34,7 @@ export function SaveSlotsScreen() {
   const payload = useUiStore((s) => s.payload)
   const loadSlot = useGameStore((s) => s.loadSlot)
   const startNewGameInSlot = useGameStore((s) => s.startNewGameInSlot)
+  const { t, fmt } = useT()
 
   const newGame = asNewGamePayload(payload)
   const [confirmingIndex, setConfirmingIndex] = useState<number | null>(null)
@@ -70,15 +71,15 @@ export function SaveSlotsScreen() {
       <Button
         style={{ position: 'absolute', top: 'var(--space-4)', left: 'var(--space-4)', width: 44, height: 44, padding: 0 }}
         onClick={back}
-        aria-label="Back"
+        aria-label={t('common.back')}
       >
         ‹
       </Button>
 
-      <Heading>{newGame ? 'CHOOSE A SLOT TO OVERWRITE' : 'SAVES'}</Heading>
+      <Heading>{newGame ? t('saveSlots.overwriteHeading') : t('menu.saves')}</Heading>
       {newGame && (
         <span style={{ color: 'var(--color-text-secondary)' }}>
-          Every slot is full - pick one to start "{newGame.pendingCompanyName}" in. This can't be undone.
+          {t('saveSlots.everySlotFull', { name: newGame.pendingCompanyName })}
         </span>
       )}
 
@@ -94,14 +95,14 @@ export function SaveSlotsScreen() {
                 onClick={() => handleSlotClick(index, data)}
               >
                 {empty ? (
-                  <span className={slotStyles.empty}>Empty Slot</span>
+                  <span className={slotStyles.empty}>{t('saveSlots.emptySlot')}</span>
                 ) : (
                   <>
                     <span className={slotStyles.name}>{data.companyName}</span>
                     <span className={slotStyles.meta}>
-                      {formatDate(makeDate(data.year, data.month, data.day))} · {compact(data.cashBalance)}
+                      {fmt.date(makeDate(data.year, data.month, data.day))} · {fmt.compact(data.cashBalance)}
                     </span>
-                    {confirmingIndex === index && <span className={slotStyles.confirm}>Tap again to overwrite</span>}
+                    {confirmingIndex === index && <span className={slotStyles.confirm}>{t('saveSlots.tapAgainToOverwrite')}</span>}
                   </>
                 )}
               </button>
@@ -110,7 +111,7 @@ export function SaveSlotsScreen() {
                   type="button"
                   className={`${slotStyles.deleteButton} ${deletingIndex === index ? slotStyles.deleteConfirming : ''}`}
                   onClick={() => handleDeleteClick(index)}
-                  aria-label={deletingIndex === index ? `Confirm delete ${data.companyName}` : `Delete ${data.companyName}`}
+                  aria-label={t(deletingIndex === index ? 'saveSlots.confirmDelete' : 'saveSlots.delete', { name: data.companyName })}
                 >
                   {deletingIndex === index ? '✓' : '🗑'}
                 </button>
@@ -120,7 +121,7 @@ export function SaveSlotsScreen() {
         })}
       </div>
 
-      {!newGame && <Button onClick={() => show('CompanyNaming')}>+ NEW GAME</Button>}
+      {!newGame && <Button onClick={() => show('CompanyNaming')}>{t('saveSlots.newGame')}</Button>}
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { useActiveTutorialStep } from '../store/useTutorialStore'
 import { unreadNewsCount } from '../core/news'
+import { useT } from '../i18n/useT'
 import { ModelSalesRow } from '../components/ModelSalesRow'
 import { SalesGraph } from '../components/SalesGraph'
 import { Button, Heading } from '../components/Primitives'
@@ -19,6 +20,7 @@ export function OfficeHubScreen() {
   const news = useGameStore((s) => s.world.news)
   const beginNewDesign = useGameStore((s) => s.beginNewDesign)
   const tutorialStep = useActiveTutorialStep()
+  const { t } = useT()
 
   const topModels = [...models].sort((a, b) => b.lifetimeEarnings - a.lifetimeEarnings).slice(0, 4)
   const unread = unreadNewsCount(news)
@@ -26,9 +28,9 @@ export function OfficeHubScreen() {
   return (
     <div className={styles.hub}>
       <div className={styles.topLeft}>
-        <Heading style={{ fontSize: '1.1rem' }}>SALES</Heading>
+        <Heading style={{ fontSize: '1.1rem' }}>{t('officeHub.sales')}</Heading>
         <div className={styles.modelsList}>
-          {topModels.length === 0 && <span className={styles.empty}>No models yet - design your first car.</span>}
+          {topModels.length === 0 && <span className={styles.empty}>{t('officeHub.noModels')}</span>}
           {topModels.map((model) => (
             <ModelSalesRow key={model.id} model={model} onClick={() => show('SalesStatistics', model.id)} />
           ))}
@@ -37,14 +39,14 @@ export function OfficeHubScreen() {
       </div>
 
       <div className={styles.bottomLeft}>
-        <Button onClick={() => show('Research')}>R&D</Button>
-        <Button onClick={() => show('Promotion')}>Promo</Button>
-        <Button onClick={() => show('ModelLineup')}>Models</Button>
-        <Button onClick={() => show('TeamCreation')}>Racing</Button>
-        <Button onClick={() => show('Employees')}>Staff</Button>
-        <Button onClick={() => show('Company')}>Company</Button>
+        <Button onClick={() => show('Research')}>{t('nav.research')}</Button>
+        <Button onClick={() => show('Promotion')}>{t('nav.promotion')}</Button>
+        <Button onClick={() => show('ModelLineup')}>{t('nav.models')}</Button>
+        <Button onClick={() => show('TeamCreation')}>{t('nav.racing')}</Button>
+        <Button onClick={() => show('Employees')}>{t('nav.staff')}</Button>
+        <Button onClick={() => show('Company')}>{t('nav.company')}</Button>
         <Button className={styles.navButton} onClick={() => show('News')}>
-          News
+          {t('nav.news')}
           {unread > 0 && <span className={styles.badge}>{unread > 9 ? '9+' : unread}</span>}
         </Button>
       </div>
@@ -58,7 +60,7 @@ export function OfficeHubScreen() {
           show('BodySelection')
         }}
       >
-        + CREATE CAR
+        {t('officeHub.createCar')}
       </Button>
     </div>
   )

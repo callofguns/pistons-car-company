@@ -3,7 +3,8 @@ import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { useActiveTutorialStep } from '../store/useTutorialStore'
 import { CATALOG } from '../data/catalog'
-import { compact } from '../core/numberFormat'
+import { useT } from '../i18n/useT'
+import { CAR_CLASS_KEY } from '../i18n/vehicles'
 import { CarCarousel } from '../components/CarCarousel'
 import { MeterBar } from '../components/MeterBar'
 import { TutorialCard } from '../components/TutorialCard'
@@ -23,6 +24,7 @@ export function BodySelectionScreen() {
   const [index, setIndex] = useState(0)
   const [error, setError] = useState(false)
   const tutorialStep = useActiveTutorialStep()
+  const { t, fmt } = useT()
 
   const bodies = CATALOG.bodies
   const body = bodies[index]
@@ -36,7 +38,7 @@ export function BodySelectionScreen() {
       <Button
         style={{ position: 'absolute', top: 'var(--space-4)', left: 'var(--space-4)', width: 44, height: 44, padding: 0 }}
         onClick={back}
-        aria-label="Back"
+        aria-label={t('common.back')}
       >
         ‹
       </Button>
@@ -44,7 +46,7 @@ export function BodySelectionScreen() {
       {tutorialStep && <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />}
 
       <span style={{ color: 'var(--color-green)', fontSize: '1.1rem' }}>
-        Production equipment cost: {alreadyTooled ? 'Owned' : compact(body.productionEquipmentCost)}
+        {t('bodySelection.equipmentCost', { cost: alreadyTooled ? t('bodySelection.owned') : fmt.compact(body.productionEquipmentCost) })}
       </span>
 
       <div style={{ width: '100%' }}>
@@ -57,13 +59,16 @@ export function BodySelectionScreen() {
       </div>
 
       <Heading>{body.displayName}</Heading>
-      <span style={{ color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>{body.carClass}</span>
+      <span style={{ color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>{t(CAR_CLASS_KEY[body.carClass])}</span>
 
       <div style={{ width: '100%' }}>
-        <MeterBar value01={Math.min(1, body.engineBayCapacityLiters / 12)} displayValue={`${body.engineBayCapacityLiters} L.`} />
+        <MeterBar
+          value01={Math.min(1, body.engineBayCapacityLiters / 12)}
+          displayValue={t('bodySelection.engineBay', { value: body.engineBayCapacityLiters })}
+        />
       </div>
 
-      {error && <span style={{ color: 'var(--color-danger)' }}>Not enough cash for this body's tooling.</span>}
+      {error && <span style={{ color: 'var(--color-danger)' }}>{t('bodySelection.notEnoughCash')}</span>}
 
       <Button
         variant="primary"
@@ -79,7 +84,7 @@ export function BodySelectionScreen() {
           }
         }}
       >
-        ✓ CONTINUE
+        {t('common.continue')}
       </Button>
     </div>
   )

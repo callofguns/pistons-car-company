@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
-import { grouped, compact } from '../core/numberFormat'
+import { grouped } from '../core/numberFormat'
+import { useT } from '../i18n/useT'
 import { CarCarousel } from '../components/CarCarousel'
 import { AdvisorPanel } from '../components/AdvisorPanel'
 import { StatRow } from '../components/StatRow'
@@ -16,6 +17,7 @@ export function SalesStatisticsScreen() {
   useGameStore((s) => s.revision)
   const models = useGameStore((s) => s.world.vehicles.models)
   const setOnSale = useGameStore((s) => s.setOnSale)
+  const { t, tp, fmt } = useT()
 
   const [index, setIndex] = useState(0)
 
@@ -32,7 +34,7 @@ export function SalesStatisticsScreen() {
   if (models.length === 0) {
     return (
       <div className={styles.screen}>
-        <span className={styles.empty}>No models to report on yet.</span>
+        <span className={styles.empty}>{t('salesStats.noModels')}</span>
       </div>
     )
   }
@@ -42,7 +44,8 @@ export function SalesStatisticsScreen() {
 
   return (
     <div className={styles.screen}>
-      <AdvisorPanel name="Ben Gross" message="Boss! Here is the sales statistics of the current model" />
+      {/* Ben Gross is a proper noun, not translated - see EmployeesScreen for the same rule. */}
+      <AdvisorPanel name="Ben Gross" message={t('salesStats.advisorMessage')} />
       <CarCarousel
         indexOneBased={index + 1}
         total={models.length}
@@ -50,21 +53,38 @@ export function SalesStatisticsScreen() {
         onNext={() => setIndex((i) => Math.min(models.length - 1, i + 1))}
       />
 
-      <StatRow label="Total sold" value={`${grouped(model.totalSold)} / ${grouped(model.plannedProductionRun)}`} />
-      <StatRow label="Models left to sell" value={grouped(leftToSell)} />
-      <StatRow label="Sales income" value={compact(model.lastDayRevenue)} />
-      <StatRow label="Earnings" value={compact(model.lifetimeEarnings)} />
-      <StatRow label="Marketing duration" value={model.marketingActive ? `${model.marketingDaysRemaining} Days` : '-'} />
-      <StatRow label="Marketing efficiency" value={model.marketingActive ? `x${model.marketingEfficiencyMultiplier.toFixed(1)}` : 'x1'} />
+      <StatRow
+        label={t('salesStats.labelTotalSold')}
+        value={t('salesStats.totalSold', { sold: grouped(model.totalSold), planned: grouped(model.plannedProductionRun) })}
+      />
+      <StatRow label={t('salesStats.labelLeftToSell')} value={grouped(leftToSell)} />
+      <StatRow label={t('salesStats.labelSalesIncome')} value={fmt.compact(model.lastDayRevenue)} />
+      <StatRow label={t('salesStats.labelEarnings')} value={fmt.compact(model.lifetimeEarnings)} />
+      <StatRow
+        label={t('salesStats.labelMarketingDuration')}
+        value={model.marketingActive ? tp('stats.marketingDaysRemaining', model.marketingDaysRemaining) : t('salesStats.marketingInactive')}
+      />
+      <StatRow
+        label={t('salesStats.labelMarketingEfficiency')}
+        value={
+          model.marketingActive
+            ? t('salesStats.efficiencyMultiplier', { value: model.marketingEfficiencyMultiplier.toFixed(1) })
+            : t('salesStats.efficiencyDefault')
+        }
+      />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <MeterBar radial value01={model.currentDailySalesRatePercent / 100} displayValue={`${Math.round(model.currentDailySalesRatePercent)}%`} />
-        <span>{model.lastDayUnitsSold} units today</span>
+        <MeterBar
+          radial
+          value01={model.currentDailySalesRatePercent / 100}
+          displayValue={t('salesStats.dailySalesRate', { value: Math.round(model.currentDailySalesRatePercent) })}
+        />
+        <span>{tp('stats.unitsSoldToday', model.lastDayUnitsSold)}</span>
       </div>
 
       <div style={{ display: 'flex', gap: 12 }}>
         <Button style={{ flex: 1 }} onClick={() => setOnSale(model.id, !model.isOnSale)}>
-          {model.isOnSale ? 'WITHDRAW FROM SALE' : 'RESUME SALE'}
+          {model.isOnSale ? t('salesStats.withdraw') : t('salesStats.resume')}
         </Button>
         <Button
           variant="primary"
@@ -72,7 +92,7 @@ export function SalesStatisticsScreen() {
           disabled={model.marketingActive}
           onClick={() => show('Promotion', model.id)}
         >
-          LAUNCH MARKETING
+          {t('salesStats.launchMarketing')}
         </Button>
       </div>
     </div>

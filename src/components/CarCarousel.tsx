@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useT } from '../i18n/useT'
 import { Button } from './Primitives'
 import styles from './CarCarousel.module.css'
 
@@ -13,9 +14,10 @@ interface CarCarouselProps {
 
 /** The "< picture >" + "n / m" carousel used in Body Selection, Model Lineup, and Sales Statistics. Direct port of CarCarouselView.cs - owns only navigation chrome. */
 export function CarCarousel({ indexOneBased, total, onPrevious, onNext, children }: CarCarouselProps) {
+  const { t } = useT()
   return (
     <div className={styles.wrap}>
-      <Button className={styles.arrow} onClick={onPrevious} disabled={indexOneBased <= 1} aria-label="Previous">
+      <Button className={styles.arrow} onClick={onPrevious} disabled={indexOneBased <= 1} aria-label={t('common.previous')}>
         ‹
       </Button>
       <div className={styles.previewArea}>
@@ -24,7 +26,7 @@ export function CarCarousel({ indexOneBased, total, onPrevious, onNext, children
           {indexOneBased} / {total}
         </span>
       </div>
-      <Button className={styles.arrow} onClick={onNext} disabled={indexOneBased >= total} aria-label="Next">
+      <Button className={styles.arrow} onClick={onNext} disabled={indexOneBased >= total} aria-label={t('common.next')}>
         ›
       </Button>
     </div>

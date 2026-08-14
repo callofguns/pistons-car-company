@@ -41,8 +41,10 @@ describe('designFitPercent', () => {
   const sportTag: ClassificationTagDefinition = {
     id: 'sport',
     label: 'Sport',
+    labelKey: 'data.classification.sport.label',
     category: 'type',
     description: '',
+    descriptionKey: 'data.classification.sport.description',
     priceMultiplier: 1.6,
     statTargets: { handling: 80, safety: 40 },
   }

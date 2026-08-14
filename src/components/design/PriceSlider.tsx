@@ -1,4 +1,5 @@
 import { plainCurrency } from '../../core/numberFormat'
+import { useT } from '../../i18n/useT'
 import styles from './PriceSlider.module.css'
 
 interface PriceSliderProps {
@@ -9,6 +10,7 @@ interface PriceSliderProps {
 
 /** The reference's price-vs-cost-price slider with live per-unit earnings. */
 export function PriceSlider({ costPrice, price, onChange }: PriceSliderProps) {
+  const { t } = useT()
   const min = Math.max(1, Math.round(costPrice))
   const max = Math.max(min + 1, Math.round(costPrice * 4))
   const earnings = price - costPrice
@@ -16,7 +18,7 @@ export function PriceSlider({ costPrice, price, onChange }: PriceSliderProps) {
   return (
     <div className={styles.wrap}>
       <div className={styles.side}>
-        <span className={styles.label}>PRICE</span>
+        <span className={styles.label}>{t('priceSlider.price')}</span>
         <span className={styles.value}>{plainCurrency(price)}</span>
       </div>
 
@@ -31,9 +33,9 @@ export function PriceSlider({ costPrice, price, onChange }: PriceSliderProps) {
       />
 
       <div className={styles.side}>
-        <span className={styles.label}>COST PRICE</span>
+        <span className={styles.label}>{t('priceSlider.costPrice')}</span>
         <span className={styles.value}>{plainCurrency(costPrice)}</span>
-        <span className={styles.earnings}>Earnings {plainCurrency(earnings)}</span>
+        <span className={styles.earnings}>{t('priceSlider.earnings', { value: plainCurrency(earnings) })}</span>
       </div>
     </div>
   )

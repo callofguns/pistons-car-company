@@ -3,6 +3,7 @@ import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { CATALOG } from '../data/catalog'
 import { isTierUnlocked } from '../core/marketing'
+import { useT } from '../i18n/useT'
 import { PromotionTierCard } from '../components/PromotionTierCard'
 import { CarCarousel } from '../components/CarCarousel'
 import { Button, Heading } from '../components/Primitives'
@@ -16,6 +17,7 @@ export function PromotionScreen() {
   const models = useGameStore((s) => s.world.vehicles.models)
   const currentYear = useGameStore((s) => s.world.time.currentDate.year)
   const startCampaign = useGameStore((s) => s.startCampaign)
+  const { t } = useT()
 
   const fixedModelId = typeof payload === 'string' ? payload : null
   const [tierId, setTierId] = useState<string | null>(null)
@@ -24,7 +26,7 @@ export function PromotionScreen() {
   if (!tierId) {
     return (
       <div className={styles.screen}>
-        <Heading>Select Promotion Method</Heading>
+        <Heading>{t('promotion.selectMethod')}</Heading>
         <div className={styles.grid}>
           {CATALOG.promotionTiers.map((tier) => (
             <PromotionTierCard
@@ -42,7 +44,7 @@ export function PromotionScreen() {
   if (models.length === 0) {
     return (
       <div className={styles.screen}>
-        <span className={styles.empty}>No models to promote yet.</span>
+        <span className={styles.empty}>{t('promotion.noModels')}</span>
       </div>
     )
   }
@@ -52,7 +54,7 @@ export function PromotionScreen() {
 
   return (
     <div className={`${styles.screen} ${styles.centered} ${styles.narrow}`}>
-      <Heading>Select Promotion Method</Heading>
+      <Heading>{t('promotion.selectMethod')}</Heading>
       <CarCarousel
         indexOneBased={index + 1}
         total={models.length}
@@ -67,7 +69,7 @@ export function PromotionScreen() {
           if (startCampaign(model.id, tierId)) show('SalesStatistics', model.id)
         }}
       >
-        CONFIRM
+        {t('promotion.confirm')}
       </Button>
     </div>
   )

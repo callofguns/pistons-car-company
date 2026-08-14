@@ -3,11 +3,22 @@ import { useGameStore } from '../store/useGameStore'
 import { CATALOG } from '../data/catalog'
 import { nodesInCategory } from '../core/catalog'
 import { getNodeState, getProgress01, currentMoneyCost, isResearched, type ResearchCategory } from '../core/research'
+import { useT } from '../i18n/useT'
+import type { MessageKey } from '../i18n/keys'
 import { ResearchNodeCard } from '../components/ResearchNodeCard'
 import { ProgressButton } from '../components/ProgressButton'
 import styles from './screen.module.css'
 
 const CATEGORIES: ResearchCategory[] = ['Engine', 'Bodies', 'Undercarriage', 'Appearance', 'Interior', 'Safety']
+
+const CATEGORY_LABEL_KEY: Record<ResearchCategory, MessageKey> = {
+  Engine: 'data.researchCategory.Engine',
+  Bodies: 'data.researchCategory.Bodies',
+  Undercarriage: 'data.researchCategory.Undercarriage',
+  Appearance: 'data.researchCategory.Appearance',
+  Interior: 'data.researchCategory.Interior',
+  Safety: 'data.researchCategory.Safety',
+}
 
 /** The tech tree: six category tabs on the left, each lighting up like a loading bar as that
  * category's research completes, and a grid of research cards for the selected category on the
@@ -17,6 +28,7 @@ export function ResearchScreen() {
   const research = useGameStore((s) => s.world.research)
   const currentYear = useGameStore((s) => s.world.time.currentDate.year)
   const startResearch = useGameStore((s) => s.startResearch)
+  const { t } = useT()
 
   const [selected, setSelected] = useState<ResearchCategory>('Engine')
 
@@ -32,7 +44,7 @@ export function ResearchScreen() {
           return (
             <ProgressButton
               key={category}
-              label={category}
+              label={t(CATEGORY_LABEL_KEY[category])}
               progress01={progress}
               active={category === selected}
               onClick={() => setSelected(category)}

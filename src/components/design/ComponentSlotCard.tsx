@@ -1,5 +1,6 @@
 import type { ComponentSlot } from '../../data/designSteps'
 import { plainCurrency } from '../../core/numberFormat'
+import { useT } from '../../i18n/useT'
 import { Button } from '../Primitives'
 import styles from './ComponentSlotCard.module.css'
 
@@ -15,6 +16,7 @@ interface ComponentSlotCardProps {
 
 /** One cycling option picker - the reference's right-hand "Airbags: NONE ‹1/1›" style cards. */
 export function ComponentSlotCard({ slot, selectedOptionId, currentYear, onSelect }: ComponentSlotCardProps) {
+  const { t } = useT()
   const unlocked = slot.options.filter((o) => o.unlockYear <= currentYear)
   const locked = slot.options.filter((o) => o.unlockYear > currentYear).sort((a, b) => a.unlockYear - b.unlockYear)
 
@@ -32,7 +34,7 @@ export function ComponentSlotCard({ slot, selectedOptionId, currentYear, onSelec
           className={styles.arrow}
           onClick={() => onSelect(unlocked[Math.max(0, index - 1)].id)}
           disabled={index <= 0}
-          aria-label={`Previous ${slot.label}`}
+          aria-label={t('component.previousLabel', { label: slot.label })}
         >
           ‹
         </Button>
@@ -46,7 +48,7 @@ export function ComponentSlotCard({ slot, selectedOptionId, currentYear, onSelec
           className={styles.arrow}
           onClick={() => onSelect(unlocked[Math.min(unlocked.length - 1, index + 1)].id)}
           disabled={index >= unlocked.length - 1}
-          aria-label={`Next ${slot.label}`}
+          aria-label={t('component.nextLabel', { label: slot.label })}
         >
           ›
         </Button>
@@ -59,9 +61,7 @@ export function ComponentSlotCard({ slot, selectedOptionId, currentYear, onSelec
         </span>
       )}
       {nextLocked && (
-        <span className={styles.lockedHint}>
-          🔒 {nextLocked.label} unlocks {nextLocked.unlockYear}
-        </span>
+        <span className={styles.lockedHint}>{t('component.unlocksIn', { label: nextLocked.label, year: nextLocked.unlockYear })}</span>
       )}
     </div>
   )

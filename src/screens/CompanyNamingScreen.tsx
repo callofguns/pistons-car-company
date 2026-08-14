@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { useTutorialStore } from '../store/useTutorialStore'
+import { useT } from '../i18n/useT'
 import { listSlots } from '../core/save'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
@@ -17,6 +18,8 @@ export function CompanyNamingScreen() {
   const show = useUiStore((s) => s.show)
   const startNewGameInSlot = useGameStore((s) => s.startNewGameInSlot)
   const startTutorial = useTutorialStore((s) => s.start)
+
+  const { t } = useT()
 
   const [name, setName] = useState('')
   const trimmed = name.trim()
@@ -43,24 +46,24 @@ export function CompanyNamingScreen() {
       <Button
         style={{ position: 'absolute', top: 'var(--space-4)', left: 'var(--space-4)', width: 44, height: 44, padding: 0 }}
         onClick={back}
-        aria-label="Back"
+        aria-label={t('common.back')}
       >
         ‹
       </Button>
 
-      <Heading>YOUR COMPANY NAME:</Heading>
+      <Heading>{t('companyNaming.heading')}</Heading>
 
       <input
         className={namingStyles.nameInput}
         value={name}
         onChange={(e) => setName(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && handleContinue()}
-        placeholder="Enter company name:"
+        placeholder={t('companyNaming.placeholder')}
         autoFocus
       />
 
       <Button variant="primary" style={{ width: '100%' }} disabled={!trimmed} onClick={handleContinue}>
-        ✓ CONTINUE
+        {t('common.continue')}
       </Button>
     </div>
   )

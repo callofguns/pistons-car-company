@@ -2,6 +2,7 @@ import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { DEFAULT_GAME_CONFIG } from '../core/gameConfig'
 import { APP_VERSION } from '../version'
+import { useT } from '../i18n/useT'
 import { Button, Heading } from '../components/Primitives'
 import { listSlots } from '../core/save'
 import styles from './screen.module.css'
@@ -29,6 +30,7 @@ function findMostRecentSlot(): RecentSlot | null {
 export function MainMenuScreen() {
   const show = useUiStore((s) => s.show)
   const loadSlot = useGameStore((s) => s.loadSlot)
+  const { t } = useT()
 
   const mostRecent = findMostRecentSlot()
 
@@ -39,26 +41,28 @@ export function MainMenuScreen() {
   return (
     <div className={`${styles.screen} ${menuStyles.menu}`}>
       <div className={menuStyles.plate}>
-        <span className={menuStyles.eyebrow}>Est. {DEFAULT_GAME_CONFIG.startYear}</span>
+        <span className={menuStyles.eyebrow}>{t('menu.est', { year: DEFAULT_GAME_CONFIG.startYear })}</span>
+        {/* The app's own brand name - a proper noun, like company.companyName or an advisor name,
+            never translated. */}
         <Heading className={menuStyles.header}>Pistons: Car Company Inc</Heading>
       </div>
 
       <div className={menuStyles.buttons}>
         {mostRecent && (
           <Button variant="primary" className={menuStyles.playButton} onClick={handlePlay}>
-            PLAY ({mostRecent.companyName})
+            {t('menu.play', { companyName: mostRecent.companyName })}
           </Button>
         )}
         <Button variant={mostRecent ? 'ghost' : 'primary'} onClick={() => show('SaveSlots')}>
-          SAVES
+          {t('menu.saves')}
         </Button>
         {/* Read-only from here (no live world loaded at the menu) - reads whichever save was
             played most recently, same slot PLAY resumes. See NewsScreen.tsx's payload handling. */}
         <Button variant="ghost" disabled={!mostRecent} onClick={() => mostRecent && show('News', { slotIndex: mostRecent.index })}>
-          NEWS
+          {t('menu.news')}
         </Button>
         <Button variant="ghost" onClick={() => show('Language')}>
-          LANGUAGE
+          {t('menu.language')}
         </Button>
       </div>
 

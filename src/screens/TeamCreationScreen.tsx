@@ -1,11 +1,18 @@
 import { useState } from 'react'
 import { useGameStore } from '../store/useGameStore'
-import { compact } from '../core/numberFormat'
 import { isRacingUnlocked, RACING_REGISTRATION_COST } from '../core/racing'
+import { useT } from '../i18n/useT'
+import type { MessageKey } from '../i18n/keys'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
 
-const NAME_POOL = ['Ironclad Racing', 'Silver Arrow Motorsport', 'Redline Syndicate', 'Vector Racing Team', 'Apex Dynamics']
+const NAME_POOL_KEYS: MessageKey[] = [
+  'data.racingNamePool.0',
+  'data.racingNamePool.1',
+  'data.racingNamePool.2',
+  'data.racingNamePool.3',
+  'data.racingNamePool.4',
+]
 
 /** "TEAM REGISTRATION" - name the racing team and pay the one-time registration cost. Locked until the configured unlock year. */
 export function TeamCreationScreen() {
@@ -14,35 +21,32 @@ export function TeamCreationScreen() {
   const currentYear = useGameStore((s) => s.world.time.currentDate.year)
   const unlockYear = useGameStore((s) => s.config.racingUnlockYear)
   const registerTeam = useGameStore((s) => s.registerTeam)
+  const { t, fmt } = useT()
 
   const [name, setName] = useState(racing.teamName)
   const unlocked = isRacingUnlocked(currentYear, unlockYear)
 
   return (
     <div className={`${styles.screen} ${styles.centered} ${styles.narrow}`}>
-      <Heading>TEAM REGISTRATION</Heading>
-      <span style={{ color: 'var(--color-text-secondary)' }}>
-        Register your racing team and restore the garage to compete in events
-      </span>
+      <Heading>{t('team.registration')}</Heading>
+      <span style={{ color: 'var(--color-text-secondary)' }}>{t('team.registerBlurb')}</span>
 
       <div style={{ display: 'flex', gap: 8, width: '100%' }}>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Enter team name"
+          placeholder={t('team.namePlaceholder')}
           disabled={racing.isRegistered}
           style={{ flex: 1, padding: 10 }}
         />
-        <Button onClick={() => setName(NAME_POOL[Math.floor(Math.random() * NAME_POOL.length)])} disabled={racing.isRegistered}>
+        <Button onClick={() => setName(t(NAME_POOL_KEYS[Math.floor(Math.random() * NAME_POOL_KEYS.length)]))} disabled={racing.isRegistered}>
           🎲
         </Button>
       </div>
 
-      <span style={{ color: 'var(--color-green)' }}>{compact(RACING_REGISTRATION_COST)}</span>
+      <span style={{ color: 'var(--color-green)' }}>{fmt.compact(RACING_REGISTRATION_COST)}</span>
 
-      {!racing.isRegistered && !unlocked && (
-        <span style={{ color: 'var(--color-text-secondary)' }}>Racing unlocks later in the company's history.</span>
-      )}
+      {!racing.isRegistered && !unlocked && <span style={{ color: 'var(--color-text-secondary)' }}>{t('team.locked')}</span>}
 
       <Button
         variant="primary"
@@ -50,7 +54,7 @@ export function TeamCreationScreen() {
         disabled={racing.isRegistered || !unlocked}
         onClick={() => registerTeam(name.trim())}
       >
-        {racing.isRegistered ? 'REGISTERED' : unlocked ? 'REGISTER' : 'UNAVAILABLE'}
+        {racing.isRegistered ? t('team.registered') : unlocked ? t('team.register') : t('team.unavailable')}
       </Button>
     </div>
   )

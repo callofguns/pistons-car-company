@@ -8,6 +8,9 @@ import { ENGINE_PRESETS } from '../data/enginePresets'
 import { findClassificationTag } from '../data/classifications'
 import { starRating, type DesignStatKey } from '../core/designStats'
 import { plainCurrency } from '../core/numberFormat'
+import { useT } from '../i18n/useT'
+import type { MessageKey } from '../i18n/keys'
+import { CAR_CLASS_KEY } from '../i18n/vehicles'
 import { MeterBar } from '../components/MeterBar'
 import { StatRow } from '../components/StatRow'
 import { Button, Heading } from '../components/Primitives'
@@ -48,21 +51,24 @@ const WIZARD_STEPS: WizardStepId[] = [
   'Pricing',
 ]
 
-const STEP_META: Partial<Record<WizardStepId, { breadcrumb: string; title: string }>> = {
-  Classification: { breadcrumb: 'Body Selection', title: 'Car Classification' },
-  SafetyRating: { breadcrumb: 'Safety', title: 'Safety Rating' },
-  Engine: { breadcrumb: 'Safety Rating', title: 'Engine' },
-  Finish: { breadcrumb: 'Aerodynamics', title: 'Finish' },
-  Pricing: { breadcrumb: 'Finish', title: 'Pricing' },
+/** Overrides for steps with bespoke content (Classification/SafetyRating/Engine/Finish/Pricing).
+ * The remaining steps are entirely data-driven, so their breadcrumb/title come straight from
+ * data/designSteps.ts instead (migrated to message keys separately, in PR 3). */
+const STEP_META_KEYS: Partial<Record<WizardStepId, { breadcrumbKey: MessageKey; titleKey: MessageKey }>> = {
+  Classification: { breadcrumbKey: 'carDesign.step.classification.breadcrumb', titleKey: 'carDesign.step.classification.title' },
+  SafetyRating: { breadcrumbKey: 'carDesign.step.safetyRating.breadcrumb', titleKey: 'carDesign.step.safetyRating.title' },
+  Engine: { breadcrumbKey: 'carDesign.step.engine.breadcrumb', titleKey: 'carDesign.step.engine.title' },
+  Finish: { breadcrumbKey: 'carDesign.step.finish.breadcrumb', titleKey: 'carDesign.step.finish.title' },
+  Pricing: { breadcrumbKey: 'carDesign.step.pricing.breadcrumb', titleKey: 'carDesign.step.pricing.title' },
 }
 
-const DESIGN_STAT_LABELS: Record<DesignStatKey, string> = {
-  safety: 'Safety',
-  handling: 'Handling',
-  offroad: 'Offroad',
-  comfort: 'Comfort',
-  prestige: 'Prestige',
-  attractiveness: 'Attractiveness',
+const DESIGN_STAT_LABEL_KEY: Record<DesignStatKey, MessageKey> = {
+  safety: 'data.designStat.safety',
+  handling: 'data.designStat.handling',
+  offroad: 'data.designStat.offroad',
+  comfort: 'data.designStat.comfort',
+  prestige: 'data.designStat.prestige',
+  attractiveness: 'data.designStat.attractiveness',
 }
 
 /** Steps with no meaningful Cost Price header (Classification hasn't touched a component;
@@ -71,24 +77,29 @@ const DESIGN_STAT_LABELS: Record<DesignStatKey, string> = {
  * shows it, matching the reference's persistent COST PRICE header on every customization screen. */
 const HIDES_COST_PRICE = new Set<WizardStepId>(['Classification', 'SafetyRating', 'Finish', 'Pricing'])
 
-function stepMeta(stepId: WizardStepId) {
-  const meta = STEP_META[stepId]
-  if (meta) return meta
+function stepMeta(stepId: WizardStepId, t: ReturnType<typeof useT>['t']) {
+  const meta = STEP_META_KEYS[stepId]
+  if (meta) return { breadcrumb: t(meta.breadcrumbKey), title: t(meta.titleKey) }
   const step = findDesignStep(stepId)!
   return { breadcrumb: step.breadcrumb, title: step.title }
 }
 
-function safetyFeedback(stars: number): string {
-  if (stars < 1.5) return 'This is dangerous. Stronger body materials and more airbags should be used.'
-  if (stars < 3) return 'Decent, but buyers will expect more protection at this price point.'
-  if (stars < 4) return 'Solid safety credentials - this should hold up well in reviews.'
-  return 'Excellent work. This is one of the safest designs on the lot.'
+function safetyFeedback(stars: number, t: ReturnType<typeof useT>['t']): string {
+  if (stars < 1.5) return t('carDesign.safetyFeedback.dangerous')
+  if (stars < 3) return t('carDesign.safetyFeedback.decent')
+  if (stars < 4) return t('carDesign.safetyFeedback.solid')
+  return t('carDesign.safetyFeedback.excellent')
 }
 
-function generateDefaultName(carClass: string | undefined): string {
+/** Generates the suggestion pre-filled into the Finish step's editable name field - not fixed
+ * data. What gets persisted (CarModel.name) is whatever the player actually accepts, which is why
+ * this only needs to look right at generation time and is never retro-translated afterward - see
+ * core/vehicles.ts's doc comment on CarModel.name for the full reasoning. */
+function generateDefaultName(carClass: string | undefined, t: ReturnType<typeof useT>['t']): string {
   const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26))
   const number = 100 + Math.floor(Math.random() * 900)
-  return `${carClass ?? 'Model'} ${letter}${number}`
+  const classLabel = carClass && CAR_CLASS_KEY[carClass] ? t(CAR_CLASS_KEY[carClass]) : t('carDesign.defaultNameFallback')
+  return t('carDesign.defaultNamePattern', { carClass: classLabel, suffix: `${letter}${number}` })
 }
 
 /**
@@ -112,11 +123,12 @@ export function CarDesignScreen() {
   const setCustomPrice = useGameStore((s) => s.setCustomPrice)
   const finalizeDesign = useGameStore((s) => s.finalizeDesign)
   const previewCurrentStats = useGameStore((s) => s.previewCurrentStats)
+  const { t } = useT()
 
   const body = CATALOG.bodies.find((b) => b.id === session?.selectedBodyId)
 
   const [stepIndex, setStepIndex] = useState(0)
-  const [name, setName] = useState(() => generateDefaultName(body?.carClass))
+  const [name, setName] = useState(() => generateDefaultName(body?.carClass, t))
   const [price, setPrice] = useState<number | null>(null)
 
   // stepId is local state, so TutorialOverlay (rendered at the App level) can't see it directly -
@@ -137,22 +149,22 @@ export function CarDesignScreen() {
     // forward isn't acceptable, so this offers a real way out rather than just inert text.
     return (
       <div className={`${styles.screen} ${styles.centered} ${styles.narrow}`}>
-        <span className={styles.empty}>No design in progress - go back and pick a body first.</span>
+        <span className={styles.empty}>{t('carDesign.noDesignInProgress')}</span>
         <Button variant="primary" style={{ width: '100%' }} onClick={() => goHome('OfficeHub')}>
-          ‹ BACK TO OFFICE
+          {t('carDesign.backToOffice')}
         </Button>
       </div>
     )
   }
 
   const stepId = WIZARD_STEPS[stepIndex]
-  const meta = stepMeta(stepId)
+  const meta = stepMeta(stepId, t)
   const stats = previewCurrentStats()
   const safetyStars = stats ? starRating(stats.designStats.safety) : 0
 
   const selectedTags = session.classificationTagIds
     .map((id) => findClassificationTag(id))
-    .filter((t): t is NonNullable<typeof t> => t !== undefined)
+    .filter((tag): tag is NonNullable<typeof tag> => tag !== undefined)
 
   const canContinue =
     (stepId !== 'Classification' || selectedTags.length === 2) && (stepId !== 'Finish' || name.trim().length > 0)
@@ -164,7 +176,10 @@ export function CarDesignScreen() {
 
   const handleContinue = () => {
     if (stepId === 'Pricing') {
-      const tagLabel = selectedTags.map((t) => t.label.toUpperCase()).join(' + ')
+      // Legacy field (see core/vehicles.ts's @deprecated doc comment on CarModel.categoryTag) -
+      // still written in English for save round-tripping, but no display site reads it anymore;
+      // every display derives the tag live via i18n/vehicles.ts's formatCategoryTag() instead.
+      const tagLabel = selectedTags.map((tag) => tag.label.toUpperCase()).join(' + ')
       setNameAndCategory(name.trim(), tagLabel)
       setCustomPrice(price ?? stats?.suggestedPrice ?? 0)
       const modelId = finalizeDesign()
@@ -179,7 +194,7 @@ export function CarDesignScreen() {
   return (
     <div className={styles.screen}>
       <div className={wizardStyles.header}>
-        <Button className={wizardStyles.backButton} onClick={handleBack} aria-label="Back">
+        <Button className={wizardStyles.backButton} onClick={handleBack} aria-label={t('common.back')}>
           ‹
         </Button>
         <div>
@@ -188,7 +203,7 @@ export function CarDesignScreen() {
         </div>
         {stats && !HIDES_COST_PRICE.has(stepId) && (
           <div className={wizardStyles.costPrice}>
-            <span className={wizardStyles.costPriceLabel}>Cost Price</span>
+            <span className={wizardStyles.costPriceLabel}>{t('carDesign.costPrice')}</span>
             <span className={wizardStyles.costPriceValue}>{plainCurrency(stats.unitCost)}</span>
           </div>
         )}
@@ -204,28 +219,37 @@ export function CarDesignScreen() {
 
       {stepId === 'SafetyRating' && stats && (
         <RatingResult
-          title="SAFETY RATING"
+          title={t('carDesign.safetyRatingTitle')}
           value0to5={safetyStars}
-          advisorName="Engineer"
-          message={safetyFeedback(safetyStars)}
+          advisorName={t('carDesign.engineerAdvisor')}
+          message={safetyFeedback(safetyStars, t)}
         />
       )}
 
       {stepId === 'Engine' && (
         <div className={wizardStyles.body}>
           <ComponentSlotCard
-            slot={enginePresetSlot(body.engineBayCapacityLiters)}
+            slot={enginePresetSlot(body.engineBayCapacityLiters, t('carDesign.step.engine.title'))}
             selectedOptionId={session.enginePresetId ?? undefined}
             currentYear={currentYear}
             onSelect={setEnginePreset}
           />
           {stats && (
             <div className={wizardStyles.specSheet}>
-              <StatRow label="Power" value={`${Math.round(stats.powerHp)} HP`} />
-              <StatRow label="Torque" value={`${Math.round(stats.torqueNm)} NM @${Math.round(stats.torqueRpm)} RPM`} />
-              <StatRow label="Fuel consumption" value={`${stats.fuelConsumptionL100Km.toFixed(1)} L/100KM`} />
-              <StatRow label="Reliability" value={`${Math.round(stats.reliabilityPercent)}%`} />
-              <StatRow label="Weight" value={`${Math.round(stats.weightKg)} KG`} />
+              <StatRow label={t('modelLineup.labelPower')} value={t('modelLineup.power', { value: Math.round(stats.powerHp) })} />
+              <StatRow
+                label={t('modelLineup.labelTorque')}
+                value={t('modelLineup.torque', { value: Math.round(stats.torqueNm), rpm: Math.round(stats.torqueRpm) })}
+              />
+              <StatRow
+                label={t('modelLineup.labelFuelConsumption')}
+                value={t('modelLineup.fuelConsumption', { value: stats.fuelConsumptionL100Km.toFixed(1) })}
+              />
+              <StatRow
+                label={t('modelLineup.labelReliability')}
+                value={t('carDesign.reliability', { value: Math.round(stats.reliabilityPercent) })}
+              />
+              <StatRow label={t('modelLineup.labelWeight')} value={t('modelLineup.weight', { value: Math.round(stats.weightKg) })} />
             </div>
           )}
         </div>
@@ -248,8 +272,11 @@ export function CarDesignScreen() {
             <div className={wizardStyles.meters}>
               {genericStep.meters.map((key) => (
                 <div key={key} className={wizardStyles.meter}>
-                  <span className={wizardStyles.meterLabel}>{DESIGN_STAT_LABELS[key]}</span>
-                  <MeterBar value01={stats.designStats[key] / 100} displayValue={`${Math.round(stats.designStats[key])}%`} />
+                  <span className={wizardStyles.meterLabel}>{t(DESIGN_STAT_LABEL_KEY[key])}</span>
+                  <MeterBar
+                    value01={stats.designStats[key] / 100}
+                    displayValue={t('carDesign.meterPercent', { value: Math.round(stats.designStats[key]) })}
+                  />
                 </div>
               ))}
             </div>
@@ -260,7 +287,7 @@ export function CarDesignScreen() {
       {stepId === 'Finish' && (
         <div className={wizardStyles.body}>
           <label className={wizardStyles.nameField}>
-            Model name
+            {t('carDesign.modelName')}
             <input value={name} onChange={(e) => setName(e.target.value)} />
           </label>
         </div>
@@ -269,10 +296,7 @@ export function CarDesignScreen() {
       {stepId === 'Pricing' && stats && (
         <div className={wizardStyles.body}>
           <PriceSlider costPrice={stats.unitCost} price={price ?? Math.round(stats.suggestedPrice)} onChange={setPrice} />
-          <div className={wizardStyles.comingSoon}>
-            🚧 Sales Regions and Production Runs are coming in a future update - for now, this car goes straight on
-            sale everywhere.
-          </div>
+          <div className={wizardStyles.comingSoon}>{t('carDesign.comingSoon')}</div>
         </div>
       )}
 
@@ -285,16 +309,16 @@ export function CarDesignScreen() {
         onClick={handleContinue}
         disabled={!canContinue}
       >
-        {stepId === 'Pricing' ? '✓ FINISH' : '✓ CONTINUE'}
+        {stepId === 'Pricing' ? t('carDesign.finish') : t('common.continue')}
       </Button>
     </div>
   )
 }
 
-function enginePresetSlot(engineBayCapacityLiters: number): ComponentSlot {
+function enginePresetSlot(engineBayCapacityLiters: number, label: string): ComponentSlot {
   return {
     id: 'engine-preset',
-    label: 'Engine',
+    label,
     options: ENGINE_PRESETS.filter((p) => p.spec.displacementLiters <= engineBayCapacityLiters).map((p) => ({
       id: p.id,
       label: p.name,

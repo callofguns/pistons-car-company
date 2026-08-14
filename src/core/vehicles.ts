@@ -66,8 +66,15 @@ export interface CarPerformanceStats {
 /** A produced, sellable model in the player's lineup. Plain JSON-serializable data - no class instance, no engine object references (body is looked up by bodyStyleId when needed). */
 export interface CarModel {
   id: string
+  /** Player-authored free text (a pre-filled suggestion the player can edit before accepting) -
+   * frozen at generation time and never retro-translated when the player later changes language,
+   * same as company.companyName. See CarDesignScreen.tsx's generateDefaultName. */
   name: string
   bodyStyleId: string
+  /** @deprecated Legacy display string (an uppercased, English-only join of the design's
+   * classification tag labels), kept only so older saves round-trip and as a last-resort fallback.
+   * Every display site should derive this from classificationTagIds via i18n/vehicles.ts's
+   * formatCategoryTag() instead, which resolves through the current locale. */
   categoryTag: string
   engine: EngineSpec
   /** Which named preset in src/data/enginePresets.ts produced `engine`, if any (null if never set). */

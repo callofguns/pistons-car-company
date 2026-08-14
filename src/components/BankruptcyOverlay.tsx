@@ -1,4 +1,5 @@
 import { useGameStore } from '../store/useGameStore'
+import { useT } from '../i18n/useT'
 import { Button, Heading } from './Primitives'
 
 /** Full-screen soft-fail state, rendered by App.tsx in place of the normal screen router once
@@ -6,6 +7,7 @@ import { Button, Heading } from './Primitives'
  * name rather than routing back through Main Menu's naming/slot-picker flow. */
 export function BankruptcyOverlay() {
   const restartAfterBankruptcy = useGameStore((s) => s.restartAfterBankruptcy)
+  const { t } = useT()
 
   return (
     <div
@@ -24,13 +26,10 @@ export function BankruptcyOverlay() {
       }}
     >
       <span style={{ fontSize: '3rem' }}>💸</span>
-      <Heading style={{ fontSize: '2rem', color: 'var(--color-danger)' }}>Company Bankrupt</Heading>
-      <p style={{ color: 'var(--color-text-secondary)', maxWidth: 480 }}>
-        The balance stayed too deep in debt for too long, and the company has run out of road. Time to start a new
-        one.
-      </p>
+      <Heading style={{ fontSize: '2rem', color: 'var(--color-danger)' }}>{t('bankruptcy.title')}</Heading>
+      <p style={{ color: 'var(--color-text-secondary)', maxWidth: 480 }}>{t('bankruptcy.message')}</p>
       <Button variant="primary" onClick={restartAfterBankruptcy}>
-        + START NEW GAME
+        {t('bankruptcy.startNewGame')}
       </Button>
     </div>
   )

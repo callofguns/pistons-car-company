@@ -1,5 +1,6 @@
 import type { TutorialStep } from '../data/tutorialSteps'
 import { TUTORIAL_STEPS } from '../data/tutorialSteps'
+import { useT } from '../i18n/useT'
 import { Button } from './Primitives'
 import styles from './TutorialCard.module.css'
 
@@ -16,6 +17,7 @@ interface TutorialCardProps {
  * short landscape phone, so a floating overlay there would sit on top of the Continue button
  * rather than beside it. */
 export function TutorialCard({ step, onNext, onSkip }: TutorialCardProps) {
+  const { t } = useT()
   const stepNumber = TUTORIAL_STEPS.findIndex((s) => s.id === step.id) + 1
   const isLastStep = stepNumber === TUTORIAL_STEPS.length
 
@@ -34,17 +36,17 @@ export function TutorialCard({ step, onNext, onSkip }: TutorialCardProps) {
         <p className={styles.message}>{step.message}</p>
         <div className={styles.actions}>
           <button className={styles.skipLink} onClick={onSkip}>
-            Skip tutorial
+            {t('common.skipTutorial')}
           </button>
           {/* Action-gated steps (step.targetId set) drop the Next button entirely - progress only
              comes from actually pressing the highlighted button out on the screen, which stops
              this step matching on its own (see useActiveTutorialStep). Next stays only for
              narrative steps with no single button to point at. */}
           {step.targetId ? (
-            <span className={styles.hint}>👉 Tap the highlighted button</span>
+            <span className={styles.hint}>{t('tutorial.tapHighlighted')}</span>
           ) : (
             <Button variant="primary" onClick={onNext}>
-              {isLastStep ? 'Got it' : 'Next'}
+              {isLastStep ? t('tutorial.gotIt') : t('common.next')}
             </Button>
           )}
         </div>

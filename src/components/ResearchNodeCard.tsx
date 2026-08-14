@@ -1,5 +1,6 @@
 import type { ResearchNodeDefinition, ResearchNodeState } from '../core/research'
-import { compact } from '../core/numberFormat'
+import { useT } from '../i18n/useT'
+import type { MessageKey } from '../i18n/keys'
 import { Button } from './Primitives'
 import { MeterBar } from './MeterBar'
 import styles from './ResearchNodeCard.module.css'
@@ -12,16 +13,17 @@ interface ResearchNodeCardProps {
   onAction: () => void
 }
 
-const STATE_LABEL: Record<ResearchNodeState, string> = {
-  Locked: 'LOCKED',
-  AvailableNormal: 'RESEARCH',
-  AvailableBreakthrough: 'BREAKTHROUGH',
-  InProgress: 'RESEARCHING…',
-  Researched: 'RESEARCHED',
+const STATE_LABEL_KEY: Record<ResearchNodeState, MessageKey> = {
+  Locked: 'research.state.Locked',
+  AvailableNormal: 'research.state.AvailableNormal',
+  AvailableBreakthrough: 'research.state.AvailableBreakthrough',
+  InProgress: 'research.state.InProgress',
+  Researched: 'research.state.Researched',
 }
 
 /** One tech-tree card. Action button label/color follow ResearchNodeState. Direct port of ResearchNodeCardView.cs. */
 export function ResearchNodeCard({ node, state, progress01, moneyCost, onAction }: ResearchNodeCardProps) {
+  const { t, fmt } = useT()
   const interactable = state === 'AvailableNormal' || state === 'AvailableBreakthrough'
   const variant = state === 'AvailableBreakthrough' ? 'danger' : state === 'Researched' ? 'primary' : 'ghost'
 
@@ -35,10 +37,10 @@ export function ResearchNodeCard({ node, state, progress01, moneyCost, onAction 
       <div className={styles.name}>{node.displayName}</div>
       <div className={styles.costRow}>
         <span className={styles.science}>🧪 {node.scienceCost}</span>
-        <span className={styles.money}>{compact(moneyCost)}</span>
+        <span className={styles.money}>{fmt.compact(moneyCost)}</span>
       </div>
       <Button variant={variant} disabled={!interactable} onClick={onAction}>
-        {STATE_LABEL[state]}
+        {t(STATE_LABEL_KEY[state])}
       </Button>
     </div>
   )

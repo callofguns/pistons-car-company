@@ -1,5 +1,5 @@
 import { useGameStore } from '../store/useGameStore'
-import { compact, percent } from '../core/numberFormat'
+import { useT } from '../i18n/useT'
 import { StatRow } from '../components/StatRow'
 import { RumorRow } from '../components/RumorRow'
 import { Heading } from '../components/Primitives'
@@ -10,6 +10,7 @@ export function CompanyScreen() {
   useGameStore((s) => s.revision)
   const company = useGameStore((s) => s.world.company)
   const rumors = useGameStore((s) => s.world.rumors)
+  const { t, fmt } = useT()
 
   return (
     <div className={styles.columnsPage}>
@@ -20,16 +21,16 @@ export function CompanyScreen() {
           {company.homeCity}
         </span>
 
-        <StatRow label="Auto released" value={String(company.autoReleasedCount)} />
-        <StatRow label="Total sold" value={compact(company.totalCarsSoldAllModels)} />
-        <StatRow label="Market share" value={percent(company.marketSharePercent, 0)} />
-        <StatRow label="Earned" value={compact(company.lifetimeEarnings)} />
+        <StatRow label={t('company.autoReleased')} value={String(company.autoReleasedCount)} />
+        <StatRow label={t('company.totalSold')} value={fmt.compact(company.totalCarsSoldAllModels)} />
+        <StatRow label={t('company.marketShare')} value={fmt.percent(company.marketSharePercent, 0)} />
+        <StatRow label={t('company.earned')} value={fmt.compact(company.lifetimeEarnings)} />
       </div>
 
       <div className={styles.column}>
-        <Heading style={{ fontSize: '1.1rem' }}>RUMORS</Heading>
+        <Heading style={{ fontSize: '1.1rem' }}>{t('company.rumors')}</Heading>
         <div style={{ overflowY: 'auto' }}>
-          {rumors.recent.length === 0 && <span className={styles.empty}>No rumors yet.</span>}
+          {rumors.recent.length === 0 && <span className={styles.empty}>{t('company.noRumors')}</span>}
           {rumors.recent.slice(0, 8).map((text, i) => (
             <RumorRow key={i} text={text} />
           ))}
