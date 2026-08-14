@@ -34,7 +34,7 @@ export function ResearchNodeCard({ node, state, progress01, moneyCost, onAction 
         {(state === 'AvailableBreakthrough' || state === 'InProgress') && <span className={styles.warning}>⚠</span>}
       </div>
       <MeterBar value01={progress01} />
-      <div className={styles.name}>{node.displayName}</div>
+      <div className={styles.name}>{t(`data.research.${node.id}.name` as MessageKey)}</div>
       <div className={styles.costRow}>
         <span className={styles.science}>🧪 {node.scienceCost}</span>
         <span className={styles.money}>{fmt.compact(moneyCost)}</span>

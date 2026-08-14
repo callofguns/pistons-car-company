@@ -82,7 +82,7 @@ export function BankScreen() {
           const payment = computeAmortizedPayment(tier.principal, tier.annualInterestRate, tier.termMonths)
           return (
             <div key={tier.id} className={bankStyles.loanCard}>
-              <strong>{tier.displayName}</strong>
+              <strong>{t(tier.displayNameKey)}</strong>
               <span>{plainCurrency(tier.principal)}</span>
               <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
                 {t('bank.rateAndTerm', { rate: fmt.percent(tier.annualInterestRate * 100, 0), months: tier.termMonths })}

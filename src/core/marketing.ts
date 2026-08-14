@@ -1,5 +1,6 @@
 import { tryWithdraw, type BankState } from './economy'
 import type { CarModel } from './vehicles'
+import type { MessageKey } from '../i18n/keys'
 
 /** The six channels listed on every promotion tier card, in the reference's fixed display order. */
 export type PromotionChannel = 'Press' | 'Radio' | 'BillboardsAndStands' | 'TV' | 'Internet' | 'Cinemas'
@@ -11,7 +12,13 @@ export const PROMOTION_CHANNELS: PromotionChannel[] = [
 /** One of the Basic/Medium/Large promotion tier cards. unlockedChannelCount is how many of the six channels (in order) are lit up on the card; the rest render dimmed. */
 export interface PromotionTierDefinition {
   id: string
+  /** English source string, non-translated fallback only - PromotionTierCard displays
+   * displayNameKey via t() instead. 'Medium' here is a DIFFERENT key/word than
+   * data.loanTier.medium.name or data.classification.medium.label - see i18n/locales/en.ts's
+   * module doc. Type-only MessageKey import here (erased at compile time) doesn't pull any i18n
+   * runtime code into core/, so this stays as testable/pure as every other core module. */
   displayName: string
+  displayNameKey: MessageKey
   unlockedChannelCount: number
   cost: number
   efficiencyMultiplier: number

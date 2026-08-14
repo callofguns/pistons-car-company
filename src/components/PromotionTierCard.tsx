@@ -25,7 +25,7 @@ export function PromotionTierCard({ tier, unlocked, onSelect }: PromotionTierCar
 
   return (
     <div className={styles.card}>
-      <div className={styles.title}>{tier.displayName}</div>
+      <div className={styles.title}>{t(tier.displayNameKey)}</div>
       {PROMOTION_CHANNELS.map((channel, i) => (
         <div key={channel} className={`${styles.channel} ${i >= tier.unlockedChannelCount ? styles.channelDim : ''}`}>
           <span>•</span>

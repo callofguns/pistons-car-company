@@ -1,16 +1,13 @@
 import type { NewsEntry } from '../core/news'
-import { CATALOG } from '../data/catalog'
 import type { useT } from './useT'
+import type { MessageKey } from './keys'
 import type { Formatters } from './format'
 
-/** Not yet migrated to i18n (that's PR 3's researchNodes.ts work) - displayName is still plain
- * English catalog data for now, so this returns whatever language the catalog itself is written
- * in regardless of the player's chosen locale. Becomes a
- * `t(\`data.research.${nodeId}.name\`)` lookup once PR 3 lands; the News entry only ever stores
- * the stable nodeId (see core/news.ts's save-data rule), so nothing here needs to change about
- * what's persisted when that happens - only this resolution function. */
-function researchNodeName(nodeId: string): string {
-  return CATALOG.researchNodes.find((n) => n.id === nodeId)?.displayName ?? nodeId
+/** Resolves through the current locale now that researchNodes.ts has real i18n keys (PR 3) - the
+ * News entry only ever stored the stable nodeId (see core/news.ts's save-data rule), so this
+ * function is the only thing that needed to change once that landed; what's persisted didn't. */
+function researchNodeName(nodeId: string, t: ReturnType<typeof useT>['t']): string {
+  return t(`data.research.${nodeId}.name` as MessageKey)
 }
 
 /** Not a hook - takes the `t`/`fmt` a component already obtained from its own single top-level
@@ -30,7 +27,7 @@ export function renderNewsHeadline(entry: NewsEntry, t: ReturnType<typeof useT>[
     case 'ModelSoldOut':
       return t('news.modelSoldOut', { modelName: String(entry.params.modelName) })
     case 'ResearchCompleted':
-      return t('news.researchCompleted', { tech: researchNodeName(String(entry.params.nodeId)) })
+      return t('news.researchCompleted', { tech: researchNodeName(String(entry.params.nodeId), t) })
     case 'LoanTaken':
       return t('news.loanTaken', { principal: fmt.compact(Number(entry.params.principal)) })
     case 'LoanPaidOff':

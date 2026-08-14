@@ -4,6 +4,7 @@ import { useGameStore } from '../store/useGameStore'
 import { useActiveTutorialStep } from '../store/useTutorialStore'
 import { CATALOG } from '../data/catalog'
 import { useT } from '../i18n/useT'
+import type { MessageKey } from '../i18n/keys'
 import { CAR_CLASS_KEY } from '../i18n/vehicles'
 import { CarCarousel } from '../components/CarCarousel'
 import { MeterBar } from '../components/MeterBar'
@@ -58,7 +59,7 @@ export function BodySelectionScreen() {
         />
       </div>
 
-      <Heading>{body.displayName}</Heading>
+      <Heading>{t(`data.body.${body.id}.name` as MessageKey)}</Heading>
       <span style={{ color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>{t(CAR_CLASS_KEY[body.carClass])}</span>
 
       <div style={{ width: '100%' }}>

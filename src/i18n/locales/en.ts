@@ -310,6 +310,197 @@ export const en = {
   'priceSlider.costPrice': 'COST PRICE',
   'priceSlider.earnings': 'Earnings {value}',
 
+  // loan tiers (Finance screen) - 'medium' here is a different key/word than
+  // data.promoTier.medium.name or data.classification.medium.label.
+  'data.loanTier.small.name': 'Small',
+  'data.loanTier.medium.name': 'Medium',
+  'data.loanTier.large.name': 'Large',
+
+  // promotion tiers - likewise a different key/word than the two above despite sharing English text.
+  'data.promoTier.basic.name': 'Basic',
+  'data.promoTier.medium.name': 'Medium',
+  'data.promoTier.large.name': 'Large',
+
+  // body styles - id-derived keys (data.body.<id>.name), not an explicit interface field, so
+  // adding this didn't touch BodyStyleDefinition or the 4 test files that build fixture literals
+  // of it (save.test.ts, market.test.ts, vehicleService.test.ts, carSpecsCalculator.test.ts).
+  // Compile-time safety is instead a vitest walk (tests/dataKeys.test.ts) asserting every derived
+  // key exists in en - same tradeoff the plan calls out for researchNodes/designSteps below.
+  // displayName stays the English fallback/id-derivation source, never itself shown once
+  // BodySelectionScreen resolves through this key.
+  'data.body.classic-saloon.name': 'Classic Saloon',
+  'data.body.executive-sedan.name': 'Executive Sedan',
+  'data.body.trail-suv.name': 'Trail SUV',
+  'data.body.grand-suv.name': 'Grand SUV',
+  'data.body.roadster.name': 'Roadster',
+  'data.body.gt-coupe.name': 'GT Coupe',
+  'data.body.compact-coupe.name': 'Compact Coupe',
+  'data.body.pickup.name': 'Pickup',
+
+  // engine presets - id-derived, same pattern as data.body.* above. Displacement is baked into the
+  // name (matching spec.displacementLiters) rather than composed at render time, same call as the
+  // body names - keep the number correct if translating.
+  'data.enginePreset.economy-i3.name': 'Economy I3 1.0L',
+  'data.enginePreset.standard-i4.name': 'Standard I4 1.6L',
+  'data.enginePreset.diesel-i4.name': 'Diesel I4 2.2L',
+  'data.enginePreset.performance-v6.name': 'Performance V6 3.0L',
+  'data.enginePreset.muscle-v8.name': 'Muscle V8 5.0L',
+  'data.enginePreset.sport-turbo-i4.name': 'Sport Turbo I4 2.0L',
+  'data.enginePreset.rally-turbo-i4.name': 'Rally Turbo I4 2.2L',
+  'data.enginePreset.electric-drive.name': 'Electric Drive Unit',
+
+  // research nodes - id-derived (data.research.<id>.name), same pattern as data.body.*, BUT with
+  // one hard constraint worth restating: the id itself (researchNodes.ts's slug(category) +
+  // slug(name)) is persisted in saves as ResearchNodeSaveEntry.nodeId. The English `name` in
+  // researchNodes.ts that derives it must never change once shipped - a translator "fixing" that
+  // source array would silently invalidate every existing save's research progress. Only these
+  // *.name catalog values (the display text) are meant to be translated; tests/dataKeys.test.ts
+  // pins the full id list against a hardcoded array specifically to catch that mistake.
+  'data.research.engine-engine-material.name': 'Engine Material',
+  'data.research.engine-cylinder-head-material.name': 'Cylinder Head Material',
+  'data.research.engine-pistons.name': 'Pistons',
+  'data.research.engine-crankshaft.name': 'Crankshaft',
+  'data.research.engine-fuel-system.name': 'Fuel System',
+  'data.research.bodies-aerodynamic-shell.name': 'Aerodynamic Shell',
+  'data.research.bodies-lightweight-chassis.name': 'Lightweight Chassis',
+  'data.research.bodies-composite-panels.name': 'Composite Panels',
+  'data.research.bodies-reinforced-frame.name': 'Reinforced Frame',
+  'data.research.bodies-modular-platform.name': 'Modular Platform',
+  'data.research.undercarriage-suspension-tuning.name': 'Suspension Tuning',
+  'data.research.undercarriage-disc-brakes.name': 'Disc Brakes',
+  'data.research.undercarriage-alloy-wheels.name': 'Alloy Wheels',
+  'data.research.undercarriage-independent-rear-suspension.name': 'Independent Rear Suspension',
+  'data.research.undercarriage-anti-roll-bars.name': 'Anti-Roll Bars',
+  'data.research.appearance-two-tone-paint.name': 'Two-Tone Paint',
+  'data.research.appearance-chrome-trim.name': 'Chrome Trim',
+  'data.research.appearance-led-headlights.name': 'LED Headlights',
+  'data.research.appearance-alloy-rims.name': 'Alloy Rims',
+  'data.research.appearance-custom-livery.name': 'Custom Livery',
+  'data.research.interior-leather-seats.name': 'Leather Seats',
+  'data.research.interior-climate-control.name': 'Climate Control',
+  'data.research.interior-sound-insulation.name': 'Sound Insulation',
+  'data.research.interior-digital-dashboard.name': 'Digital Dashboard',
+  'data.research.interior-premium-audio.name': 'Premium Audio',
+  'data.research.safety-seatbelt-pretensioners.name': 'Seatbelt Pretensioners',
+  'data.research.safety-airbags.name': 'Airbags',
+  'data.research.safety-abs-braking.name': 'ABS Braking',
+  'data.research.safety-crumple-zones.name': 'Crumple Zones',
+  'data.research.safety-stability-control.name': 'Stability Control',
+
+  // design wizard steps/slots/options - id-derived (data.designStep.<id>.*, data.designSlot.<id>.
+  // label, data.designOption.<slotId>.<optionId>.*), same pattern as data.body.* above. Slot ids
+  // are unique across every step; option ids are NOT (e.g. 'standard'/'steel' repeat across
+  // unrelated slots), which is exactly why option keys are namespaced under their slot id -
+  // tests/dataKeys.test.ts walks the full DESIGN_STEPS table asserting every derived key exists.
+  'data.designStep.Safety.title': 'Safety',
+  'data.designStep.Safety.breadcrumb': 'Car classification',
+  'data.designStep.Transmission.title': 'Transmission',
+  'data.designStep.Transmission.breadcrumb': 'Engine',
+  'data.designStep.Undercarriage.title': 'Undercarriage',
+  'data.designStep.Undercarriage.breadcrumb': 'Transmission',
+  'data.designStep.Tires.title': 'Tires',
+  'data.designStep.Tires.breadcrumb': 'Undercarriage',
+  'data.designStep.Appearance.title': 'Appearance',
+  'data.designStep.Appearance.breadcrumb': 'Tires',
+  'data.designStep.Interior.title': 'Interior',
+  'data.designStep.Interior.breadcrumb': 'Appearance',
+  'data.designStep.Aerodynamics.title': 'Aerodynamics',
+  'data.designStep.Aerodynamics.breadcrumb': 'Interior',
+
+  'data.designSlot.body-material.label': 'Body Material',
+  'data.designOption.body-material.steel.label': 'Steel',
+  'data.designOption.body-material.steel.description': 'Cheap and simple.',
+  'data.designOption.body-material.aluminum.label': 'Aluminum',
+  'data.designOption.body-material.aluminum.description': 'Lighter, more expensive.',
+  'data.designOption.body-material.high-strength-steel.label': 'High-Strength Steel',
+  'data.designOption.body-material.high-strength-steel.description': 'Better crash protection.',
+  'data.designOption.body-material.composite.label': 'Composite Panels',
+  'data.designOption.body-material.composite.description': 'Strong and light.',
+  'data.designOption.body-material.carbon-fiber.label': 'Carbon Fiber',
+  'data.designOption.body-material.carbon-fiber.description': 'Best-in-class, very costly.',
+
+  'data.designSlot.airbags.label': 'Airbags',
+  'data.designOption.airbags.none.label': 'None',
+  'data.designOption.airbags.driver.label': 'Driver Airbag',
+  'data.designOption.airbags.dual-front.label': 'Dual Front Airbags',
+  'data.designOption.airbags.full-curtain.label': 'Full Curtain Airbags',
+
+  'data.designSlot.passive-safety.label': 'Passive Safety',
+  'data.designOption.passive-safety.none.label': 'None',
+  'data.designOption.passive-safety.crumple-zones.label': 'Crumple Zones',
+  'data.designOption.passive-safety.reinforced-cage.label': 'Reinforced Cage',
+  'data.designOption.passive-safety.advanced-structure.label': 'Advanced Structure',
+
+  'data.designSlot.gearbox-type.label': 'Gearbox',
+  'data.designOption.gearbox-type.manual.label': 'Manual',
+  'data.designOption.gearbox-type.automatic.label': 'Automatic',
+  'data.designOption.gearbox-type.dual-clutch.label': 'Dual-Clutch',
+
+  'data.designSlot.drive-type.label': 'Drive Type',
+  'data.designOption.drive-type.fwd.label': 'Front-Wheel Drive',
+  'data.designOption.drive-type.rwd.label': 'Rear-Wheel Drive',
+  'data.designOption.drive-type.awd.label': 'All-Wheel Drive',
+
+  'data.designSlot.suspension.label': 'Suspension',
+  'data.designOption.suspension.standard.label': 'Standard',
+  'data.designOption.suspension.sport.label': 'Sport',
+  'data.designOption.suspension.off-road.label': 'Off-Road',
+  'data.designOption.suspension.adaptive.label': 'Adaptive',
+
+  'data.designSlot.brakes.label': 'Brakes',
+  'data.designOption.brakes.drum.label': 'Drum',
+  'data.designOption.brakes.disc-front.label': 'Front Disc',
+  'data.designOption.brakes.disc-all-round.label': 'All-Round Disc',
+  'data.designOption.brakes.performance.label': 'Performance',
+
+  'data.designSlot.tire-supplier.label': 'Tire Supplier',
+  'data.designOption.tire-supplier.pireri.label': 'Pireri',
+  'data.designOption.tire-supplier.pireri.description': 'Excellent handling and grip; weak offroad, pricey.',
+  'data.designOption.tire-supplier.michelin.label': 'Michelin',
+  'data.designOption.tire-supplier.michelin.description': 'Good handling and grip; weak offroad.',
+  'data.designOption.tire-supplier.ridgestones.label': 'Ridgestones',
+  'data.designOption.tire-supplier.ridgestones.description': 'Great offroad; weak handling and grip.',
+  'data.designOption.tire-supplier.yoody-gear.label': 'Yoody Gear',
+  'data.designOption.tire-supplier.yoody-gear.description': 'Good handling and price; weak offroad and grip.',
+
+  'data.designSlot.paint-finish.label': 'Paint Finish',
+  'data.designOption.paint-finish.standard.label': 'Standard',
+  'data.designOption.paint-finish.metallic.label': 'Metallic',
+  'data.designOption.paint-finish.pearlescent.label': 'Pearlescent',
+  'data.designOption.paint-finish.matte.label': 'Matte',
+
+  'data.designSlot.wheel-style.label': 'Wheels',
+  'data.designOption.wheel-style.steel.label': 'Steel',
+  'data.designOption.wheel-style.alloy.label': 'Alloy',
+  'data.designOption.wheel-style.sport-alloy.label': 'Sport Alloy',
+  'data.designOption.wheel-style.custom-forged.label': 'Custom Forged',
+
+  'data.designSlot.interior-material.label': 'Interior Material',
+  'data.designOption.interior-material.basic-vinyl.label': 'Basic Vinyl',
+  'data.designOption.interior-material.fabric.label': 'Fabric',
+  'data.designOption.interior-material.leatherette.label': 'Leatherette',
+  'data.designOption.interior-material.leather.label': 'Leather',
+  'data.designOption.interior-material.premium-leather.label': 'Premium Leather',
+
+  'data.designSlot.features.label': 'Features',
+  'data.designOption.features.basic.label': 'Basic',
+  'data.designOption.features.climate-control.label': 'Climate Control',
+  'data.designOption.features.premium-audio.label': 'Premium Audio',
+  'data.designOption.features.full-luxury-suite.label': 'Full Luxury Suite',
+
+  'data.designSlot.aero-package.label': 'Aero Package',
+  'data.designOption.aero-package.standard.label': 'Standard',
+  'data.designOption.aero-package.sport-kit.label': 'Sport Kit',
+  'data.designOption.aero-package.track-kit.label': 'Track Kit',
+
+  // engine preset spec-line description ("3.0L 6-cyl Turbo Petrol") - composed from EngineSpec at
+  // render time, not stored as a fixed string in enginePresets.ts.
+  'carDesign.engineSpecDescription': '{liters}L {cylinders}-cyl {fuelType}',
+  'carDesign.turbo': 'Turbo',
+  'data.fuelType.Petrol': 'Petrol',
+  'data.fuelType.Diesel': 'Diesel',
+  'data.fuelType.Electric': 'Electric',
+
   // screen.<id>.title - the persistent top bar's title (see TopHud.tsx); a Record<ScreenId,
   // MessageKey> in useUiStore.ts maps every screen id to one of these.
   'screen.mainMenu.title': 'Main Menu',

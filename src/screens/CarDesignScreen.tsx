@@ -11,6 +11,7 @@ import { plainCurrency } from '../core/numberFormat'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
 import { CAR_CLASS_KEY } from '../i18n/vehicles'
+import { translateDesignStep } from '../i18n/designSteps'
 import { MeterBar } from '../components/MeterBar'
 import { StatRow } from '../components/StatRow'
 import { Button, Heading } from '../components/Primitives'
@@ -80,7 +81,7 @@ const HIDES_COST_PRICE = new Set<WizardStepId>(['Classification', 'SafetyRating'
 function stepMeta(stepId: WizardStepId, t: ReturnType<typeof useT>['t']) {
   const meta = STEP_META_KEYS[stepId]
   if (meta) return { breadcrumb: t(meta.breadcrumbKey), title: t(meta.titleKey) }
-  const step = findDesignStep(stepId)!
+  const step = translateDesignStep(findDesignStep(stepId)!, t)
   return { breadcrumb: step.breadcrumb, title: step.title }
 }
 
@@ -189,7 +190,8 @@ export function CarDesignScreen() {
     setStepIndex((i) => Math.min(WIZARD_STEPS.length - 1, i + 1))
   }
 
-  const genericStep = findDesignStep(stepId)
+  const rawGenericStep = findDesignStep(stepId)
+  const genericStep = rawGenericStep ? translateDesignStep(rawGenericStep, t) : undefined
 
   return (
     <div className={styles.screen}>
@@ -229,7 +231,7 @@ export function CarDesignScreen() {
       {stepId === 'Engine' && (
         <div className={wizardStyles.body}>
           <ComponentSlotCard
-            slot={enginePresetSlot(body.engineBayCapacityLiters, t('carDesign.step.engine.title'))}
+            slot={enginePresetSlot(body.engineBayCapacityLiters, t('carDesign.step.engine.title'), t)}
             selectedOptionId={session.enginePresetId ?? undefined}
             currentYear={currentYear}
             onSelect={setEnginePreset}
@@ -315,18 +317,32 @@ export function CarDesignScreen() {
   )
 }
 
-function enginePresetSlot(engineBayCapacityLiters: number, label: string): ComponentSlot {
+const FUEL_TYPE_KEY: Record<string, MessageKey> = {
+  Petrol: 'data.fuelType.Petrol',
+  Diesel: 'data.fuelType.Diesel',
+  Electric: 'data.fuelType.Electric',
+}
+
+function enginePresetSlot(engineBayCapacityLiters: number, label: string, t: ReturnType<typeof useT>['t']): ComponentSlot {
   return {
     id: 'engine-preset',
     label,
-    options: ENGINE_PRESETS.filter((p) => p.spec.displacementLiters <= engineBayCapacityLiters).map((p) => ({
-      id: p.id,
-      label: p.name,
-      description: `${p.spec.displacementLiters}L ${p.spec.cylinders}-cyl ${p.spec.aspiration === 'Turbocharged' ? 'Turbo ' : ''}${p.spec.fuelType}`,
-      unlockYear: p.unlockYear,
-      costDelta: 0,
-      weightDeltaKg: 0,
-      effects: {},
-    })),
+    options: ENGINE_PRESETS.filter((p) => p.spec.displacementLiters <= engineBayCapacityLiters).map((p) => {
+      const fuelTypeLabel = t(FUEL_TYPE_KEY[p.spec.fuelType])
+      const aspirationPrefix = p.spec.aspiration === 'Turbocharged' ? `${t('carDesign.turbo')} ` : ''
+      return {
+        id: p.id,
+        label: t(`data.enginePreset.${p.id}.name` as MessageKey),
+        description: t('carDesign.engineSpecDescription', {
+          liters: p.spec.displacementLiters,
+          cylinders: p.spec.cylinders,
+          fuelType: aspirationPrefix + fuelTypeLabel,
+        }),
+        unlockYear: p.unlockYear,
+        costDelta: 0,
+        weightDeltaKg: 0,
+        effects: {},
+      }
+    }),
   }
 }
