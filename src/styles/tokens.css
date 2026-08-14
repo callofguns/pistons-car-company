@@ -118,12 +118,18 @@ input {
 /* The tutorial's "click this one" spotlight - a plain (non-module) class name so any screen's
    Button can opt into it just by adding the literal string, without every screen needing its own
    copy of the animation. Only ever applied to the exact button a guided step wants pressed (see
-   tutorialSteps.ts's targetId/TutorialCard) - a trim-colored ring that pulses outward, on top of
-   the button's own z-index so it isn't clipped by a sibling. prefers-reduced-motion already turns
-   all animation-duration to ~0 globally above, so this needs no separate guard. */
+   tutorialSteps.ts's targetId/TutorialCard) - a trim-colored ring that pulses outward. Deliberately
+   does NOT set position/z-index: every current target (createCarButton, body-continue,
+   wizard-continue) is itself position:absolute or otherwise already-positioned in its own screen
+   module, and this class and that module CSS are both single-class selectors of equal specificity
+   - whichever stylesheet happens to land later in the bundle wins, so a `position: relative` here
+   previously stomped the button's own `position: absolute` and dropped it into normal document
+   flow (it visibly jumped to the top-left, overlapping the HUD). box-shadow alone doesn't need a
+   stacking context to render; if a future target genuinely gets clipped by a sibling, fix that with
+   `isolation: isolate` (a real stacking context, but position-independent) rather than reintroducing
+   position/z-index here. prefers-reduced-motion already turns all animation-duration to ~0 globally
+   above, so this needs no separate guard. */
 .tutorial-target-highlight {
-  position: relative;
-  z-index: 2;
   animation: tutorial-pulse 1.6s ease-out infinite;
 }
 

@@ -76,6 +76,30 @@
   color: var(--color-text-secondary);
 }
 
+/* Short landscape phones (~330-390px tall - see tokens.css's own breakpoint comment) can't spare
+   the full-size card: BodySelection/CarDesign embed this inline in an already-tall flex column
+   above their own Continue button, and --space-* alone (which the padding/gap above already use)
+   wasn't shrinking the card enough to keep that button on-screen without scrolling - defeating the
+   point of an action-gated step that tells the player to tap a button they can't see. Drop the
+   portrait icon and tighten text instead of just relying on spacing tokens. */
+@media (max-height: 560px) {
+  .portrait {
+    display: none;
+  }
+
+  .card {
+    padding: var(--space-3);
+  }
+
+  .title {
+    font-size: 0.85rem;
+  }
+
+  .message {
+    font-size: 0.78rem;
+  }
+}
+
 /* Stands in for the Next button on action-gated steps - same slot in the layout, but not
    clickable, since the only way past that step is the highlighted button out on the screen. */
 .hint {
