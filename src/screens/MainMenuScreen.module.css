@@ -32,6 +32,14 @@
   width: min(320px, 100%);
 }
 
+/* Company names are free-text and can run long - keep the button one line instead of wrapping or
+   blowing out the menu's fixed width. */
+.playButton {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .version {
   position: absolute;
   bottom: var(--space-4);
