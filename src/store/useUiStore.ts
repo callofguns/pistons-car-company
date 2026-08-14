@@ -13,8 +13,11 @@ const SCREENS_WITHOUT_HUD = new Set<ScreenId>([
   'BodySelection',
   'CarDesign',
   // Reachable from the Main Menu, where world is a blank unsaved createNewWorld() - the HUD would
-  // otherwise render stats (company name, cash, date) for a company that doesn't exist.
+  // otherwise render stats (company name, cash, date) for a company that doesn't exist. News is
+  // also reachable from Office Hub with a real world loaded, but SCREENS_WITHOUT_HUD is per-screen
+  // not per-context, and this screen has its own back button either way (see NewsScreen.tsx).
   'Language',
+  'News',
 ])
 
 export function screenWantsTopHud(screen: ScreenId): boolean {
@@ -37,9 +40,10 @@ export const SCREEN_TITLES: Record<ScreenId, string> = {
   Company: 'Company',
   TeamCreation: 'Team Creation',
   Bank: 'Finance',
-  // Not actually shown - Language is in SCREENS_WITHOUT_HUD - but SCREEN_TITLES is a
+  // Not actually shown - both are in SCREENS_WITHOUT_HUD - but SCREEN_TITLES is a
   // Record<ScreenId, string>, so every screen needs an entry regardless.
   Language: 'Language',
+  News: 'News',
 }
 
 interface UiStore {

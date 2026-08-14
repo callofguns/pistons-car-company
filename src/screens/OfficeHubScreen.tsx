@@ -1,6 +1,7 @@
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { useActiveTutorialStep } from '../store/useTutorialStore'
+import { unreadNewsCount } from '../core/news'
 import { ModelSalesRow } from '../components/ModelSalesRow'
 import { SalesGraph } from '../components/SalesGraph'
 import { Button, Heading } from '../components/Primitives'
@@ -15,10 +16,12 @@ export function OfficeHubScreen() {
   const show = useUiStore((s) => s.show)
   useGameStore((s) => s.revision)
   const models = useGameStore((s) => s.world.vehicles.models)
+  const news = useGameStore((s) => s.world.news)
   const beginNewDesign = useGameStore((s) => s.beginNewDesign)
   const tutorialStep = useActiveTutorialStep()
 
   const topModels = [...models].sort((a, b) => b.lifetimeEarnings - a.lifetimeEarnings).slice(0, 4)
+  const unread = unreadNewsCount(news)
 
   return (
     <div className={styles.hub}>
@@ -39,6 +42,11 @@ export function OfficeHubScreen() {
         <Button onClick={() => show('ModelLineup')}>Models</Button>
         <Button onClick={() => show('TeamCreation')}>Racing</Button>
         <Button onClick={() => show('Employees')}>Staff</Button>
+        <Button onClick={() => show('Company')}>Company</Button>
+        <Button className={styles.navButton} onClick={() => show('News')}>
+          News
+          {unread > 0 && <span className={styles.badge}>{unread > 9 ? '9+' : unread}</span>}
+        </Button>
       </div>
 
       <Button

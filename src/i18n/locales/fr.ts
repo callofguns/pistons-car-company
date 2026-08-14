@@ -22,6 +22,27 @@ export const fr: LocaleCatalog = {
   'stats.unitsSoldToday_one': '{count} unité aujourd’hui',
   'stats.unitsSoldToday_other': '{count} unités aujourd’hui',
 
+  'news.screenTitle': 'Actualités',
+  'news.empty': 'Rien à signaler pour le moment.',
+  'news.modelReleased': '{modelName} entre en production à {price}.',
+  'news.modelSoldOut': '{modelName} a épuisé sa série de production.',
+  'news.researchCompleted': 'R&D terminée : {tech}.',
+  'news.loanTaken': 'Un prêt de {principal} a été contracté.',
+  'news.loanPaidOff': 'Un prêt de {principal} a été remboursé.',
+  'news.marketingCampaignStarted': 'Une campagne marketing a été lancée pour {modelName}.',
+  'news.marketingCampaignEnded': 'La campagne marketing de {modelName} est terminée.',
+  'news.monthlyReport': 'Rapport mensuel : {income} de recettes, {expense} de dépenses.',
+  'news.bankruptcyWarning': 'Avertissement : {days} jours avant la faillite.',
+  'news.racingTeamRegistered': '{teamName} a été inscrite en compétition.',
+
+  'rumor.soldWell.0': 'L’avis de {person} s’est révélé décisif cette fois-ci.',
+  'rumor.soldWell.1': '{model} pourrait bien lancer une nouvelle tendance du marché.',
+  'rumor.soldWell.2': 'L’avis de {person} a nettement relancé l’intérêt pour {model}.',
+  'rumor.struggled.0': 'On dit que le marché n’est pas prêt à payer autant pour {model}.',
+  'rumor.struggled.1': 'Les ventes de {model} ont été plus lentes que prévu ce mois-ci.',
+  'rumor.research.0': 'Les ingénieurs ont fait du bon travail ! La nouvelle technologie est très prometteuse.',
+  'rumor.research.1': 'L’entreprise mise sur la fiabilité. Les technologies plus risquées semblent avoir été mises de côté.',
+
   // FR convention wants a non-breaking space before '%' - a plain space is intentional here
   // (an actual NBSP is easy to lose in an editor/diff); src/i18n/format.ts's fmt.percent()
   // normalizes the rendered space to U+00A0 at format time instead of relying on this literal.

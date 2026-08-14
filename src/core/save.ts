@@ -4,6 +4,7 @@ import type { GameConfig } from './gameConfig'
 import { makeDate } from './gameDate'
 import { createNewWorld, type World } from './world'
 import type { CarModel } from './vehicles'
+import type { NewsEntry } from './news'
 
 /** One research node's saved progress. Effects aren't serialized - on load they're re-applied to a fresh TechModifiers from the catalog definition, same as ResearchService.RestoreState did in the C# port. */
 export interface ResearchNodeSaveEntry {
@@ -49,6 +50,12 @@ export interface SaveGameData {
 
   racingRegistered: boolean
   racingTeamName: string
+
+  // Optional and read defensively (`data.news ?? []` in loadWorld) rather than bumping
+  // CURRENT_SCHEMA_VERSION - see isCompatibleSave's doc comment on why that's the one thing NOT
+  // to do here (it's a strict === with no migration path, so bumping it silently deletes every
+  // existing save). A pre-News save simply loads with an empty feed instead of "Empty Slot".
+  news?: NewsEntry[]
 }
 
 // Bumped for the classificationTagIds/componentSelections/enginePresetId fields the car design
@@ -101,6 +108,8 @@ export function buildSaveData(world: World): SaveGameData {
 
     racingRegistered: world.racing.isRegistered,
     racingTeamName: world.racing.teamName,
+
+    news: world.news.entries,
   }
 }
 
@@ -146,6 +155,8 @@ export function loadWorld(config: GameConfig, catalog: Catalog, data: SaveGameDa
 
   world.racing.isRegistered = data.racingRegistered
   world.racing.teamName = data.racingTeamName
+
+  world.news.entries = data.news ?? []
 
   return world
 }

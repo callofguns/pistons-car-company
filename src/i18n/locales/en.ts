@@ -39,6 +39,34 @@ export const en = {
   'stats.unitsSoldToday_one': '{count} unit today',
   'stats.unitsSoldToday_other': '{count} units today',
 
+  // news screen + headlines - see src/i18n/news.ts for the entry.type -> key mapping. Money/date
+  // params arrive pre-formatted (fmt.compact()'d) by the caller, so these templates only ever
+  // interpolate strings, never raw numbers needing their own locale formatting.
+  'news.screenTitle': 'News',
+  'news.empty': 'Nothing to report yet.',
+  'news.modelReleased': '{modelName} enters production at {price}.',
+  'news.modelSoldOut': '{modelName} has sold out its production run.',
+  'news.researchCompleted': 'R&D completed: {tech}.',
+  'news.loanTaken': 'Took out a loan of {principal}.',
+  'news.loanPaidOff': 'Paid off a loan of {principal}.',
+  'news.marketingCampaignStarted': 'Launched a marketing campaign for {modelName}.',
+  'news.marketingCampaignEnded': 'The marketing campaign for {modelName} has ended.',
+  'news.monthlyReport': 'Monthly report: {income} in, {expense} out.',
+  'news.bankruptcyWarning': 'Warning: {days} days left before bankruptcy.',
+  'news.racingTeamRegistered': '{teamName} has been registered for competition.',
+
+  // rumor.* - src/i18n/rumors.ts assembles these into a RumorTemplateSet per locale. {person}/
+  // {model} are NOT resolved by t() here - they're left as literal placeholders for
+  // core/company.ts's own fill() to substitute later, same as the English source data always
+  // worked (see data/rumorTemplates.ts). Advisor names are proper nouns and stay untranslated.
+  'rumor.soldWell.0': "{person}'s opinion turned out to be decisive this time.",
+  'rumor.soldWell.1': '{model} might set a new market trend.',
+  'rumor.soldWell.2': "{person}'s opinion noticeably increased interest in {model}.",
+  'rumor.struggled.0': "They say the market isn't ready to pay that much for {model}.",
+  'rumor.struggled.1': 'Sales of {model} have been slower than expected this month.',
+  'rumor.research.0': 'The engineers did a great job! The new tech looks very promising.',
+  'rumor.research.1': 'The company is betting on reliability. It seems riskier technologies have been shelved.',
+
   // format - consumed by src/i18n/format.ts, never rendered as a whole message on their own
   'format.datePattern': '{day} {month} {year}',
   'format.percentPattern': '{value}%',

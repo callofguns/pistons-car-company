@@ -106,10 +106,14 @@ export function startResearch(
   return true
 }
 
-/** Advances every in-progress node by one day and folds finished nodes' effects into `research.modifiers`. Also grants the daily research-point income. */
-export function onResearchDayTick(research: ResearchState, allNodes: ResearchNodeDefinition[], pointsPerDay: number): void {
+/** Advances every in-progress node by one day and folds finished nodes' effects into
+ * `research.modifiers`. Also grants the daily research-point income. Returns the ids of any nodes
+ * that finished this tick (empty most days) - world.ts's News hook uses this to post
+ * ResearchCompleted without needing its own before/after diff over every node every day. */
+export function onResearchDayTick(research: ResearchState, allNodes: ResearchNodeDefinition[], pointsPerDay: number): string[] {
   research.points += pointsPerDay
 
+  const justCompleted: string[] = []
   for (const node of allNodes) {
     const r = runtimeOf(research, node.id)
     if (!r.started || r.researched) continue
@@ -119,6 +123,8 @@ export function onResearchDayTick(research: ResearchState, allNodes: ResearchNod
       r.progress01 = 1
       r.researched = true
       research.modifiers.apply(node.effects)
+      justCompleted.push(node.id)
     }
   }
+  return justCompleted
 }

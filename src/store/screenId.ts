@@ -15,3 +15,4 @@ export type ScreenId =
   | 'TeamCreation'
   | 'Bank'
   | 'Language'
+  | 'News'

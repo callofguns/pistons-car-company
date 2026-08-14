@@ -26,13 +26,44 @@
   font-size: 0.9rem;
 }
 
+/* Grid, not flex-nowrap: this went from 5 buttons to 7 (Company + News added alongside R&D/Promo/
+   Models/Racing/Staff), and flex-nowrap would have pushed the overflow off-screen with no
+   scrollbar - especially at the max-height:560px breakpoint below, and especially once translated
+   ES/FR labels (PR 2) run longer than their English originals. max-content columns keep each
+   button its own natural width (matching the old flex row's look) while wrapping onto a second
+   row after 4 - the row grows upward from this box's bottom-anchored position, into space that
+   was already empty above it, so it costs nothing layout-wise. */
 .bottomLeft {
   position: absolute;
   bottom: var(--space-5);
   left: var(--space-5);
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(4, max-content);
   gap: var(--space-2);
+}
+
+.navButton {
+  position: relative;
+}
+
+/* Office Hub's own unread-News indicator - see NewsScreen for the persisted read/unread state
+   this counts. */
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-text-primary);
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Deliberately elongated rectangle, not a full-width bar, set apart from the rest of the nav

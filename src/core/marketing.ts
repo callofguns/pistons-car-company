@@ -40,7 +40,10 @@ export function startCampaign(
   return true
 }
 
-export function onMarketingDayTick(models: CarModel[]): void {
+/** Returns the models whose campaign expired this tick (empty most days) - world.ts's News hook
+ * uses this to post MarketingCampaignEnded without a separate before/after diff. */
+export function onMarketingDayTick(models: CarModel[]): CarModel[] {
+  const justEnded: CarModel[] = []
   for (const model of models) {
     if (!model.marketingActive) continue
 
@@ -48,6 +51,8 @@ export function onMarketingDayTick(models: CarModel[]): void {
     if (model.marketingDaysRemaining <= 0) {
       model.marketingActive = false
       model.marketingEfficiencyMultiplier = 1
+      justEnded.push(model)
     }
   }
+  return justEnded
 }

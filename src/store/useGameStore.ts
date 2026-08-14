@@ -16,7 +16,11 @@ import { takeLoan as coreTakeLoan } from '../core/economy'
 import { startResearch as coreStartResearch } from '../core/research'
 import { maxProductionBatch, setBudgetLevel as coreSetBudgetLevel } from '../core/staff'
 import { startCampaign as coreStartCampaign } from '../core/marketing'
+import { markAllNewsRead as coreMarkAllNewsRead, postNews } from '../core/news'
 import { registerTeam as coreRegisterTeam } from '../core/racing'
+import { loadSettings } from '../core/settings'
+import { resolveInitialLocale } from '../i18n/locale'
+import { getRumorTemplates } from '../i18n/rumors'
 import {
   beginNewDesign as coreBeginNewDesign,
   beginRestyling as coreBeginRestyling,
@@ -89,11 +93,21 @@ interface GameStore {
   registerTeam: (teamName: string) => boolean
 
   takeLoan: (tierId: string) => boolean
+
+  /** Marks every current News entry read (see NewsScreen's mount effect). Off-tick news posts for
+   * events that happen on player action rather than the daily tick - mirrors notifyResearchProgressed's
+   * split between world.ts's daily-tick hooks and this store's action-triggered ones. */
+  markAllNewsRead: () => void
 }
 
 export const useGameStore = create<GameStore>((set, get) => {
   const config = DEFAULT_GAME_CONFIG
-  const catalog = CATALOG
+  // Rumor templates specifically (not the rest of the catalog, which isn't localized yet) are
+  // swapped for the player's already-resolved locale right at store creation - not just on a
+  // later explicit language change via useSettingsStore.setLocale - so a returning French player's
+  // very first rumor of the session is already in French rather than English until they happen to
+  // revisit the Language screen.
+  const catalog: Catalog = { ...CATALOG, rumorTemplates: getRumorTemplates(resolveInitialLocale(loadSettings()?.locale)) }
 
   // Runs once, before anything (Main Menu's Continue-button check, Save Slots' listing) reads
   // slot data - see save.ts's migrateLegacySaveIfNeeded for why.
@@ -218,6 +232,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         world.time.currentDate,
         maxProductionBatch(world.staff),
       )
+      if (model) postNews(world.news, 'ModelReleased', world.time.currentDate, { modelName: model.name, price: model.salePrice })
       bump()
       return model?.id ?? null
     },
@@ -266,6 +281,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const tier = catalog.promotionTiers.find((t) => t.id === tierId)
       if (!model || !tier) return false
       const ok = coreStartCampaign(model, tier, world.bank, world.time.currentDate.year)
+      if (ok) postNews(world.news, 'MarketingCampaignStarted', world.time.currentDate, { modelName: model.name })
       bump()
       return ok
     },
@@ -273,6 +289,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     registerTeam: (teamName) => {
       const { world, config } = get()
       const ok = coreRegisterTeam(world.racing, teamName, world.bank, world.time.currentDate.year, config.racingUnlockYear)
+      if (ok) postNews(world.news, 'RacingTeamRegistered', world.time.currentDate, { teamName })
       bump()
       return ok
     },
@@ -282,8 +299,14 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (!tier) return false
       const { world } = get()
       coreTakeLoan(world.bank, world.ledger, tier.principal, tier.annualInterestRate, tier.termMonths, world.time.currentDate)
+      postNews(world.news, 'LoanTaken', world.time.currentDate, { principal: tier.principal })
       bump()
       return true
+    },
+
+    markAllNewsRead: () => {
+      coreMarkAllNewsRead(get().world.news)
+      bump()
     },
   }
 })

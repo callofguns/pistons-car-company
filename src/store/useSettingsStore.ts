@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { loadSettings, saveSettings } from '../core/settings'
 import { resolveInitialLocale, type Locale } from '../i18n/locale'
+import { getRumorTemplates } from '../i18n/rumors'
+import { useGameStore } from './useGameStore'
 
 interface SettingsStore {
   locale: Locale
@@ -28,6 +30,19 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
   setLocale: (locale) => {
     saveSettings({ locale })
     if (typeof document !== 'undefined') document.documentElement.lang = locale
+
+    // Rumors are pre-rendered strings, not persisted (see core/company.ts's RumorState doc
+    // comment) - unlike News, there's no structured data to re-translate in place, so a language
+    // switch just swaps in the new locale's phrase bank for future rumors and clears the old
+    // ones. Acceptable: it's unpersisted flavor gossip, not anything the player would notice
+    // "losing" the way they'd notice a renamed car model.
+    const game = useGameStore.getState()
+    game.world.rumors.recent = []
+    useGameStore.setState((s) => ({
+      catalog: { ...s.catalog, rumorTemplates: getRumorTemplates(locale) },
+      revision: s.revision + 1,
+    }))
+
     set({ locale })
   },
 

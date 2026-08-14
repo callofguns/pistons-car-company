@@ -3,6 +3,7 @@ import {
   buildSaveData,
   isCompatibleSave,
   listSlots,
+  loadWorld,
   migrateLegacySaveIfNeeded,
   saveToStorage,
   tryLoadFromStorage,
@@ -11,9 +12,11 @@ import {
 import { createNewWorld } from '../src/core/world'
 import { createBank } from '../src/core/economy'
 import { DEFAULT_GAME_CONFIG } from '../src/core/gameConfig'
+import { CATALOG } from '../src/data/catalog'
 import { createVehicleState, beginNewDesign, selectBody, setEngineSpec, setNameAndCategory, finalizeDesign } from '../src/core/vehicleService'
 import { DEFAULT_ENGINE_SPEC } from '../src/core/vehicles'
 import { TechModifiers } from '../src/core/techModifiers'
+import { postNews } from '../src/core/news'
 import { makeDate } from '../src/core/gameDate'
 import type { BodyStyleDefinition } from '../src/core/vehicles'
 import { createMemoryStorage } from './helpers/memoryStorage'
@@ -88,6 +91,41 @@ describe('save/load round trip', () => {
     storage.setItem('pistons.save.v1.slot0', '{ not valid json ][')
     expect(() => tryLoadFromStorage(storage)).not.toThrow()
     expect(tryLoadFromStorage(storage)).toBeNull()
+  })
+
+  it('round-trips the news feed', () => {
+    const storage = createMemoryStorage()
+    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    postNews(world.news, 'RacingTeamRegistered', makeDate(1971, 3, 1), { teamName: 'Ironclad Racing' })
+
+    saveToStorage(buildSaveData(world), storage)
+    const loaded = loadWorld(DEFAULT_GAME_CONFIG, CATALOG, tryLoadFromStorage(storage)!)
+
+    expect(loaded.news.entries).toHaveLength(1)
+    expect(loaded.news.entries[0].params.teamName).toBe('Ironclad Racing')
+  })
+
+  // Backward compat: a save written before News existed (or a hand-crafted one missing the
+  // field) must load with an empty feed, not throw - this is the whole point of adding `news` as
+  // an optional field instead of bumping CURRENT_SCHEMA_VERSION (see save.ts's comment on why
+  // that's the one thing NOT to do here).
+  it('loads a save missing the news field as an empty feed, without throwing', () => {
+    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    const data = buildSaveData(world)
+    delete (data as Partial<typeof data>).news
+
+    expect(() => loadWorld(DEFAULT_GAME_CONFIG, CATALOG, data)).not.toThrow()
+    expect(loadWorld(DEFAULT_GAME_CONFIG, CATALOG, data).news.entries).toEqual([])
+  })
+
+  // A literal guard against reflexively bumping CURRENT_SCHEMA_VERSION when adding a field -
+  // isCompatibleSave is a strict === with no migration path, so bumping it silently deletes every
+  // existing player's save (see save.ts's doc comment on isCompatibleSave). Adding `news` as an
+  // optional field was deliberately NOT supposed to require a bump; this test fails loudly if a
+  // future change does it anyway.
+  it('keeps the save schema at version 3 (news was added without a schema bump)', () => {
+    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    expect(buildSaveData(world).schemaVersion).toBe(3)
   })
 })
 

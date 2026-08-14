@@ -52,7 +52,9 @@ export function MainMenuScreen() {
         <Button variant={mostRecent ? 'ghost' : 'primary'} onClick={() => show('SaveSlots')}>
           SAVES
         </Button>
-        <Button variant="ghost" onClick={() => console.log('[MainMenu] News - not implemented yet.')}>
+        {/* Read-only from here (no live world loaded at the menu) - reads whichever save was
+            played most recently, same slot PLAY resumes. See NewsScreen.tsx's payload handling. */}
+        <Button variant="ghost" disabled={!mostRecent} onClick={() => mostRecent && show('News', { slotIndex: mostRecent.index })}>
           NEWS
         </Button>
         <Button variant="ghost" onClick={() => show('Language')}>
