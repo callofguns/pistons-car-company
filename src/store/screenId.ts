@@ -13,6 +13,7 @@ export type ScreenId =
   | 'Promotion'
   | 'Company'
   | 'TeamCreation'
+  | 'RaceEntry'
   | 'Bank'
   | 'Language'
   | 'News'

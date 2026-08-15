@@ -127,6 +127,42 @@ describe('save/load round trip', () => {
     const world = createNewWorld(DEFAULT_GAME_CONFIG)
     expect(buildSaveData(world).schemaVersion).toBe(3)
   })
+
+  it('round-trips a pending race entry and race history', () => {
+    const storage = createMemoryStorage()
+    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    world.racing.isRegistered = true
+    world.racing.teamName = 'Ironclad Racing'
+    world.racing.pendingEntry = { tierId: 'local-circuit', modelId: 'model-1', modelName: 'Test Racer' }
+    world.racing.history = [
+      { id: 'race-1', tierId: 'local-circuit', modelName: 'Test Racer', position: 1, fieldSize: 6, prize: 1_200_000, date: makeDate(1980, 4, 1) },
+    ]
+    world.racing.rngState = 999
+
+    saveToStorage(buildSaveData(world), storage)
+    const loaded = loadWorld(DEFAULT_GAME_CONFIG, CATALOG, tryLoadFromStorage(storage)!)
+
+    expect(loaded.racing.pendingEntry).toEqual({ tierId: 'local-circuit', modelId: 'model-1', modelName: 'Test Racer' })
+    expect(loaded.racing.history).toHaveLength(1)
+    expect(loaded.racing.history[0].prize).toBe(1_200_000)
+    expect(loaded.racing.rngState).toBe(999)
+  })
+
+  // Backward compat: a save written before pending entries/history existed must load with no
+  // pending entry and an empty history, not throw - the same optional-field pattern as News (see
+  // save.ts's doc comment on why CURRENT_SCHEMA_VERSION must NOT be bumped for this).
+  it('loads a save missing the racing entry/history fields without throwing', () => {
+    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    const data = buildSaveData(world)
+    delete (data as Partial<typeof data>).racingPendingEntry
+    delete (data as Partial<typeof data>).racingHistory
+    delete (data as Partial<typeof data>).racingRngState
+
+    expect(() => loadWorld(DEFAULT_GAME_CONFIG, CATALOG, data)).not.toThrow()
+    const loaded = loadWorld(DEFAULT_GAME_CONFIG, CATALOG, data)
+    expect(loaded.racing.pendingEntry).toBeNull()
+    expect(loaded.racing.history).toEqual([])
+  })
 })
 
 describe('save slots', () => {

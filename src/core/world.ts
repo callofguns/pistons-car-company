@@ -8,7 +8,7 @@ import { onMarketDayTick, createCompetitorState, type CompetitorState } from './
 import { onMarketingDayTick } from './marketing'
 import { createNewsState, postNews, type NewsState } from './news'
 import { onProductionDayTick } from './production'
-import { createRacingState, type RacingState } from './racing'
+import { createRacingState, onRacingMonthTick, type RacingState } from './racing'
 import { onResearchDayTick, createResearchState, type ResearchState } from './research'
 import { createStaffState, onStaffDayTick, onStaffMonthTick, productionSpeedBonusPercent, type StaffState } from './staff'
 import { createTimeState, tickTime, type TimeState } from './time'
@@ -99,6 +99,20 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
 
     onStaffMonthTick(world.staff, world.bank, world.ledger, today)
     payMandatory(world.bank, world.ledger, config.hqOverheadPerMonth, 'HQOverhead', today)
+
+    // Before the MonthlyReport snapshot below, same reason as everything else in this block - a
+    // race prize (or entry fee, though that's already deducted at enterRace time) should count in
+    // the month it actually landed in.
+    const raceResult = onRacingMonthTick(world.racing, world.vehicles.models, catalog.raceTiers, world.company, world.bank, world.ledger, today)
+    if (raceResult) {
+      postNews(world.news, 'RaceCompleted', today, {
+        modelName: raceResult.modelName,
+        tierId: raceResult.tierId,
+        position: raceResult.position,
+        fieldSize: raceResult.fieldSize,
+        prize: raceResult.prize,
+      })
+    }
 
     // Must read the month's income/expense BEFORE onLedgerMonthTick, which clears
     // monthIncomeByCategory/monthExpenseByCategory for the new month - posting after would report

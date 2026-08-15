@@ -24,6 +24,7 @@ export type NewsEventType =
   | 'MonthlyReport'
   | 'BankruptcyWarning'
   | 'RacingTeamRegistered'
+  | 'RaceCompleted'
 
 export interface NewsEntry {
   id: string

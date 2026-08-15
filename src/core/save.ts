@@ -5,6 +5,7 @@ import { makeDate } from './gameDate'
 import { createNewWorld, type World } from './world'
 import type { CarModel } from './vehicles'
 import type { NewsEntry } from './news'
+import type { RaceResultRecord, RacingState } from './racing'
 
 /** One research node's saved progress. Effects aren't serialized - on load they're re-applied to a fresh TechModifiers from the catalog definition, same as ResearchService.RestoreState did in the C# port. */
 export interface ResearchNodeSaveEntry {
@@ -56,6 +57,12 @@ export interface SaveGameData {
   // to do here (it's a strict === with no migration path, so bumping it silently deletes every
   // existing save). A pre-News save simply loads with an empty feed instead of "Empty Slot".
   news?: NewsEntry[]
+
+  // Same optional-field treatment as `news` above, added for the race-entry/history feature - a
+  // pre-racing save loads with no pending entry and an empty history instead of losing the slot.
+  racingPendingEntry?: RacingState['pendingEntry']
+  racingHistory?: RaceResultRecord[]
+  racingRngState?: number
 }
 
 // Bumped for the classificationTagIds/componentSelections/enginePresetId fields the car design
@@ -110,6 +117,10 @@ export function buildSaveData(world: World): SaveGameData {
     racingTeamName: world.racing.teamName,
 
     news: world.news.entries,
+
+    racingPendingEntry: world.racing.pendingEntry,
+    racingHistory: world.racing.history,
+    racingRngState: world.racing.rngState,
   }
 }
 
@@ -155,6 +166,9 @@ export function loadWorld(config: GameConfig, catalog: Catalog, data: SaveGameDa
 
   world.racing.isRegistered = data.racingRegistered
   world.racing.teamName = data.racingTeamName
+  world.racing.pendingEntry = data.racingPendingEntry ?? null
+  world.racing.history = data.racingHistory ?? []
+  world.racing.rngState = data.racingRngState ?? world.racing.rngState
 
   world.news.entries = data.news ?? []
 

@@ -13,6 +13,7 @@ import { EmployeesScreen } from './EmployeesScreen'
 import { PromotionScreen } from './PromotionScreen'
 import { CompanyScreen } from './CompanyScreen'
 import { TeamCreationScreen } from './TeamCreationScreen'
+import { RaceEntryScreen } from './RaceEntryScreen'
 import { BankScreen } from './BankScreen'
 import { LanguageScreen } from './LanguageScreen'
 import { NewsScreen } from './NewsScreen'
@@ -31,6 +32,7 @@ export const SCREENS: Record<ScreenId, ComponentType> = {
   Promotion: PromotionScreen,
   Company: CompanyScreen,
   TeamCreation: TeamCreationScreen,
+  RaceEntry: RaceEntryScreen,
   Bank: BankScreen,
   Language: LanguageScreen,
   News: NewsScreen,

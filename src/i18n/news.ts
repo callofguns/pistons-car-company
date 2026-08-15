@@ -10,6 +10,11 @@ function researchNodeName(nodeId: string, t: ReturnType<typeof useT>['t']): stri
   return t(`data.research.${nodeId}.name` as MessageKey)
 }
 
+/** Same id-derived shape as researchNodeName above, for race tier names. */
+function raceTierName(tierId: string, t: ReturnType<typeof useT>['t']): string {
+  return t(`data.raceTier.${tierId}.name` as MessageKey)
+}
+
 /** Not a hook - takes the `t`/`fmt` a component already obtained from its own single top-level
  * useT() call, rather than being one itself. NewsScreen calls this once per entry inside a
  * render-time .map(), and calling a hook per list item there would violate React's rules of hooks
@@ -45,6 +50,18 @@ export function renderNewsHeadline(entry: NewsEntry, t: ReturnType<typeof useT>[
       return t('news.bankruptcyWarning', { days: Number(entry.params.daysRemaining) })
     case 'RacingTeamRegistered':
       return t('news.racingTeamRegistered', { teamName: String(entry.params.teamName) })
+    case 'RaceCompleted': {
+      const vars = {
+        modelName: String(entry.params.modelName),
+        tier: raceTierName(String(entry.params.tierId), t),
+        position: Number(entry.params.position),
+        fieldSize: Number(entry.params.fieldSize),
+      }
+      const prize = Number(entry.params.prize)
+      return prize > 0
+        ? t('news.raceCompletedWithPrize', { ...vars, prize: fmt.compact(prize) })
+        : t('news.raceCompletedNoPrize', vars)
+    }
     default: {
       const exhaustive: never = entry.type
       return exhaustive

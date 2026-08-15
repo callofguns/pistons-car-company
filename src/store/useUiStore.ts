@@ -44,6 +44,7 @@ export const SCREEN_TITLE_KEYS: Record<ScreenId, MessageKey> = {
   Company: 'screen.company.title',
   TeamCreation: 'screen.teamCreation.title',
   Bank: 'screen.bank.title',
+  RaceEntry: 'screen.raceEntry.title',
   // Not actually shown - both are in SCREENS_WITHOUT_HUD - but this is a
   // Record<ScreenId, MessageKey>, so every screen needs an entry regardless.
   Language: 'language.screenTitle',

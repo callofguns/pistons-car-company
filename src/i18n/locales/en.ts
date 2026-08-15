@@ -133,6 +133,36 @@ export const en = {
   'team.registered': 'REGISTERED',
   'team.register': 'REGISTER',
   'team.unavailable': 'UNAVAILABLE',
+  'team.pendingEntry': 'Entered {tier} with {model}. Results at the end of the month.',
+  'team.enterRace': 'ENTER A RACE',
+  'team.recentResults': 'Recent Results',
+  'team.noResultsYet': 'No races run yet.',
+  'team.resultRow': '{tier} - {position}/{fieldSize}',
+  'team.resultPrize': '+{prize}',
+  'team.resultNoPrize': 'No prize',
+
+  // race entry screen (ENTER A RACE) - mirrors promotion.* above structurally
+  'race.selectTier': 'Select a Race',
+  'race.noModels': 'No models to enter yet.',
+  'race.confirm': 'ENTER',
+  'race.notEnoughCash': "Not enough cash for this race's entry fee.",
+  'race.entryFee': 'Entry fee',
+  'race.firstPrize': '1st prize',
+  'race.fieldSize': 'Field size',
+  'race.favorsType': 'Favors {type}',
+
+  // race tiers (ENTER A RACE screen) - id-derived key set (data.raceTier.<id>.name), see
+  // tests/dataKeys.test.ts for the walking-test that stands in for compile-time safety here.
+  'data.raceTier.local-circuit.name': 'Local Circuit',
+  'data.raceTier.regional-rally.name': 'Regional Rally',
+  'data.raceTier.national-grand-prix.name': 'National Grand Prix',
+  'data.raceTier.international-endurance.name': 'International Endurance',
+
+  // race news headlines - two variants (with/without prize) so a non-podium finish doesn't read
+  // as "won $0"; see src/i18n/news.ts's RaceCompleted case.
+  'news.raceCompletedWithPrize': '{modelName} finished {position}/{fieldSize} in the {tier} - {prize} prize.',
+  'news.raceCompletedNoPrize': '{modelName} finished {position}/{fieldSize} in the {tier}.',
+
   // Suggested team names for the 🎲 shuffle button - a starting point pre-filled into an editable
   // field, same "suggestion, not fixed data" status as CarDesignScreen's generateDefaultName. Once
   // accepted (registerTeam), the chosen name is persisted as plain free text - see
@@ -563,6 +593,7 @@ export const en = {
   'screen.promotion.title': 'Promotion',
   'screen.company.title': 'Company',
   'screen.teamCreation.title': 'Team Creation',
+  'screen.raceEntry.title': 'Enter a Race',
   'screen.bank.title': 'Finance',
 
   'hud.inDebt': 'IN DEBT',

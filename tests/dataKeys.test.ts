@@ -4,6 +4,7 @@ import { BODIES } from '../src/data/bodies'
 import { ENGINE_PRESETS } from '../src/data/enginePresets'
 import { RESEARCH_NODES } from '../src/data/researchNodes'
 import { DESIGN_STEPS } from '../src/data/designSteps'
+import { RACE_TIERS } from '../src/data/raceTiers'
 import type { MessageKey } from '../src/i18n/keys'
 
 const catalogKeys = new Set(Object.keys(en))
@@ -44,6 +45,10 @@ describe('id-derived i18n keys exist for every data table entry', () => {
     for (const step of DESIGN_STEPS) {
       for (const slot of step.slots) assertKeyExists(`data.designSlot.${slot.id}.label`)
     }
+  })
+
+  it('raceTiers.ts', () => {
+    for (const tier of RACE_TIERS) assertKeyExists(`data.raceTier.${tier.id}.name`)
   })
 
   it('designSteps.ts - option labels, and descriptions where present', () => {

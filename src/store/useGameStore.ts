@@ -17,7 +17,7 @@ import { startResearch as coreStartResearch } from '../core/research'
 import { maxProductionBatch, setBudgetLevel as coreSetBudgetLevel } from '../core/staff'
 import { startCampaign as coreStartCampaign } from '../core/marketing'
 import { markAllNewsRead as coreMarkAllNewsRead, postNews } from '../core/news'
-import { registerTeam as coreRegisterTeam } from '../core/racing'
+import { registerTeam as coreRegisterTeam, enterRace as coreEnterRace } from '../core/racing'
 import { loadSettings } from '../core/settings'
 import { resolveInitialLocale } from '../i18n/locale'
 import { getRumorTemplates } from '../i18n/rumors'
@@ -91,6 +91,9 @@ interface GameStore {
   startCampaign: (modelId: string, tierId: string) => boolean
 
   registerTeam: (teamName: string) => boolean
+  /** Charges the entry fee and commits a pending entry - the race itself resolves automatically
+   * on the next month rollover (see core/world.ts's onRacingMonthTick call). */
+  enterRace: (tierId: string, modelId: string) => boolean
 
   takeLoan: (tierId: string) => boolean
 
@@ -288,8 +291,26 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     registerTeam: (teamName) => {
       const { world, config } = get()
-      const ok = coreRegisterTeam(world.racing, teamName, world.bank, world.time.currentDate.year, config.racingUnlockYear)
+      const ok = coreRegisterTeam(
+        world.racing,
+        teamName,
+        world.bank,
+        world.ledger,
+        world.time.currentDate.year,
+        config.racingUnlockYear,
+        world.time.currentDate,
+      )
       if (ok) postNews(world.news, 'RacingTeamRegistered', world.time.currentDate, { teamName })
+      bump()
+      return ok
+    },
+
+    enterRace: (tierId, modelId) => {
+      const { world, catalog } = get()
+      const tier = catalog.raceTiers.find((t) => t.id === tierId)
+      const model = findModel(world, modelId)
+      if (!tier || !model) return false
+      const ok = coreEnterRace(world.racing, tier, model, world.bank, world.ledger, world.time.currentDate.year, world.time.currentDate)
       bump()
       return ok
     },

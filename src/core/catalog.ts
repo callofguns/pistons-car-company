@@ -3,6 +3,7 @@ import type { ResearchNodeDefinition, ResearchCategory } from './research'
 import type { MarketSegmentDefinition } from './market'
 import type { PromotionTierDefinition } from './marketing'
 import type { RumorTemplateSet } from './company'
+import type { RaceTierDefinition } from './racing'
 
 /** All authored content in one place - the TS equivalent of DefinitionCatalog.cs, just a plain object instead of a ScriptableObject asset. Loaded once from src/data/, never mutated at runtime. */
 export interface Catalog {
@@ -10,6 +11,7 @@ export interface Catalog {
   researchNodes: ResearchNodeDefinition[]
   marketSegments: MarketSegmentDefinition[]
   promotionTiers: PromotionTierDefinition[]
+  raceTiers: RaceTierDefinition[]
   rumorTemplates: RumorTemplateSet
 }
 
