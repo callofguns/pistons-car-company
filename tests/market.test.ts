@@ -47,10 +47,11 @@ const TODAY = makeDate(1974, 1, 1)
 function buildModel(inventory: number) {
   const today = TODAY
   const bank = createBank(1_000_000)
+  const ledger = createLedgerState()
   const vehicles = createVehicleState()
 
   beginNewDesign(vehicles)
-  selectBody(vehicles, body, bank, 1974)
+  selectBody(vehicles, body, bank, ledger, 1974, today)
   setEngineSpec(vehicles, DEFAULT_ENGINE_SPEC)
   setNameAndCategory(vehicles, 'Test Model', 'TEST')
   const model = finalizeDesign(vehicles, [body], new TechModifiers(), today, 1_000_000)

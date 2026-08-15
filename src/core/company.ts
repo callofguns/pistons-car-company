@@ -15,6 +15,9 @@ export interface CompanyState {
   daysInsolvent: number
   /** Soft-fail state: once true, App.tsx shows the bankruptcy overlay instead of the normal game. */
   isBankrupt: boolean
+  /** 1-based index into core/hq.ts's HQLevelDefinition ladder - staff.ts's roster capacity is
+   * gated on this (see hqSlotCap), and world.ts bills the matching level's monthlyOverhead. */
+  hqLevel: number
 }
 
 export function createCompanyState(companyName: string, homeCity: string, populationServed: number): CompanyState {
@@ -29,6 +32,7 @@ export function createCompanyState(companyName: string, homeCity: string, popula
     lifetimeEarnings: 0,
     daysInsolvent: 0,
     isBankrupt: false,
+    hqLevel: 1,
   }
 }
 

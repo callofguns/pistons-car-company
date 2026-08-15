@@ -6,6 +6,7 @@ import { createNewWorld, type World } from './world'
 import type { CarModel } from './vehicles'
 import type { NewsEntry } from './news'
 import type { RaceResultRecord, RacingState } from './racing'
+import type { Employee } from './staff'
 
 /** One research node's saved progress. Effects aren't serialized - on load they're re-applied to a fresh TechModifiers from the catalog definition, same as ResearchService.RestoreState did in the C# port. */
 export interface ResearchNodeSaveEntry {
@@ -42,9 +43,12 @@ export interface SaveGameData {
   researchPoints: number
   researchNodes: ResearchNodeSaveEntry[]
 
-  staffBudgetLevel01: number
-  staffExperienceLevel: number
-  staffExperienceProgress01: number
+  // Superseded by the individual-employee roster below (staffEmployees/staffCandidates) -
+  // buildSaveData no longer writes these, but they stay optional (not removed outright) so an
+  // older save that still has them parses as valid JSON; loadWorld simply never reads them.
+  staffBudgetLevel01?: number
+  staffExperienceLevel?: number
+  staffExperienceProgress01?: number
 
   models: CarModel[]
   tooledBodyIds: string[]
@@ -63,6 +67,14 @@ export interface SaveGameData {
   racingPendingEntry?: RacingState['pendingEntry']
   racingHistory?: RaceResultRecord[]
   racingRngState?: number
+
+  // Same optional-field treatment, added for the individual-employee roster/HQ leveling feature -
+  // a pre-roster save loads with the same default starting roster createStaffState() builds (see
+  // loadWorld) and HQ level 1, rather than losing the slot or landing on an empty payroll.
+  hqLevel?: number
+  staffEmployees?: Employee[]
+  staffCandidates?: Employee[]
+  staffRngState?: number
 }
 
 // Bumped for the classificationTagIds/componentSelections/enginePresetId fields the car design
@@ -106,10 +118,6 @@ export function buildSaveData(world: World): SaveGameData {
       researched: r.researched,
     })),
 
-    staffBudgetLevel01: world.staff.budgetLevel01,
-    staffExperienceLevel: world.staff.experienceLevel,
-    staffExperienceProgress01: world.staff.experienceProgress01,
-
     models: world.vehicles.models,
     tooledBodyIds: world.vehicles.tooledBodyIds,
 
@@ -121,12 +129,17 @@ export function buildSaveData(world: World): SaveGameData {
     racingPendingEntry: world.racing.pendingEntry,
     racingHistory: world.racing.history,
     racingRngState: world.racing.rngState,
+
+    hqLevel: world.company.hqLevel,
+    staffEmployees: world.staff.employees,
+    staffCandidates: world.staff.candidates,
+    staffRngState: world.staff.rngState,
   }
 }
 
 /** Builds a fresh World and restores it to match `data`. */
 export function loadWorld(config: GameConfig, catalog: Catalog, data: SaveGameData): World {
-  const world = createNewWorld(config)
+  const world = createNewWorld(config, catalog)
 
   world.time.currentDate = makeDate(data.year, data.month, data.day)
   world.bank.balance = data.cashBalance
@@ -157,9 +170,15 @@ export function loadWorld(config: GameConfig, catalog: Catalog, data: SaveGameDa
     }
   }
 
-  world.staff.budgetLevel01 = data.staffBudgetLevel01
-  world.staff.experienceLevel = data.staffExperienceLevel
-  world.staff.experienceProgress01 = data.staffExperienceProgress01
+  // A pre-roster save (data.staffEmployees undefined) keeps whatever createNewWorld's own
+  // createStaffState() call already seeded onto world.staff above - the same default starting
+  // roster/candidate pool a brand-new company gets - rather than landing the player on an empty
+  // payroll with no way to hire anyone back.
+  if (data.staffEmployees) world.staff.employees = data.staffEmployees
+  if (data.staffCandidates) world.staff.candidates = data.staffCandidates
+  world.staff.rngState = data.staffRngState ?? world.staff.rngState
+
+  world.company.hqLevel = data.hqLevel ?? 1
 
   world.vehicles.models = data.models
   world.vehicles.tooledBodyIds = data.tooledBodyIds

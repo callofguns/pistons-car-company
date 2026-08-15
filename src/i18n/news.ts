@@ -15,6 +15,11 @@ function raceTierName(tierId: string, t: ReturnType<typeof useT>['t']): string {
   return t(`data.raceTier.${tierId}.name` as MessageKey)
 }
 
+/** Same id-derived shape as researchNodeName above, for HQ level names. */
+function hqLevelName(level: number, t: ReturnType<typeof useT>['t']): string {
+  return t(`data.hqLevel.${level}.name` as MessageKey)
+}
+
 /** Not a hook - takes the `t`/`fmt` a component already obtained from its own single top-level
  * useT() call, rather than being one itself. NewsScreen calls this once per entry inside a
  * render-time .map(), and calling a hook per list item there would violate React's rules of hooks
@@ -62,6 +67,8 @@ export function renderNewsHeadline(entry: NewsEntry, t: ReturnType<typeof useT>[
         ? t('news.raceCompletedWithPrize', { ...vars, prize: fmt.compact(prize) })
         : t('news.raceCompletedNoPrize', vars)
     }
+    case 'HQUpgraded':
+      return t('news.hqUpgraded', { level: hqLevelName(Number(entry.params.level), t) })
     default: {
       const exhaustive: never = entry.type
       return exhaustive

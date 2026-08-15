@@ -14,6 +14,7 @@ const CATEGORY_LABEL_KEY: Record<TransactionCategory, MessageKey> = {
   Sales: 'data.transactionCategory.Sales',
   Staff: 'data.transactionCategory.Staff',
   HQOverhead: 'data.transactionCategory.HQOverhead',
+  HQUpgrade: 'data.transactionCategory.HQUpgrade',
   Production: 'data.transactionCategory.Production',
   Research: 'data.transactionCategory.Research',
   Marketing: 'data.transactionCategory.Marketing',

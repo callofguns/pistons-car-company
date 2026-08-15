@@ -92,6 +92,7 @@ export const en = {
   'data.transactionCategory.Sales': 'Sales',
   'data.transactionCategory.Staff': 'Staff wages',
   'data.transactionCategory.HQOverhead': 'HQ overhead',
+  'data.transactionCategory.HQUpgrade': 'HQ upgrade',
   'data.transactionCategory.Production': 'Production',
   'data.transactionCategory.Research': 'Research',
   'data.transactionCategory.Marketing': 'Marketing',
@@ -101,14 +102,44 @@ export const en = {
   'data.transactionCategory.OverdraftInterest': 'Overdraft interest',
   'data.transactionCategory.Other': 'Other',
 
-  // employees screen
-  'employees.growthTrend': 'Growth trend',
-  'employees.advisorMessage': 'A high budget increases staff and production speed but can lead to corruption and reduced quality.',
+  // employees screen - roster (left) + applicant pool (right), see EmployeesScreen.tsx
   'employees.perMonth': '{amount} / month',
-  'employees.level': '{level}/{max} Level',
-  'employees.maxBatch': 'Max. allowed production batch',
+  'employees.roster': 'Roster ({count}/{cap})',
+  'employees.wageBill': 'Monthly wage bill',
   'employees.prodSpeed': 'Production speed',
+  'employees.researchBonus': 'Research bonus',
   'employees.prodQuality': 'Production quality',
+  'employees.marketingDiscount': 'Marketing discount',
+  'employees.unitCostReduction': 'Unit cost reduction',
+  'employees.noEmployees': 'No one hired yet - pick a candidate from the applicant pool.',
+  'employees.fire': 'FIRE',
+  'employees.applicants': 'Applicants',
+  'employees.atCap': 'Roster is full - upgrade the HQ for more slots.',
+  'employees.noApplicants': 'No applicants right now - check back next month.',
+  'employees.hire': 'HIRE',
+
+  // employee roles (EmployeeRow) - id-derived-style key set, not a MessageKey field on Employee
+  // itself (Employee.role stays a plain string union for save-data simplicity)
+  'data.employeeRole.Engineer': 'Engineer',
+  'data.employeeRole.Assembler': 'Assembler',
+  'data.employeeRole.Designer': 'Designer',
+  'data.employeeRole.Marketer': 'Marketer',
+  'data.employeeRole.Logistician': 'Logistician',
+
+  // employee perks (EmployeeRow's chip + tooltip) - id-derived key set, see
+  // tests/dataKeys.test.ts for the walking-test that stands in for compile-time safety here.
+  'data.employeePerk.negotiator.name': 'Negotiator',
+  'data.employeePerk.negotiator.description': 'Haggles down media rates - extra marketing discount.',
+  'data.employeePerk.prodigy.name': 'Prodigy',
+  'data.employeePerk.prodigy.description': 'Learns twice as fast as anyone else on the team.',
+  'data.employeePerk.mentor.name': 'Mentor',
+  'data.employeePerk.mentor.description': 'Sets the pace for the department - stronger output.',
+  'data.employeePerk.perfectionist.name': 'Perfectionist',
+  'data.employeePerk.perfectionist.description': 'Meticulous work - stronger output, slower to level up.',
+  'data.employeePerk.efficient.name': 'Efficient',
+  'data.employeePerk.efficient.description': 'Cuts waste - extra unit cost reduction.',
+  'data.employeePerk.veteran.name': 'Veteran',
+  'data.employeePerk.veteran.description': 'Years on the job - noticeably stronger output.',
 
   // promotion screen
   'promotion.selectMethod': 'Select Promotion Method',
@@ -157,6 +188,14 @@ export const en = {
   'data.raceTier.regional-rally.name': 'Regional Rally',
   'data.raceTier.national-grand-prix.name': 'National Grand Prix',
   'data.raceTier.international-endurance.name': 'International Endurance',
+
+  // HQ levels (Company screen's HQ panel) - id-derived key set (data.hqLevel.<level>.name), see
+  // tests/dataKeys.test.ts for the walking-test that stands in for compile-time safety here.
+  'data.hqLevel.1.name': 'Garage',
+  'data.hqLevel.2.name': 'Workshop',
+  'data.hqLevel.3.name': 'Factory',
+  'data.hqLevel.4.name': 'Industrial Park',
+  'data.hqLevel.5.name': 'Global HQ',
 
   // race news headlines - two variants (with/without prize) so a non-podium finish doesn't read
   // as "won $0"; see src/i18n/news.ts's RaceCompleted case.
@@ -256,6 +295,14 @@ export const en = {
   'company.earned': 'Earned',
   'company.rumors': 'RUMORS',
   'company.noRumors': 'No rumors yet.',
+  'company.hqTitle': 'Headquarters',
+  'company.hqLevel': 'Level',
+  'company.hqSlots': 'Staff slots',
+  'company.hqOverhead': 'Overhead',
+  'company.hqNextLevel': 'Next: {name} ({slots} slots) - {cost}',
+  'company.hqNotEnoughCash': 'Not enough cash for this upgrade.',
+  'company.hqUpgrade': 'UPGRADE',
+  'company.hqMaxLevel': 'Maximum HQ level reached.',
 
   // bankruptcy overlay
   'bankruptcy.title': 'Company Bankrupt',
@@ -625,6 +672,7 @@ export const en = {
   'news.monthlyReport': 'Monthly report: {income} in, {expense} out.',
   'news.bankruptcyWarning': 'Warning: {days} days left before bankruptcy.',
   'news.racingTeamRegistered': '{teamName} has been registered for competition.',
+  'news.hqUpgraded': 'Headquarters upgraded to {level}.',
 
   // rumor.* - src/i18n/rumors.ts assembles these into a RumorTemplateSet per locale. {person}/
   // {model} are NOT resolved by t() here - they're left as literal placeholders for

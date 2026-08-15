@@ -14,10 +14,17 @@ import {
 } from '../core/save'
 import { takeLoan as coreTakeLoan } from '../core/economy'
 import { startResearch as coreStartResearch } from '../core/research'
-import { maxProductionBatch, setBudgetLevel as coreSetBudgetLevel } from '../core/staff'
+import {
+  hireEmployee as coreHireEmployee,
+  fireEmployee as coreFireEmployee,
+  marketingDiscountPercent,
+  qualityBonusPercent,
+  maxProductionBatch,
+} from '../core/staff'
 import { startCampaign as coreStartCampaign } from '../core/marketing'
 import { markAllNewsRead as coreMarkAllNewsRead, postNews } from '../core/news'
 import { registerTeam as coreRegisterTeam, enterRace as coreEnterRace } from '../core/racing'
+import { upgradeHq as coreUpgradeHq, hqSlotCap } from '../core/hq'
 import { loadSettings } from '../core/settings'
 import { resolveInitialLocale } from '../i18n/locale'
 import { getRumorTemplates } from '../i18n/rumors'
@@ -86,7 +93,13 @@ interface GameStore {
 
   startResearch: (nodeId: string) => boolean
 
-  setBudgetLevel: (level01: number) => void
+  /** Hires a candidate from world.staff.candidates into world.staff.employees - refused once the
+   * roster is at the current HQ level's slot cap (see core/hq.ts's hqSlotCap). */
+  hireEmployee: (candidateId: string) => boolean
+  fireEmployee: (employeeId: string) => void
+  /** Upgrades to the next HQ level, charging its upgradeCost - see core/hq.ts's upgradeHq. Fails
+   * when already at the max level or the cost is unaffordable. */
+  upgradeHq: () => boolean
 
   startCampaign: (modelId: string, tierId: string) => boolean
 
@@ -124,7 +137,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     catalog,
     // Blank and unsaved until the player actually starts or loads a game - Main Menu boots to
     // the title screen regardless of what's in `world`, so there's nothing to accidentally show.
-    world: createNewWorld(config),
+    world: createNewWorld(config, catalog),
     revision: 0,
     activeSlotIndex: null,
 
@@ -146,7 +159,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     startNewGameInSlot: (slotIndex, companyName) => {
-      const world = createNewWorld(get().config, companyName)
+      const world = createNewWorld(get().config, get().catalog, companyName)
       saveToStorage(buildSaveData(world), undefined, slotIndex)
       set((s) => ({ world, activeSlotIndex: slotIndex, revision: s.revision + 1 }))
     },
@@ -161,8 +174,8 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     restartAfterBankruptcy: () => {
-      const { config, world, activeSlotIndex } = get()
-      const freshWorld = createNewWorld(config, world.company.companyName)
+      const { config, catalog, world, activeSlotIndex } = get()
+      const freshWorld = createNewWorld(config, catalog, world.company.companyName)
       const slot = activeSlotIndex ?? 0
       saveToStorage(buildSaveData(freshWorld), undefined, slot)
       set((s) => ({ world: freshWorld, activeSlotIndex: slot, revision: s.revision + 1 }))
@@ -191,7 +204,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const { world, catalog } = get()
       const body = catalog.bodies.find((b) => b.id === bodyId)
       if (!body) return false
-      const ok = coreSelectBody(world.vehicles, body, world.bank, world.time.currentDate.year)
+      const ok = coreSelectBody(world.vehicles, body, world.bank, world.ledger, world.time.currentDate.year, world.time.currentDate)
       bump()
       return ok
     },
@@ -234,6 +247,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         world.research.modifiers,
         world.time.currentDate,
         maxProductionBatch(world.staff),
+        qualityBonusPercent(world.staff, catalog.employeePerks),
       )
       if (model) postNews(world.news, 'ModelReleased', world.time.currentDate, { modelName: model.name, price: model.salePrice })
       bump()
@@ -267,15 +281,31 @@ export const useGameStore = create<GameStore>((set, get) => {
       const { world, catalog } = get()
       const node = catalog.researchNodes.find((n) => n.id === nodeId)
       if (!node) return false
-      const ok = coreStartResearch(world.research, node, world.bank, world.time.currentDate.year)
+      const ok = coreStartResearch(world.research, node, world.bank, world.ledger, world.time.currentDate.year, world.time.currentDate)
       if (ok) notifyResearchProgressed(world, catalog)
       bump()
       return ok
     },
 
-    setBudgetLevel: (level01) => {
-      coreSetBudgetLevel(get().world.staff, level01)
+    hireEmployee: (candidateId) => {
+      const { world, catalog } = get()
+      const ok = coreHireEmployee(world.staff, candidateId, hqSlotCap(catalog.hqLevels, world.company.hqLevel))
       bump()
+      return ok
+    },
+
+    fireEmployee: (employeeId) => {
+      coreFireEmployee(get().world.staff, employeeId)
+      bump()
+    },
+
+    upgradeHq: () => {
+      const { world, catalog } = get()
+      const newLevel = world.company.hqLevel + 1
+      const ok = coreUpgradeHq(world.company, catalog.hqLevels, world.bank, world.ledger, world.time.currentDate)
+      if (ok) postNews(world.news, 'HQUpgraded', world.time.currentDate, { level: newLevel })
+      bump()
+      return ok
     },
 
     startCampaign: (modelId, tierId) => {
@@ -283,7 +313,15 @@ export const useGameStore = create<GameStore>((set, get) => {
       const model = findModel(world, modelId)
       const tier = catalog.promotionTiers.find((t) => t.id === tierId)
       if (!model || !tier) return false
-      const ok = coreStartCampaign(model, tier, world.bank, world.time.currentDate.year)
+      const ok = coreStartCampaign(
+        model,
+        tier,
+        world.bank,
+        world.ledger,
+        world.time.currentDate.year,
+        world.time.currentDate,
+        marketingDiscountPercent(world.staff, catalog.employeePerks),
+      )
       if (ok) postNews(world.news, 'MarketingCampaignStarted', world.time.currentDate, { modelName: model.name })
       bump()
       return ok

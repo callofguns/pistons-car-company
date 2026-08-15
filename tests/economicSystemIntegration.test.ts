@@ -2,8 +2,15 @@ import { describe, expect, it } from 'vitest'
 import { createNewWorld, tickWorld } from '../src/core/world'
 import { DEFAULT_GAME_CONFIG } from '../src/core/gameConfig'
 import { CATALOG } from '../src/data/catalog'
-import { setBudgetLevel } from '../src/core/staff'
+import type { Employee } from '../src/core/staff'
 import { takeLoan } from '../src/core/economy'
+
+/** A deliberately high-salary fixture, bypassing the normal hireEmployee flow (and its HQ slot
+ * cap) - these tests care about "a heavy fixed wage bill" as an input, not about exercising the
+ * hiring UI path itself. */
+function expensiveEmployee(id: string): Employee {
+  return { id, name: 'Test Employee', role: 'Assembler', skill: 5, skillProgress01: 0, perkId: null, monthlySalary: 85_000 }
+}
 
 /**
  * End-to-end checks through the real World/tickWorld path (the same functions the store and UI
@@ -13,8 +20,10 @@ import { takeLoan } from '../src/core/economy'
  */
 describe('economic system, end to end', () => {
   it('a company with no income and maxed-out staff spending eventually goes bankrupt', () => {
-    const world = createNewWorld(DEFAULT_GAME_CONFIG)
-    setBudgetLevel(world.staff, 1) // max headcount/expense, no models to sell means zero income
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
+    // Max headcount/expense (3 employees at a deliberately high salary), no models to sell means
+    // zero income.
+    world.staff.employees = [expensiveEmployee('e1'), expensiveEmployee('e2'), expensiveEmployee('e3')]
 
     let daysElapsed = 0
     while (!world.company.isBankrupt && daysElapsed < 120) {
@@ -28,8 +37,8 @@ describe('economic system, end to end', () => {
   })
 
   it('taking a loan keeps a cash-strapped company solvent through a full monthly payment cycle', () => {
-    const world = createNewWorld(DEFAULT_GAME_CONFIG)
-    setBudgetLevel(world.staff, 1)
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
+    world.staff.employees = [expensiveEmployee('e1'), expensiveEmployee('e2'), expensiveEmployee('e3')]
     // Simulate a company already under pressure, not a fresh $250K start.
     world.bank.balance = 5_000
 

@@ -5,6 +5,8 @@ import { ENGINE_PRESETS } from '../src/data/enginePresets'
 import { RESEARCH_NODES } from '../src/data/researchNodes'
 import { DESIGN_STEPS } from '../src/data/designSteps'
 import { RACE_TIERS } from '../src/data/raceTiers'
+import { HQ_LEVELS } from '../src/data/hqLevels'
+import { EMPLOYEE_PERKS } from '../src/data/employeePerks'
 import type { MessageKey } from '../src/i18n/keys'
 
 const catalogKeys = new Set(Object.keys(en))
@@ -49,6 +51,17 @@ describe('id-derived i18n keys exist for every data table entry', () => {
 
   it('raceTiers.ts', () => {
     for (const tier of RACE_TIERS) assertKeyExists(`data.raceTier.${tier.id}.name`)
+  })
+
+  it('hqLevels.ts', () => {
+    for (const level of HQ_LEVELS) assertKeyExists(`data.hqLevel.${level.level}.name`)
+  })
+
+  it('employeePerks.ts', () => {
+    for (const perk of EMPLOYEE_PERKS) {
+      assertKeyExists(`data.employeePerk.${perk.id}.name`)
+      assertKeyExists(`data.employeePerk.${perk.id}.description`)
+    }
   })
 
   it('designSteps.ts - option labels, and descriptions where present', () => {

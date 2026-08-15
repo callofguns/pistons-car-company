@@ -7,9 +7,13 @@ import {
   toggleClassificationTag,
 } from '../src/core/vehicleService'
 import { createBank } from '../src/core/economy'
+import { createLedgerState } from '../src/core/ledger'
+import { makeDate } from '../src/core/gameDate'
 import { findEnginePreset } from '../src/data/enginePresets'
 import { DESIGN_STEPS } from '../src/data/designSteps'
 import type { BodyStyleDefinition } from '../src/core/vehicles'
+
+const TODAY = makeDate(1974, 1, 1)
 
 const bigBody: BodyStyleDefinition = {
   id: 'big-body',
@@ -37,9 +41,10 @@ describe('selectBody', () => {
   it('seeds every component slot with a default option and a fitting, unlocked engine preset', () => {
     const vehicles = createVehicleState()
     const bank = createBank(1_000_000)
+    const ledger = createLedgerState()
     beginNewDesign(vehicles)
 
-    selectBody(vehicles, bigBody, bank, 1974)
+    selectBody(vehicles, bigBody, bank, ledger, 1974, TODAY)
 
     const session = vehicles.currentSession!
     const totalSlots = DESIGN_STEPS.flatMap((s) => s.slots).length
@@ -54,13 +59,14 @@ describe('selectBody', () => {
   it('re-picks a fitting engine preset when a bigger preset no longer fits a newly selected body', () => {
     const vehicles = createVehicleState()
     const bank = createBank(1_000_000)
+    const ledger = createLedgerState()
     beginNewDesign(vehicles)
 
-    selectBody(vehicles, bigBody, bank, 1974)
+    selectBody(vehicles, bigBody, bank, ledger, 1974, TODAY)
     setEnginePreset(vehicles, 'muscle-v8') // 5.0L - fits the 7L body, would not fit the 1.2L one
     expect(vehicles.currentSession!.engine.displacementLiters).toBe(5.0)
 
-    selectBody(vehicles, smallBody, bank, 1974)
+    selectBody(vehicles, smallBody, bank, ledger, 1974, TODAY)
 
     expect(vehicles.currentSession!.engine.displacementLiters).toBeLessThanOrEqual(smallBody.engineBayCapacityLiters)
     const preset = findEnginePreset(vehicles.currentSession!.enginePresetId!)
@@ -70,11 +76,12 @@ describe('selectBody', () => {
   it('leaves an engine preset untouched when the newly selected body can still fit it', () => {
     const vehicles = createVehicleState()
     const bank = createBank(1_000_000)
+    const ledger = createLedgerState()
     beginNewDesign(vehicles)
 
-    selectBody(vehicles, bigBody, bank, 1974)
+    selectBody(vehicles, bigBody, bank, ledger, 1974, TODAY)
     setEnginePreset(vehicles, 'standard-i4') // 1.6L - fits both bodies
-    selectBody(vehicles, bigBody, bank, 1974) // re-selecting the same body shouldn't reset it
+    selectBody(vehicles, bigBody, bank, ledger, 1974, TODAY) // re-selecting the same body shouldn't reset it
 
     expect(vehicles.currentSession!.enginePresetId).toBe('standard-i4')
   })

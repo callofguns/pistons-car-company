@@ -1,4 +1,6 @@
-import { tryWithdraw, type BankState } from './economy'
+import { tryWithdrawRecorded, type BankState } from './economy'
+import type { LedgerState } from './ledger'
+import type { GameDate } from './gameDate'
 import type { CarModel } from './vehicles'
 import type { MessageKey } from '../i18n/keys'
 
@@ -30,16 +32,27 @@ export function isTierUnlocked(tier: PromotionTierDefinition, currentYear: numbe
   return currentYear >= tier.unlockYear
 }
 
-/** Runs an ad campaign ("LAUNCH MARKETING"). Campaign state lives directly on the CarModel it targets - MarketSimulator reads marketingEfficiencyMultiplier while active to boost daily demand. */
+/** Runs an ad campaign ("LAUNCH MARKETING"). Campaign state lives directly on the CarModel it
+ * targets - MarketSimulator reads marketingEfficiencyMultiplier while active to boost daily
+ * demand. marketingDiscountPercent comes from staff.ts's Marketer aggregate - a strong marketing
+ * team makes every campaign cheaper to run. */
 export function startCampaign(
   model: CarModel,
   tier: PromotionTierDefinition,
   bank: BankState,
+  ledger: LedgerState,
   currentYear: number,
+  today: GameDate,
+  marketingDiscountPercent = 0,
 ): boolean {
   if (!isTierUnlocked(tier, currentYear)) return false
   if (model.marketingActive) return false
-  if (!tryWithdraw(bank, tier.cost)) return false
+  const cost = tier.cost * (1 - Math.min(90, Math.max(0, marketingDiscountPercent)) / 100)
+  // Was a bare tryWithdraw() - campaign spend never touched the ledger, even though 'Marketing'
+  // has always been a real TransactionCategory (ledger.ts) with an already-translated
+  // Finance-screen row (BankScreen.tsx) that simply never lit up. Same bug as registerTeam's
+  // (core/racing.ts) and now startResearch's/selectBody's.
+  if (!tryWithdrawRecorded(bank, ledger, cost, 'Marketing', today)) return false
 
   model.marketingActive = true
   model.marketingDaysRemaining = tier.durationDays

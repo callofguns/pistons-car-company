@@ -7,6 +7,7 @@ import { createVehicleState, beginNewDesign, selectBody, setEngineSpec, setNameA
 import { DEFAULT_ENGINE_SPEC } from '../src/core/vehicles'
 import { TechModifiers } from '../src/core/techModifiers'
 import { createBank } from '../src/core/economy'
+import { createLedgerState } from '../src/core/ledger'
 import type { BodyStyleDefinition } from '../src/core/vehicles'
 
 const body: BodyStyleDefinition = {
@@ -25,8 +26,9 @@ const body: BodyStyleDefinition = {
 function buildWinningModel() {
   const vehicles = createVehicleState()
   const bank = createBank(1_000_000)
+  const ledger = createLedgerState()
   beginNewDesign(vehicles)
-  selectBody(vehicles, body, bank, 1980)
+  selectBody(vehicles, body, bank, ledger, 1980, makeDate(1980, 1, 1))
   setEngineSpec(vehicles, DEFAULT_ENGINE_SPEC)
   setNameAndCategory(vehicles, 'Test Racer', 'TEST')
   const model = finalizeDesign(vehicles, [body], new TechModifiers(), makeDate(1980, 1, 1), 1_000_000)
@@ -46,7 +48,7 @@ function buildWinningModel() {
  */
 describe('racing events - integration through advanceOneDay', () => {
   it('resolves a pending entry on the next day===1 rollover, posts exactly one RaceCompleted entry, and counts the prize in that month\'s MonthlyReport income', () => {
-    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
     const tier = CATALOG.raceTiers[0]
     const model = buildWinningModel()
     world.vehicles.models.push(model)
@@ -76,7 +78,7 @@ describe('racing events - integration through advanceOneDay', () => {
   })
 
   it('does not resolve a pending entry on a non-day-1 tick', () => {
-    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
     const tier = CATALOG.raceTiers[0]
     const model = buildWinningModel()
     world.vehicles.models.push(model)
@@ -92,7 +94,7 @@ describe('racing events - integration through advanceOneDay', () => {
   })
 
   it('does not post a RaceCompleted entry, or crash, when there is no pending entry', () => {
-    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
     advanceOneDay(world, CATALOG, DEFAULT_GAME_CONFIG, makeDate(1980, 4, 1))
     expect(world.news.entries.some((e) => e.type === 'RaceCompleted')).toBe(false)
   })

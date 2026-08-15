@@ -1,4 +1,6 @@
-import { tryWithdraw, canAfford, type BankState } from './economy'
+import { tryWithdrawRecorded, canAfford, type BankState } from './economy'
+import type { LedgerState } from './ledger'
+import type { GameDate } from './gameDate'
 import { TechModifiers, type TechEffect } from './techModifiers'
 
 /** The six research tabs in the reference's left-hand sidebar, in display order. */
@@ -89,13 +91,19 @@ export function startResearch(
   research: ResearchState,
   node: ResearchNodeDefinition,
   bank: BankState,
+  ledger: LedgerState,
   currentYear: number,
+  today: GameDate,
 ): boolean {
   if (!canStartResearch(research, node, bank, currentYear)) return false
 
   const isBreakthrough = getNodeState(research, node, currentYear) === 'AvailableBreakthrough'
   const moneyCost = currentMoneyCost(research, node, currentYear)
-  if (!tryWithdraw(bank, moneyCost)) return false
+  // Was a bare tryWithdraw() - research spend never touched the ledger, even though 'Research'
+  // has always been a real TransactionCategory (ledger.ts) with an already-translated
+  // Finance-screen row (BankScreen.tsx) that simply never lit up. Same bug as registerTeam's
+  // (core/racing.ts) and now startCampaign's/selectBody's.
+  if (!tryWithdrawRecorded(bank, ledger, moneyCost, 'Research', today)) return false
 
   research.points -= node.scienceCost
 

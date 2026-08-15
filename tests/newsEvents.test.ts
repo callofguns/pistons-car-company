@@ -14,7 +14,7 @@ import { recordTransaction } from '../src/core/ledger'
  */
 describe('news events - integration through advanceOneDay', () => {
   it('MonthlyReport captures non-zero income and expense - pins the ordering requirement that it posts BEFORE onLedgerMonthTick clears the month buckets', () => {
-    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
     const day1 = makeDate(1971, 3, 1)
     recordTransaction(world.ledger, 'Sales', 12_000, day1)
 
@@ -33,7 +33,7 @@ describe('news events - integration through advanceOneDay', () => {
   })
 
   it('posts exactly one ResearchCompleted entry when a node finishes, not one per day while it stays researched', () => {
-    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
     const node = CATALOG.researchNodes[0]
     world.research.nodeRuntime[node.id] = { started: true, isBreakthrough: false, progress01: 0.999999, researched: false }
 
@@ -47,7 +47,7 @@ describe('news events - integration through advanceOneDay', () => {
   })
 
   it('stores the nodeId, not a resolved display name, in a ResearchCompleted entry', () => {
-    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
     const node = CATALOG.researchNodes[0]
     world.research.nodeRuntime[node.id] = { started: true, isBreakthrough: false, progress01: 0.999999, researched: false }
 
@@ -58,7 +58,7 @@ describe('news events - integration through advanceOneDay', () => {
   })
 
   it('fires BankruptcyWarning exactly twice over a full insolvency episode - entering the red, and again near the grace-day deadline - with no per-day spam in between', () => {
-    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
     world.bank.balance = DEFAULT_GAME_CONFIG.bankruptcyBalanceThreshold - 1
 
     let day = makeDate(1971, 3, 1)
@@ -73,7 +73,7 @@ describe('news events - integration through advanceOneDay', () => {
   })
 
   it('does not fire BankruptcyWarning at all for a company that stays solvent', () => {
-    const world = createNewWorld(DEFAULT_GAME_CONFIG)
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
     advanceOneDay(world, CATALOG, DEFAULT_GAME_CONFIG, makeDate(1971, 3, 15))
     expect(world.news.entries.some((e) => e.type === 'BankruptcyWarning')).toBe(false)
   })

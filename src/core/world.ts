@@ -10,7 +10,16 @@ import { createNewsState, postNews, type NewsState } from './news'
 import { onProductionDayTick } from './production'
 import { createRacingState, onRacingMonthTick, type RacingState } from './racing'
 import { onResearchDayTick, createResearchState, type ResearchState } from './research'
-import { createStaffState, onStaffDayTick, onStaffMonthTick, productionSpeedBonusPercent, type StaffState } from './staff'
+import {
+  createStaffState,
+  onStaffDayTick,
+  onStaffMonthTick,
+  productionSpeedBonusPercent,
+  researchPointsBonus,
+  unitCostReductionPercent,
+  type StaffState,
+} from './staff'
+import { hqMonthlyOverhead } from './hq'
 import { createTimeState, tickTime, type TimeState } from './time'
 import { resolveBody, createVehicleState, type VehicleState } from './vehicleService'
 
@@ -35,7 +44,7 @@ export interface World {
   racing: RacingState
 }
 
-export function createNewWorld(config: GameConfig, companyName?: string): World {
+export function createNewWorld(config: GameConfig, catalog: Catalog, companyName?: string): World {
   const startDate = makeDate(config.startYear, config.startMonth, config.startDay)
 
   return {
@@ -46,7 +55,7 @@ export function createNewWorld(config: GameConfig, companyName?: string): World 
     rumors: createRumorState(),
     news: createNewsState(),
     research: createResearchState(config.startingResearchPoints),
-    staff: createStaffState(),
+    staff: createStaffState(catalog.employeeNames, catalog.employeePerks),
     vehicles: createVehicleState(),
     competitors: createCompetitorState(config.startingCompetitorDailyVolume),
     racing: createRacingState(),
@@ -55,11 +64,22 @@ export function createNewWorld(config: GameConfig, companyName?: string): World 
 
 /** Fixed daily tick order: research unlocks feed design, staff sets capacity, production fills stock, marketing/market sell it, then the financial-risk checks (overdraft interest, bankruptcy) run last so they see the day's final balance. Mirrors SimulationRunner.cs's system order exactly, extended with the new financial-risk systems. HQ overhead and staff wages are billed once a month (see the day===1 block below), not prorated daily. */
 export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig, today: GameDate): void {
-  const completedResearch = onResearchDayTick(world.research, catalog.researchNodes, config.researchPointsPerDay)
+  const completedResearch = onResearchDayTick(
+    world.research,
+    catalog.researchNodes,
+    config.researchPointsPerDay + researchPointsBonus(world.staff, catalog.employeePerks),
+  )
   for (const nodeId of completedResearch) postNews(world.news, 'ResearchCompleted', today, { nodeId })
 
-  onStaffDayTick(world.staff)
-  onProductionDayTick(world.vehicles.models, world.bank, world.ledger, today, productionSpeedBonusPercent(world.staff))
+  onStaffDayTick(world.staff, catalog.employeePerks)
+  onProductionDayTick(
+    world.vehicles.models,
+    world.bank,
+    world.ledger,
+    today,
+    productionSpeedBonusPercent(world.staff, catalog.employeePerks),
+    unitCostReductionPercent(world.staff, catalog.employeePerks),
+  )
 
   const endedCampaigns = onMarketingDayTick(world.vehicles.models)
   for (const model of endedCampaigns) postNews(world.news, 'MarketingCampaignEnded', today, { modelName: model.name })
@@ -97,8 +117,8 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
       }
     }
 
-    onStaffMonthTick(world.staff, world.bank, world.ledger, today)
-    payMandatory(world.bank, world.ledger, config.hqOverheadPerMonth, 'HQOverhead', today)
+    onStaffMonthTick(world.staff, catalog.employeeNames, catalog.employeePerks, world.bank, world.ledger, today)
+    payMandatory(world.bank, world.ledger, hqMonthlyOverhead(catalog.hqLevels, world.company.hqLevel), 'HQOverhead', today)
 
     // Before the MonthlyReport snapshot below, same reason as everything else in this block - a
     // race prize (or entry fee, though that's already deducted at enterRace time) should count in

@@ -25,6 +25,7 @@ export type NewsEventType =
   | 'BankruptcyWarning'
   | 'RacingTeamRegistered'
   | 'RaceCompleted'
+  | 'HQUpgraded'
 
 export interface NewsEntry {
   id: string

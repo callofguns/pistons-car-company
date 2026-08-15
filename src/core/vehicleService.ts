@@ -1,5 +1,6 @@
 import { calculateCarSpecs, type DesignChoices } from './carSpecsCalculator'
-import { tryWithdraw, type BankState } from './economy'
+import { tryWithdrawRecorded, type BankState } from './economy'
+import type { LedgerState } from './ledger'
 import type { TechModifiers } from './techModifiers'
 import {
   createDesignSession,
@@ -67,11 +68,22 @@ function defaultEnginePresetFor(body: BodyStyleDefinition, currentYear: number) 
 /** Selects a body for the current session, charging the one-time tooling cost the first time this
  * body is used, and seeding sane defaults (first option in every component slot, a best-fit
  * preset engine) so the rest of the wizard has valid values to preview immediately. */
-export function selectBody(vehicles: VehicleState, body: BodyStyleDefinition, bank: BankState, currentYear: number): boolean {
+export function selectBody(
+  vehicles: VehicleState,
+  body: BodyStyleDefinition,
+  bank: BankState,
+  ledger: LedgerState,
+  currentYear: number,
+  today: GameDate,
+): boolean {
   if (!vehicles.currentSession) beginNewDesign(vehicles)
 
   if (!isBodyTooled(vehicles, body.id)) {
-    if (!tryWithdraw(bank, body.productionEquipmentCost)) return false
+    // Was a bare tryWithdraw() - tooling spend never touched the ledger, even though 'Production'
+    // has always been a real TransactionCategory (ledger.ts) with an already-translated
+    // Finance-screen row (BankScreen.tsx) that simply never lit up for this charge. Same bug as
+    // registerTeam's (core/racing.ts) and now startCampaign's/startResearch's.
+    if (!tryWithdrawRecorded(bank, ledger, body.productionEquipmentCost, 'Production', today)) return false
     vehicles.tooledBodyIds.push(body.id)
   }
 
@@ -192,13 +204,17 @@ function nextModelId(): string {
   return `model-${Date.now().toString(36)}-${modelIdCounter}`
 }
 
-/** Completes the wizard, creating a sellable CarModel from the session in progress. */
+/** Completes the wizard, creating a sellable CarModel from the session in progress.
+ * qualityBonusPercent comes from staff.ts's Designer aggregate - a strong design team ships a
+ * more reliable car straight off the line, applied as a one-time nudge to the freshly calculated
+ * reliabilityPercent (calculateCarSpecs' own ceiling is 99, see carSpecsCalculator.ts). */
 export function finalizeDesign(
   vehicles: VehicleState,
   bodies: BodyStyleDefinition[],
   tech: TechModifiers,
   today: GameDate,
   maxProductionBatch: number,
+  qualityBonusPercent = 0,
 ): CarModel | null {
   const session = vehicles.currentSession
   if (!session || !session.selectedBodyId || !session.name.trim()) return null
@@ -207,6 +223,9 @@ export function finalizeDesign(
   if (!body) return null
 
   const stats = calculateCarSpecs(body, session.engine, tech, resolveDesignChoices(session))
+  if (qualityBonusPercent > 0) {
+    stats.reliabilityPercent = Math.min(99, stats.reliabilityPercent + qualityBonusPercent)
+  }
   const model: CarModel = {
     id: nextModelId(),
     name: session.name,
