@@ -4,11 +4,12 @@ import { applyOverdraftInterest, checkBankruptcy, createBank, onLoanMonthTick, p
 import type { GameConfig } from './gameConfig'
 import { makeDate, type GameDate } from './gameDate'
 import { createLedgerState, monthTotalExpense, monthTotalIncome, onLedgerMonthTick, type LedgerState } from './ledger'
-import { onMarketDayTick, createCompetitorState, type CompetitorState } from './market'
+import { onMarketDayTick, createCompetitorState, growReach, type CompetitorState, type MarketConditions } from './market'
 import { onMarketingDayTick } from './marketing'
 import { createNewsState, postNews, type NewsState } from './news'
-import { onProductionDayTick } from './production'
 import { isInDevelopment, onDevelopmentDayTick } from './development'
+import { autoAssignReleasedModel, carsOnOrder, createFactoryState, onFactoryDayTick, onFactoryMonthTick, type FactoryState } from './factory'
+import { difficultySettings } from './difficulty'
 import { createRacingState, onRacingMonthTick, type RacingState } from './racing'
 import { onResearchDayTick, createResearchState, type ResearchState } from './research'
 import {
@@ -21,6 +22,7 @@ import {
   type StaffState,
 } from './staff'
 import { hqMonthlyOverhead } from './hq'
+import type { Difficulty } from './difficulty'
 import { createTimeState, tickTime, type TimeState } from './time'
 import { resolveBody, createVehicleState, type VehicleState } from './vehicleService'
 
@@ -43,31 +45,46 @@ export interface World {
   vehicles: VehicleState
   competitors: CompetitorState
   racing: RacingState
+  factory: FactoryState
 }
 
-export function createNewWorld(config: GameConfig, catalog: Catalog, companyName?: string): World {
+export function createNewWorld(config: GameConfig, catalog: Catalog, companyName?: string, difficulty: Difficulty = 'normal'): World {
   const startDate = makeDate(config.startYear, config.startMonth, config.startDay)
 
   return {
     time: createTimeState(startDate, config.secondsPerDay),
     bank: createBank(config.startingCapital),
     ledger: createLedgerState(),
-    company: createCompanyState(companyName ?? config.defaultCompanyName, config.defaultHomeCity, config.startingPopulation),
+    company: createCompanyState(companyName ?? config.defaultCompanyName, config.defaultHomeCity, config.startingPopulation, difficulty),
     rumors: createRumorState(),
     news: createNewsState(),
     research: createResearchState(config.startingResearchPoints),
     staff: createStaffState(catalog.employeeNames, catalog.employeePerks),
     vehicles: createVehicleState(),
-    competitors: createCompetitorState(config.startingCompetitorDailyVolume),
+    competitors: createCompetitorState(),
     racing: createRacingState(),
+    factory: createFactoryState(),
+  }
+}
+
+/** Today's market conditions: difficulty plus (later) history events and per-model factors. */
+export function marketConditionsFor(world: World): MarketConditions {
+  return {
+    demandMultiplier: difficultySettings(world.company.difficulty).demandMultiplier,
+    fuelEconomyWeightMultiplier: 1,
+    powerWeightMultiplier: 1,
+    classDemandMultiplier: {},
+    modelMultiplier: () => 1,
   }
 }
 
 /** Fixed daily tick order: research (points only while a car is in development) and development
- * countdowns first, then staff sets capacity, production fills stock, marketing/market sell it,
- * then the financial-risk checks (overdraft interest, bankruptcy) run last so they see the day's
- * final balance. Mirrors SimulationRunner.cs's system order exactly, extended with the new financial-risk systems. HQ overhead and staff wages are billed once a month (see the day===1 block below), not prorated daily. */
+ * countdowns first, then staff, the factory builds cars, marketing/market sell them, then the
+ * financial-risk checks (overdraft interest, bankruptcy) run last so they see the day's final
+ * balance. Monthly bills (wages, HQ overhead, line upkeep, storage, loans) land on day 1. */
 export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig, today: GameDate): void {
+  const difficulty = difficultySettings(world.company.difficulty)
+
   // Research points are earned only on days when at least one car is in development (Engineers
   // raise the rate) - researching itself keeps progressing either way.
   const developing = world.vehicles.models.some(isInDevelopment)
@@ -76,19 +93,23 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
   for (const nodeId of completedResearch) postNews(world.news, 'ResearchCompleted', today, { nodeId })
 
   for (const model of onDevelopmentDayTick(world.vehicles.models)) {
+    // A newly released model goes straight onto an idle line, if any - the player still decides
+    // how many to build.
+    autoAssignReleasedModel(world.factory, model.id)
     postNews(world.news, 'ModelReleased', today, { modelName: model.name, price: model.salePrice })
   }
 
   onStaffDayTick(world.staff, catalog.employeePerks)
-  onProductionDayTick(
-    world.vehicles.models,
-    world.bank,
-    world.ledger,
-    today,
-    productionSpeedBonusPercent(world.staff, catalog.employeePerks),
-    unitCostReductionPercent(world.staff, catalog.employeePerks),
-  )
+  const built = onFactoryDayTick(world.factory, world.vehicles.models, world.bank, world.ledger, today, {
+    speedMultiplier: 1 + productionSpeedBonusPercent(world.staff, catalog.employeePerks) / 100,
+    unitCostMultiplier: difficulty.costMultiplier * (1 - Math.min(90, unitCostReductionPercent(world.staff, catalog.employeePerks)) / 100),
+  })
+  for (const model of world.vehicles.models) if (built.has(model.id)) model.outOfStockNotified = false
 
+  // Ad campaigns spread the word every day they run.
+  for (const model of world.vehicles.models) {
+    if (model.marketingActive) growReach(world.company, model.marketingReachPerDay ?? 0)
+  }
   const endedCampaigns = onMarketingDayTick(world.vehicles.models)
   for (const model of endedCampaigns) postNews(world.news, 'MarketingCampaignEnded', today, { modelName: model.name })
 
@@ -102,15 +123,15 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
     today,
     world.company,
     world.competitors,
+    marketConditionsFor(world),
   )
 
   world.vehicles.models.forEach((model, i) => {
     if (model.totalSold > soldBefore[i]) {
       postSaleRumor(world.rumors, catalog.rumorTemplates, world.company, model)
-      // Free to check here (already iterating with before/after totals in hand) rather than a
-      // second pass - only fires once, the tick totalSold crosses plannedProductionRun, since
-      // soldBefore[i] < plannedProductionRun is only true the one time that happens.
-      if (model.totalSold >= model.plannedProductionRun && soldBefore[i] < model.plannedProductionRun) {
+      // Ran out today with nothing more on order: tell the player once per empty spell.
+      if (model.inventory === 0 && carsOnOrder(world.factory, model.id) === 0 && !model.outOfStockNotified) {
+        model.outOfStockNotified = true
         postNews(world.news, 'ModelSoldOut', today, { modelName: model.name })
       }
     }
@@ -125,8 +146,9 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
       }
     }
 
-    onStaffMonthTick(world.staff, catalog.employeeNames, catalog.employeePerks, world.bank, world.ledger, today)
-    payMandatory(world.bank, world.ledger, hqMonthlyOverhead(catalog.hqLevels, world.company.hqLevel), 'HQOverhead', today)
+    onStaffMonthTick(world.staff, catalog.employeeNames, catalog.employeePerks, world.bank, world.ledger, today, difficulty.costMultiplier)
+    payMandatory(world.bank, world.ledger, hqMonthlyOverhead(catalog.hqLevels, world.company.hqLevel) * difficulty.costMultiplier, 'HQOverhead', today)
+    onFactoryMonthTick(world.factory, world.vehicles.models, world.bank, world.ledger, today, difficulty.costMultiplier)
 
     // Before the MonthlyReport snapshot below, same reason as everything else in this block - a
     // race prize (or entry fee, though that's already deducted at enterRace time) should count in
@@ -152,7 +174,7 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
     onLedgerMonthTick(world.ledger)
   }
 
-  applyOverdraftInterest(world.bank, world.ledger, config.overdraftDailyInterestRate, today)
+  applyOverdraftInterest(world.bank, world.ledger, config.overdraftDailyInterestRate * difficulty.interestMultiplier, today)
 
   const wasInsolvent = world.company.daysInsolvent
   checkBankruptcy(world.bank, world.company, config.bankruptcyBalanceThreshold, config.bankruptcyGraceDays)

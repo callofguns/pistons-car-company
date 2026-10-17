@@ -2,9 +2,11 @@ import { Check, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
-import { clearStorage, listSlots, type SaveGameData } from '../core/save'
+import { clearStorage, listSlotInfo, type SlotInfo } from '../core/save'
+import type { Difficulty } from '../core/difficulty'
 import { makeDate } from '../core/gameDate'
 import { useT } from '../i18n/useT'
+import type { MessageKey } from '../i18n/keys'
 import { Button, Heading } from '../components/Primitives'
 import { BackButton } from '../components/BackButton'
 import styles from './screen.module.css'
@@ -13,6 +15,7 @@ import slotStyles from './SaveSlotsScreen.module.css'
 interface NewGamePayload {
   mode: 'new'
   pendingCompanyName: string
+  difficulty: Difficulty
 }
 
 function asNewGamePayload(payload: unknown): NewGamePayload | null {
@@ -42,12 +45,12 @@ export function SaveSlotsScreen() {
   const [confirmingIndex, setConfirmingIndex] = useState<number | null>(null)
   const [deletingIndex, setDeletingIndex] = useState<number | null>(null)
 
-  const slots = listSlots()
+  const slots = listSlotInfo()
 
-  const handleSlotClick = (index: number, data: SaveGameData | null) => {
+  const handleSlotClick = (index: number, slot: SlotInfo) => {
     if (newGame) {
-      if (data === null || confirmingIndex === index) {
-        startNewGameInSlot(index, newGame.pendingCompanyName)
+      if (slot.kind !== 'save' || confirmingIndex === index) {
+        startNewGameInSlot(index, newGame.pendingCompanyName, newGame.difficulty ?? 'normal')
         goHome('OfficeHub')
         return
       }
@@ -55,7 +58,7 @@ export function SaveSlotsScreen() {
       return
     }
 
-    if (data === null) return // nothing to continue in an empty slot
+    if (slot.kind !== 'save') return // nothing playable in this slot
     if (loadSlot(index)) goHome('OfficeHub')
   }
 
@@ -80,34 +83,41 @@ export function SaveSlotsScreen() {
       )}
 
       <div className={slotStyles.list}>
-        {slots.map((data, index) => {
-          const empty = data === null
+        {slots.map((slot, index) => {
+          const data = slot.kind === 'save' ? slot.data : null
+          const deletable = !newGame && slot.kind !== 'empty'
+          const deleteName = data ? data.companyName : t('saveSlots.oldSave')
           return (
             <div key={index} className={slotStyles.row}>
               <button
                 type="button"
                 className={slotStyles.slot}
-                disabled={!newGame && empty}
-                onClick={() => handleSlotClick(index, data)}
+                disabled={!newGame && slot.kind !== 'save'}
+                onClick={() => handleSlotClick(index, slot)}
               >
-                {empty ? (
-                  <span className={slotStyles.empty}>{t('saveSlots.emptySlot')}</span>
-                ) : (
+                {slot.kind === 'empty' && <span className={slotStyles.empty}>{t('saveSlots.emptySlot')}</span>}
+                {slot.kind === 'old' && (
+                  <>
+                    <span className={slotStyles.name}>{t('saveSlots.oldVersion')}</span>
+                    <span className={slotStyles.meta}>{t('saveSlots.oldVersionHint')}</span>
+                  </>
+                )}
+                {data && (
                   <>
                     <span className={slotStyles.name}>{data.companyName}</span>
                     <span className={slotStyles.meta}>
-                      {fmt.date(makeDate(data.year, data.month, data.day))} · {fmt.money(data.cashBalance)}
+                      {fmt.date(makeDate(data.year, data.month, data.day))} · {fmt.money(data.cashBalance)} · {t(`difficulty.${data.difficulty}` as MessageKey)}
                     </span>
                     {confirmingIndex === index && <span className={slotStyles.confirm}>{t('saveSlots.tapAgainToOverwrite')}</span>}
                   </>
                 )}
               </button>
-              {!newGame && !empty && (
+              {deletable && (
                 <button
                   type="button"
                   className={`${slotStyles.deleteButton} ${deletingIndex === index ? slotStyles.deleteConfirming : ''}`}
                   onClick={() => handleDeleteClick(index)}
-                  aria-label={t(deletingIndex === index ? 'saveSlots.confirmDelete' : 'saveSlots.delete', { name: data.companyName })}
+                  aria-label={t(deletingIndex === index ? 'saveSlots.confirmDelete' : 'saveSlots.delete', { name: deleteName })}
                 >
                   {deletingIndex === index ? <Check size={18} strokeWidth={3} /> : <Trash2 size={18} />}
                 </button>

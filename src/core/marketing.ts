@@ -25,6 +25,8 @@ export interface PromotionTierDefinition {
   cost: number
   efficiencyMultiplier: number
   durationDays: number
+  /** New people who hear about the company per day while the campaign runs. */
+  reachPerDay: number
   unlockYear: number
 }
 
@@ -57,6 +59,7 @@ export function startCampaign(
   model.marketingActive = true
   model.marketingDaysRemaining = tier.durationDays
   model.marketingEfficiencyMultiplier = tier.efficiencyMultiplier
+  model.marketingReachPerDay = tier.reachPerDay
   return true
 }
 
@@ -71,6 +74,7 @@ export function onMarketingDayTick(models: CarModel[]): CarModel[] {
     if (model.marketingDaysRemaining <= 0) {
       model.marketingActive = false
       model.marketingEfficiencyMultiplier = 1
+      model.marketingReachPerDay = 0
       justEnded.push(model)
     }
   }

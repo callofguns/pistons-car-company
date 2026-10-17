@@ -19,18 +19,24 @@ import {
   fireEmployee as coreFireEmployee,
   marketingDiscountPercent,
   qualityBonusPercent,
-  maxProductionBatch,
 } from '../core/staff'
 import { startCampaign as coreStartCampaign } from '../core/marketing'
 import { markAllNewsRead as coreMarkAllNewsRead, postNews } from '../core/news'
 import { registerTeam as coreRegisterTeam, enterRace as coreEnterRace } from '../core/racing'
 import { upgradeHq as coreUpgradeHq, hqSlotCap } from '../core/hq'
+import {
+  addOrder as coreAddOrder,
+  assignModel as coreAssignModel,
+  buildLine as coreBuildLine,
+  clearOrder as coreClearOrder,
+  upgradeLine as coreUpgradeLine,
+} from '../core/factory'
+import { difficultySettings, type Difficulty } from '../core/difficulty'
 import { DEFAULT_LOCALE } from '../i18n/locale'
 import { getRumorTemplates } from '../i18n/rumors'
 import {
   beginNewDesign as coreBeginNewDesign,
   beginRestyling as coreBeginRestyling,
-  extendProductionRun as coreExtendProductionRun,
   finalizeDesign as coreFinalizeDesign,
   previewCurrentStats as corePreviewCurrentStats,
   selectBody as coreSelectBody,
@@ -61,7 +67,7 @@ interface GameStore {
   saveNow: () => void
   /** Starts a brand-new company in the given slot (overwriting whatever was there) and makes it
    * the active game. Used by the Company Naming / Save Slots screens. */
-  startNewGameInSlot: (slotIndex: number, companyName: string) => void
+  startNewGameInSlot: (slotIndex: number, companyName: string, difficulty: Difficulty) => void
   /** Loads a slot's save into play. Returns false (and leaves the current game untouched) if that
    * slot turns out to be empty or incompatible - shouldn't happen from the Save Slots screen,
    * which only offers slots listSlots() already confirmed are loadable, but this stays safe either way. */
@@ -88,7 +94,12 @@ interface GameStore {
 
   setOnSale: (modelId: string, onSale: boolean) => void
   setSalePrice: (modelId: string, price: number) => void
-  extendProductionRun: (modelId: string, additionalUnits: number) => void
+  /** Factory actions - see core/factory.ts. */
+  assignLineModel: (lineId: string, modelId: string | null) => void
+  addLineOrder: (lineId: string, cars: number) => boolean
+  clearLineOrder: (lineId: string) => void
+  buildLine: () => boolean
+  upgradeLine: (lineId: string) => boolean
 
   startResearch: (nodeId: string) => boolean
 
@@ -152,8 +163,8 @@ export const useGameStore = create<GameStore>((set, get) => {
       saveToStorage(buildSaveData(world), undefined, activeSlotIndex)
     },
 
-    startNewGameInSlot: (slotIndex, companyName) => {
-      const world = createNewWorld(get().config, get().catalog, companyName)
+    startNewGameInSlot: (slotIndex, companyName, difficulty) => {
+      const world = createNewWorld(get().config, get().catalog, companyName, difficulty)
       saveToStorage(buildSaveData(world), undefined, slotIndex)
       set((s) => ({ world, activeSlotIndex: slotIndex, revision: s.revision + 1 }))
     },
@@ -169,7 +180,7 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     restartAfterBankruptcy: () => {
       const { config, catalog, world, activeSlotIndex } = get()
-      const freshWorld = createNewWorld(config, catalog, world.company.companyName)
+      const freshWorld = createNewWorld(config, catalog, world.company.companyName, world.company.difficulty)
       const slot = activeSlotIndex ?? 0
       saveToStorage(buildSaveData(freshWorld), undefined, slot)
       set((s) => ({ world: freshWorld, activeSlotIndex: slot, revision: s.revision + 1 }))
@@ -240,7 +251,6 @@ export const useGameStore = create<GameStore>((set, get) => {
         catalog.bodies,
         world.research.modifiers,
         world.time.currentDate,
-        maxProductionBatch(world.staff),
         qualityBonusPercent(world.staff, catalog.employeePerks),
       )
       if (model) {
@@ -270,10 +280,34 @@ export const useGameStore = create<GameStore>((set, get) => {
       bump()
     },
 
-    extendProductionRun: (modelId, additionalUnits) => {
-      const model = findModel(get().world, modelId)
-      if (model) coreExtendProductionRun(model, additionalUnits)
+    assignLineModel: (lineId, modelId) => {
+      coreAssignModel(get().world.factory, lineId, modelId)
       bump()
+    },
+
+    addLineOrder: (lineId, cars) => {
+      const ok = coreAddOrder(get().world.factory, lineId, cars)
+      bump()
+      return ok
+    },
+
+    clearLineOrder: (lineId) => {
+      coreClearOrder(get().world.factory, lineId)
+      bump()
+    },
+
+    buildLine: () => {
+      const { world } = get()
+      const ok = coreBuildLine(world.factory, world.company.hqLevel, world.bank, world.ledger, world.time.currentDate) !== null
+      bump()
+      return ok
+    },
+
+    upgradeLine: (lineId) => {
+      const { world } = get()
+      const ok = coreUpgradeLine(world.factory, lineId, world.bank, world.ledger, world.time.currentDate)
+      bump()
+      return ok
     },
 
     startResearch: (nodeId) => {
@@ -356,7 +390,8 @@ export const useGameStore = create<GameStore>((set, get) => {
       const tier = LOAN_TIERS.find((t) => t.id === tierId)
       if (!tier) return false
       const { world } = get()
-      coreTakeLoan(world.bank, world.ledger, tier.principal, tier.annualInterestRate, tier.termMonths, world.time.currentDate)
+      const rate = tier.annualInterestRate * difficultySettings(world.company.difficulty).interestMultiplier
+      coreTakeLoan(world.bank, world.ledger, tier.principal, rate, tier.termMonths, world.time.currentDate)
       postNews(world.news, 'LoanTaken', world.time.currentDate, { principal: tier.principal })
       bump()
       return true

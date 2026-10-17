@@ -1,9 +1,10 @@
 import type { ComponentType } from 'react'
-import { Building2, Car, Flag, FlaskConical, Megaphone, Newspaper, UserPlus, type LucideProps } from 'lucide-react'
+import { Building2, Car, Factory, Flag, FlaskConical, Megaphone, Newspaper, UserPlus, type LucideProps } from 'lucide-react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { useActiveTutorialStep } from '../store/useTutorialStore'
 import { unreadNewsCount } from '../core/news'
+import { carsOnOrder } from '../core/factory'
 import type { ScreenId } from '../store/screenId'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
@@ -22,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
   { screen: 'Research', labelKey: 'nav.research', Icon: FlaskConical },
   { screen: 'Promotion', labelKey: 'nav.promotion', Icon: Megaphone },
   { screen: 'ModelLineup', labelKey: 'nav.models', Icon: Car },
+  { screen: 'Factory', labelKey: 'nav.factory', Icon: Factory },
   { screen: 'TeamCreation', labelKey: 'nav.racing', Icon: Flag },
   { screen: 'Employees', labelKey: 'nav.staff', Icon: UserPlus },
   { screen: 'Company', labelKey: 'nav.company', Icon: Building2 },
@@ -37,6 +39,7 @@ export function OfficeHubScreen() {
   const show = useUiStore((s) => s.show)
   useGameStore((s) => s.revision)
   const models = useGameStore((s) => s.world.vehicles.models)
+  const factory = useGameStore((s) => s.world.factory)
   const news = useGameStore((s) => s.world.news)
   const hqLevel = useGameStore((s) => s.world.company.hqLevel)
   const beginNewDesign = useGameStore((s) => s.beginNewDesign)
@@ -57,7 +60,12 @@ export function OfficeHubScreen() {
         <div className={styles.salesFrame}>
           {topModels.length === 0 && <span className={styles.empty}>{t('officeHub.noModels')}</span>}
           {topModels.map((model) => (
-            <ModelSalesRow key={model.id} model={model} onClick={() => show('SalesStatistics', model.id)} />
+            <ModelSalesRow
+              key={model.id}
+              model={model}
+              onOrder={carsOnOrder(factory, model.id)}
+              onClick={() => show('SalesStatistics', model.id)}
+            />
           ))}
         </div>
       </section>

@@ -53,6 +53,16 @@ export const en = {
   'saveSlots.newGame': '+ NEW GAME',
   'saveSlots.confirmDelete': 'Confirm delete {name}',
   'saveSlots.delete': 'Delete {name}',
+  'saveSlots.oldVersion': 'Older version',
+  'saveSlots.oldVersionHint': "Saved by an older version of the game - it can't be loaded. Delete it or start a new game here.",
+  'saveSlots.oldSave': 'older save',
+  'companyNaming.difficulty': 'Difficulty',
+  'difficulty.easy': 'Easy',
+  'difficulty.normal': 'Normal',
+  'difficulty.hard': 'Hard',
+  'difficulty.easy.description': 'More buyers, cheaper running costs, low interest.',
+  'difficulty.normal.description': 'The intended challenge.',
+  'difficulty.hard.description': 'Fewer buyers, pricier running costs, steep interest.',
 
   // nav.* - Office Hub's nav cluster specifically (title case, no CSS text-transform there - see
   // OfficeHubScreen.tsx). Main Menu's SAVES/NEWS/LANGUAGE are a separate menu.* domain below: same
@@ -66,6 +76,29 @@ export const en = {
   'nav.staff': 'Staff',
   'nav.company': 'Company',
   'nav.news': 'News',
+  'nav.factory': 'Factory',
+  'factory.lines': 'Lines {count}/{max}',
+  'factory.stock': '{count} cars in stock',
+  'factory.monthlyCosts': 'Upkeep {upkeep} · storage {storage} / month',
+  'factory.line': 'Line {number}',
+  'factory.levelCapacity': 'Level {level} · {cars} cars/day',
+  'factory.idle': 'Idle',
+  'factory.idleHint': 'Pick a model to build with the arrows.',
+  'factory.developingHint': 'Still in development - building starts when it is ready.',
+  'factory.onOrder': '{count} on order',
+  'factory.daysLeft': '~{days} days',
+  'factory.noOrder': 'Nothing on order - add cars below.',
+  'factory.clear': 'Clear',
+  'factory.upgrade': 'Upgrade: {cars}/day · {cost}',
+  'factory.maxLevel': 'Max level',
+  'factory.newLine': 'New production line',
+  'factory.newLineCost': 'Build for {cost}',
+  'factory.lineLimit': 'Your HQ has room for {max} line(s) - upgrade it on the Company screen for more.',
+  'factory.notEnoughCash': 'Not enough cash.',
+  'factory.previousModel': 'Previous model',
+  'factory.nextModel': 'Next model',
+  'factory.addCars': 'Add {count} cars to the order',
+  'screen.factory.title': 'Factory',
 
   // office hub
   'officeHub.sales': 'SALES',
@@ -93,7 +126,9 @@ export const en = {
   'data.transactionCategory.Staff': 'Staff wages',
   'data.transactionCategory.HQOverhead': 'HQ overhead',
   'data.transactionCategory.HQUpgrade': 'HQ upgrade',
-  'data.transactionCategory.Production': 'Production',
+  'data.transactionCategory.Production': 'Building cars',
+  'data.transactionCategory.Factory': 'Factory lines',
+  'data.transactionCategory.Storage': 'Car storage',
   'data.transactionCategory.Research': 'Research',
   'data.transactionCategory.Marketing': 'Marketing',
   'data.transactionCategory.Racing': 'Racing',
@@ -241,6 +276,7 @@ export const en = {
   'development.inDevelopment': 'In development',
   'development.daysLeft': 'In development - {days} days left',
   'development.daysShort': 'Developing · {days}d',
+  'officeHub.noStock': 'No stock - order at Factory',
 
   // model lineup screen (spec sheet)
   'modelLineup.noModels': 'No models designed yet.',
@@ -273,9 +309,9 @@ export const en = {
   // sales statistics screen
   'salesStats.noModels': 'No models to report on yet.',
   'salesStats.advisorMessage': 'Boss! Here is the sales statistics of the current model',
-  'salesStats.totalSold': '{sold} / {planned}',
   'salesStats.labelTotalSold': 'Total sold',
-  'salesStats.labelLeftToSell': 'Models left to sell',
+  'salesStats.labelInStock': 'In stock',
+  'salesStats.labelOnOrder': 'On order at the Factory',
   'salesStats.labelSalesIncome': 'Sales income',
   'salesStats.labelEarnings': 'Earnings',
   'salesStats.labelMarketingDuration': 'Marketing duration',
@@ -386,7 +422,7 @@ export const en = {
   'carDesign.meterPercent': '{value}%',
   'carDesign.modelName': 'Model name',
   'carDesign.comingSoon':
-    'Sales Regions and Production Runs are coming in a future update - for now, this car goes straight on sale everywhere.',
+    'After development finishes, order cars from a production line on the Factory screen - only cars you order get built.',
   'carDesign.finish': '✓ FINISH',
   'carDesign.stepOf': 'Step {step} of {total}',
   // generateDefaultName's suggestion pattern - see the trap this exists to avoid, documented on
@@ -653,7 +689,7 @@ export const en = {
     'Price above your Cost Price to turn a profit. The suggested price balances margin against what buyers in your segment expect - then tap the highlighted ✓ FINISH button to put it into production.',
   'tutorial.lineupFinale.title': "You're on the lot",
   'tutorial.lineupFinale.message':
-    'Your first car is now in development. While it develops you earn research points - spend them in Research. When development finishes, the factory starts building it and it goes on sale back at the Office. Good luck out there.',
+    'Your first car is now in development. While it develops you earn research points - spend them in Research. When it is ready, open the Factory (the building icon at the bottom of the Office) and order cars on a production line - they go on sale as they are built. Good luck out there.',
 
   // screen.<id>.title - the persistent top bar's title (see TopHud.tsx); a Record<ScreenId,
   // MessageKey> in useUiStore.ts maps every screen id to one of these.
@@ -697,8 +733,8 @@ export const en = {
   'news.screenTitle': 'News',
   'news.empty': 'Nothing to report yet.',
   'news.modelDevelopmentStarted': '{modelName} is now in development - ready in {days} days. Research points come in while it develops.',
-  'news.modelReleased': '{modelName} finished development and enters production at {price}.',
-  'news.modelSoldOut': '{modelName} has sold out its production run.',
+  'news.modelReleased': '{modelName} finished development and is ready at {price} - order cars at the Factory.',
+  'news.modelSoldOut': '{modelName} is out of stock with nothing on order - order more at the Factory.',
   'news.researchCompleted': 'R&D completed: {tech}.',
   'news.loanTaken': 'Took out a loan of {principal}.',
   'news.loanPaidOff': 'Paid off a loan of {principal}.',

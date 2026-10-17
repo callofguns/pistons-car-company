@@ -16,3 +16,4 @@ export type ScreenId =
   | 'RaceEntry'
   | 'Bank'
   | 'News'
+  | 'Factory'

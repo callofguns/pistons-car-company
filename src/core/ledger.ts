@@ -10,6 +10,8 @@ export type TransactionCategory =
   | 'HQOverhead'
   | 'HQUpgrade'
   | 'Production'
+  | 'Factory'
+  | 'Storage'
   | 'Research'
   | 'Marketing'
   | 'Racing'

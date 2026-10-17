@@ -4,7 +4,7 @@ import { DEFAULT_GAME_CONFIG } from '../core/gameConfig'
 import { APP_VERSION } from '../version'
 import { useT } from '../i18n/useT'
 import { Button, Heading } from '../components/Primitives'
-import { listSlots } from '../core/save'
+import { listSlotInfo } from '../core/save'
 import { CarArt } from '../art/CarArt'
 import styles from './screen.module.css'
 import menuStyles from './MainMenuScreen.module.css'
@@ -15,8 +15,9 @@ import menuStyles from './MainMenuScreen.module.css'
 type RecentSlot = { index: number; companyName: string; savedAtUnixMs: number }
 
 function findMostRecentSlot(): RecentSlot | null {
-  return listSlots().reduce<RecentSlot | null>((best, data, index) => {
-    if (!data) return best
+  return listSlotInfo().reduce<RecentSlot | null>((best, slot, index) => {
+    if (slot.kind !== 'save') return best
+    const data = slot.data
     if (best && best.savedAtUnixMs >= data.savedAtUnixMs) return best
     return { index, companyName: data.companyName, savedAtUnixMs: data.savedAtUnixMs }
   }, null)

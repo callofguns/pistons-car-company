@@ -87,8 +87,6 @@ export interface CarModel {
   issueDate: GameDate
   unitCost: number
   salePrice: number
-  /** Total units this production run targets; can be raised later via extendProductionRun. Drives "Models left to sell" = plannedProductionRun - totalSold. */
-  plannedProductionRun: number
   inventory: number
   totalProduced: number
   totalSold: number
@@ -101,17 +99,15 @@ export interface CarModel {
   marketingActive: boolean
   marketingDaysRemaining: number
   marketingEfficiencyMultiplier: number
-  /** True for exactly one model - whichever a company finalizes first. A brand-new company's
-   * starting reach is deliberately tiny (see gameConfig.ts's startingPopulation), which leaves the
-   * population-gated demand formula in market.ts with almost nothing to work with - without a
-   * debut boost the very first car could sit unsold indefinitely and the company could never earn
-   * the sales that grow its reach in the first place. See onMarketDayTick for how it tapers off. */
-  isDebutModel: boolean
+  /** New people reached per day while the current ad campaign runs (from its tier). */
+  marketingReachPerDay?: number
   /** Fraction of a car of demand left over from previous days (0-1). Daily demand is fractional,
    * and rounding it each day on its own turned a steady 0.4 cars/day into 0 sales forever - this
    * carries the remainder forward so 0.4/day sells a car every 2-3 days instead. Optional so
    * saves from before it existed still load (treated as 0). */
   demandCarry?: number
+  /** True once "out of stock" has been announced for the current empty spell (reset on restock). */
+  outOfStockNotified?: boolean
   /** Days left before this design finishes development and can be built and sold (see
    * core/development.ts). 0 or missing = released. Research points only come in while at least
    * one model is in development. */

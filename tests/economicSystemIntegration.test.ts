@@ -9,7 +9,7 @@ import { takeLoan } from '../src/core/economy'
  * cap) - these tests care about "a heavy fixed wage bill" as an input, not about exercising the
  * hiring UI path itself. */
 function expensiveEmployee(id: string): Employee {
-  return { id, name: 'Test Employee', role: 'Assembler', skill: 5, skillProgress01: 0, perkId: null, monthlySalary: 85_000 }
+  return { id, name: 'Test Employee', role: 'Assembler', skill: 5, skillProgress01: 0, perkId: null, monthlySalary: 20_000_000 }
 }
 
 /**
@@ -42,14 +42,14 @@ describe('economic system, end to end', () => {
     // Simulate a company already under pressure, not a fresh $250K start.
     world.bank.balance = 5_000
 
-    takeLoan(world.bank, world.ledger, 400_000, 0.12, 24, world.time.currentDate)
-    expect(world.bank.balance).toBeGreaterThan(400_000)
+    takeLoan(world.bank, world.ledger, 80_000_000, 0.12, 24, world.time.currentDate)
+    expect(world.bank.balance).toBeGreaterThan(80_000_000)
 
     for (let i = 0; i < 35; i++) tickWorld(world, CATALOG, DEFAULT_GAME_CONFIG, DEFAULT_GAME_CONFIG.secondsPerDay)
 
     // 35 days crosses at least one month boundary, so the loan's first amortized payment must
     // have actually been deducted (proving onLoanMonthTick really runs from the daily tick path).
-    expect(world.bank.loans[0].remainingBalance).toBeLessThan(400_000)
+    expect(world.bank.loans[0].remainingBalance).toBeLessThan(80_000_000)
     expect(world.company.isBankrupt).toBe(false)
   })
 })

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useGameStore } from '../store/useGameStore'
 import { currentHqLevel, nextHqLevel } from '../core/hq'
 import { useT } from '../i18n/useT'
+import type { MessageKey } from '../i18n/keys'
 import { StatRow } from '../components/StatRow'
 import { RumorRow } from '../components/RumorRow'
 import { Button, Heading } from '../components/Primitives'
@@ -53,6 +54,7 @@ export function CompanyScreen() {
 
       {/* The numbers. */}
       <div className={`${styles.column} ${styles.card}`}>
+        <StatRow label={t('companyNaming.difficulty')} value={t(`difficulty.${company.difficulty}` as MessageKey)} />
         <StatRow label={t('company.autoReleased')} value={String(company.autoReleasedCount)} />
         <StatRow label={t('company.totalSold')} value={fmt.compact(company.totalCarsSoldAllModels)} />
         <StatRow label={t('company.marketShare')} value={fmt.percent(company.marketSharePercent, 0)} />

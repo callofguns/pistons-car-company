@@ -11,7 +11,6 @@ import {
   unitCostReductionPercent,
   onStaffDayTick,
   onStaffMonthTick,
-  maxProductionBatch,
   MAX_EMPLOYEE_SKILL,
   type Employee,
   type EmployeePerkDefinition,
@@ -215,12 +214,3 @@ describe('onStaffMonthTick', () => {
   })
 })
 
-describe('maxProductionBatch', () => {
-  it('grows with roster size', () => {
-    const empty = createStaffState(NAMES, PERKS)
-    const staffed = createStaffState(NAMES, PERKS)
-    staffed.employees = [fixtureEmployee({ id: 'a' }), fixtureEmployee({ id: 'b' })]
-
-    expect(maxProductionBatch(staffed)).toBeGreaterThan(maxProductionBatch(empty))
-  })
-})

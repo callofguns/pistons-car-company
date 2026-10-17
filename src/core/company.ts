@@ -1,5 +1,6 @@
 import { createRng, randInt } from './prng'
 import type { CarModel } from './vehicles'
+import type { Difficulty } from './difficulty'
 
 /** Company-wide numbers that don't belong to any single model. Direct port of CompanyState.cs. */
 export interface CompanyState {
@@ -18,9 +19,16 @@ export interface CompanyState {
   /** 1-based index into core/hq.ts's HQLevelDefinition ladder - staff.ts's roster capacity is
    * gated on this (see hqSlotCap), and world.ts bills the matching level's monthlyOverhead. */
   hqLevel: number
+  /** Picked on the new-game screen - see core/difficulty.ts for what it changes. */
+  difficulty: Difficulty
 }
 
-export function createCompanyState(companyName: string, homeCity: string, populationServed: number): CompanyState {
+export function createCompanyState(
+  companyName: string,
+  homeCity: string,
+  populationServed: number,
+  difficulty: Difficulty = 'normal',
+): CompanyState {
   return {
     companyName,
     homeCity,
@@ -33,6 +41,7 @@ export function createCompanyState(companyName: string, homeCity: string, popula
     daysInsolvent: 0,
     isBankrupt: false,
     hqLevel: 1,
+    difficulty,
   }
 }
 
@@ -56,6 +65,10 @@ export function createRumorState(seed = 777): RumorState {
 const MAX_RUMOR_HISTORY = 30
 
 /** Turns a units-sold event into a rumor string and pushes it into state. Purely cosmetic - never mutates any other game state. */
+/** Chance a day of sales produces a rumor, and the daily sales that count as "selling well". */
+const SALE_RUMOR_CHANCE = 0.08
+const SELLING_WELL_UNITS_PER_DAY = 15
+
 export function postSaleRumor(
   rumors: RumorState,
   templates: RumorTemplateSet,
@@ -63,8 +76,13 @@ export function postSaleRumor(
   model: CarModel,
 ): void {
   const rng = createRng(rumors.rngState)
-  const sellThroughGood = model.inventory === 0 || model.currentDailySalesRatePercent > 50
-  const pool = sellThroughGood ? templates.modelSoldWellTemplates : templates.modelStruggledTemplates
+  // Called on every day a model sells - only occasionally worth a rumor.
+  if (rng() > SALE_RUMOR_CHANCE) {
+    rumors.rngState = Math.floor(rng() * 2 ** 31)
+    return
+  }
+  const sellingWell = model.inventory === 0 || model.lastDayUnitsSold >= SELLING_WELL_UNITS_PER_DAY
+  const pool = sellingWell ? templates.modelSoldWellTemplates : templates.modelStruggledTemplates
   post(rumors, fill(pick(pool, rng), templates, company, model, rng))
   rumors.rngState = Math.floor(rng() * 2 ** 31)
 }
@@ -101,6 +119,8 @@ function fill(
 
 function post(rumors: RumorState, text: string): void {
   if (!text.trim()) return
+  // Never the same line twice in a row.
+  if (rumors.recent[0] === text) return
   rumors.recent.unshift(text)
   if (rumors.recent.length > MAX_RUMOR_HISTORY) rumors.recent.length = MAX_RUMOR_HISTORY
 }

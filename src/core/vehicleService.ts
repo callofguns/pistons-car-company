@@ -219,7 +219,6 @@ export function finalizeDesign(
   bodies: BodyStyleDefinition[],
   tech: TechModifiers,
   today: GameDate,
-  maxProductionBatch: number,
   qualityBonusPercent = 0,
 ): CarModel | null {
   const session = vehicles.currentSession
@@ -245,7 +244,6 @@ export function finalizeDesign(
     issueDate: today,
     unitCost: stats.unitCost,
     salePrice: session.customPrice ?? stats.suggestedPrice,
-    plannedProductionRun: maxProductionBatch,
     inventory: 0,
     totalProduced: 0,
     totalSold: 0,
@@ -257,7 +255,6 @@ export function finalizeDesign(
     marketingActive: false,
     marketingDaysRemaining: 0,
     marketingEfficiencyMultiplier: 1,
-    isDebutModel: vehicles.models.length === 0,
   }
 
   const developmentDays = developmentDaysFor(stats.unitCost, session.classificationTagIds)
@@ -277,7 +274,3 @@ export function setSalePrice(model: CarModel, price: number): void {
   model.salePrice = price
 }
 
-export function extendProductionRun(model: CarModel, additionalUnits: number): void {
-  if (additionalUnits <= 0) return
-  model.plannedProductionRun += additionalUnits
-}

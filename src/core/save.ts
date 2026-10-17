@@ -7,6 +7,8 @@ import type { CarModel } from './vehicles'
 import type { NewsEntry } from './news'
 import type { RaceResultRecord, RacingState } from './racing'
 import type { Employee } from './staff'
+import type { FactoryState } from './factory'
+import type { Difficulty } from './difficulty'
 
 /** One research node's saved progress. Effects aren't serialized - on load they're re-applied to a fresh TechModifiers from the catalog definition, same as ResearchService.RestoreState did in the C# port. */
 export interface ResearchNodeSaveEntry {
@@ -75,12 +77,16 @@ export interface SaveGameData {
   staffEmployees?: Employee[]
   staffCandidates?: Employee[]
   staffRngState?: number
+
+  // Schema 4 (the Stage 3 economy): required.
+  difficulty: Difficulty
+  factory: FactoryState
 }
 
-// Bumped for the classificationTagIds/componentSelections/enginePresetId fields the car design
-// wizard rebuild added to CarModel. No migration path - saves from an older schema are treated as
-// absent and the player starts fresh (acceptable pre-1.0; see isCompatibleSave).
-const CURRENT_SCHEMA_VERSION = 3
+// 4: the Stage 3 economy - $45M money scale, difficulty, the factory (production lines replace the
+// old automatic production runs). No migration path: older saves show as "older version" on the
+// Saves screen (see listSlotInfo) and can be deleted; a new game may overwrite them.
+const CURRENT_SCHEMA_VERSION = 4
 
 export function isCompatibleSave(data: SaveGameData): boolean {
   return data.schemaVersion === CURRENT_SCHEMA_VERSION
@@ -134,12 +140,16 @@ export function buildSaveData(world: World): SaveGameData {
     staffEmployees: world.staff.employees,
     staffCandidates: world.staff.candidates,
     staffRngState: world.staff.rngState,
+
+    difficulty: world.company.difficulty,
+    factory: world.factory,
   }
 }
 
 /** Builds a fresh World and restores it to match `data`. */
 export function loadWorld(config: GameConfig, catalog: Catalog, data: SaveGameData): World {
-  const world = createNewWorld(config, catalog)
+  const world = createNewWorld(config, catalog, data.companyName, data.difficulty)
+  world.factory = data.factory
 
   world.time.currentDate = makeDate(data.year, data.month, data.day)
   world.bank.balance = data.cashBalance
@@ -246,6 +256,18 @@ export function tryLoadFromStorage(
 export function clearStorage(storage: KeyValueStorage | undefined = defaultStorage(), slotIndex = 0): void {
   if (!storage) return
   storage.removeItem(slotKey(slotIndex))
+}
+
+/** What's in a save slot: nothing, a save from an older version of the game (can't be loaded,
+ * only deleted or overwritten), or a playable save. */
+export type SlotInfo = { kind: 'empty' } | { kind: 'old' } | { kind: 'save'; data: SaveGameData }
+
+export function listSlotInfo(storage: KeyValueStorage | undefined = defaultStorage()): SlotInfo[] {
+  return Array.from({ length: SAVE_SLOT_COUNT }, (_, i): SlotInfo => {
+    const data = tryLoadFromStorage(storage, i)
+    if (!data) return { kind: 'empty' }
+    return isCompatibleSave(data) ? { kind: 'save', data } : { kind: 'old' }
+  })
 }
 
 /** Every slot's save data in order, or null for a slot that's empty, corrupt, or from an

@@ -3,3 +3,44 @@
   font-size: 1.15rem;
   text-align: center;
 }
+
+.difficulty {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.difficultyOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-panel-glass);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.difficultySelected {
+  border-color: var(--color-trim);
+  background: rgba(242, 181, 60, 0.14);
+}
+
+.difficultyName {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+}
+
+.difficultySelected .difficultyName {
+  color: var(--color-trim);
+}
+
+.difficultyDescription {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+}

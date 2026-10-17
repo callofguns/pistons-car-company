@@ -10,26 +10,23 @@ const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 const inverseLerp = (a: number, b: number, v: number) => clamp01((v - a) / (b - a))
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
-/** Flat extra daily demand for a company's debut model, independent of population - the ordinary
- * formula multiplies demand by populationServed/500_000 per segment, which is deliberately near
- * nothing at the tiny starting population (see gameConfig.ts), so without this a first car could
- * sell nothing and a fresh company could never earn the sales that grow its reach. Represents
- * early curiosity about the new company that doesn't depend on reach it doesn't have yet. */
-const DEBUT_BONUS_UNITS_PER_DAY = 8
-/** The debut boost applies until the model has sold this many units total, then it's just another
- * model living on the (by then much larger) reach its own sales have built. */
-const DEBUT_BONUS_SALES_CAP = 150
-
-/** How many new people a single unit sold brings into the company's reach, via word of mouth -
- * this is the "something else" gameConfig.ts's startingPopulation comment predicted might one day
- * move populationServed off its deliberately tiny starting value. Tapers via POPULATION_CEILING so
- * a mature company doesn't grow forever - that ceiling sits comfortably above the point where every
- * market segment's own demand term is already saturated (scoreAppeal's /500_000 clamp), so nothing
- * downstream even notices reach beyond it. */
-const WORD_OF_MOUTH_REACH_PER_UNIT_SOLD = 50
+/** How many people who know your company it takes to reach half of every buyer. Awareness is
+ * reach / (reach + this): 20K people (a brand-new company) is ~3% of buyers, 600K is 50%. */
+const HALF_AWARENESS_REACH = 600_000
+/** How many new people a single car sold brings into the company's reach, via word of mouth. */
+const WORD_OF_MOUTH_REACH_PER_UNIT_SOLD = 15
+/** Reach growth tapers off toward this ceiling - by then awareness is already ~93%. */
 const POPULATION_CEILING = 5_000_000
+/** The buyer market grows every year (more people, more cars per family). */
+const MARKET_GROWTH_PER_YEAR = 0.02
+const MARKET_BASE_YEAR = 1970
+/** Appeal of the average rival car, and how many rival makers compete for each aware buyer - a car
+ * as appealing as a rival wins 1 in (RIVAL_COUNT + 1) of them. See captureShare. */
+const RIVAL_APPEAL = 0.6
+const RIVAL_COUNT = 3
 
-/** A buyer segment (Economy, Family, Luxury, Sports, Utility). MarketSimulator scores every on-sale model against each segment's preferences to decide daily demand. */
+/** A buyer segment (Economy, Family, Luxury, Sports, Utility). Every on-sale model is scored
+ * against each segment's preferences to decide daily demand. */
 export interface MarketSegmentDefinition {
   id: string
   displayName: string
@@ -38,37 +35,104 @@ export interface MarketSegmentDefinition {
   weightReliability: number
   weightFuelEconomy: number
   weightPrice: number
-  /** Fraction of total market population belonging to this segment. */
+  /** Unused since the market rework; kept so segment data stays a plain, complete table. */
   populationShare: number
   /** Price this segment expects to pay for a well-matched car; higher prices reduce appeal. */
   expectedPrice: number
-  /** Base units/day a fully-matched, fully-marketed model could sell to this whole segment. */
-  baseDemandPerDay: number
+  /** How many new cars this whole segment buys per day (from every maker) in 1970 - grows with
+   * MARKET_GROWTH_PER_YEAR. */
+  marketCarsPerDay: number
 }
 
-/** Simulated rival manufacturers, so market share is a share of *something* rather than always reading 100%. */
+/** Everything outside a car's own design that shifts how well it sells today: difficulty, history
+ * events (core/events.ts) and per-model factors such as age and regulations. Built fresh each day
+ * by world.ts. */
+export interface MarketConditions {
+  /** Multiplies every model's demand (difficulty x recessions/booms). */
+  demandMultiplier: number
+  /** Multiplies how much buyers care about fuel economy (oil crises). */
+  fuelEconomyWeightMultiplier: number
+  /** Multiplies how much buyers care about power (cheap-fuel eras). */
+  powerWeightMultiplier: number
+  /** Extra demand for particular body classes (e.g. the SUV boom). */
+  classDemandMultiplier: Partial<Record<CarClass, number>>
+  /** Per-model multiplier - age (freshness), regulation bans. 1 = no effect, 0 = can't sell. */
+  modelMultiplier: (model: CarModel) => number
+}
+
+export const NEUTRAL_MARKET_CONDITIONS: MarketConditions = {
+  demandMultiplier: 1,
+  fuelEconomyWeightMultiplier: 1,
+  powerWeightMultiplier: 1,
+  classDemandMultiplier: {},
+  modelMultiplier: () => 1,
+}
+
+/** Rival makers' day-to-day sales wobble, so market share isn't a perfectly smooth line. */
 export interface CompetitorState {
-  baselineVolume: number
   rngState: number
 }
 
-export function createCompetitorState(startingDailyVolume: number, seed = 12345): CompetitorState {
-  return { baselineVolume: startingDailyVolume, rngState: seed }
+export function createCompetitorState(seed = 12345): CompetitorState {
+  return { rngState: seed }
 }
 
-export function getTodayCompetitorVolume(competitors: CompetitorState): number {
+function nextWobble(competitors: CompetitorState): number {
   const rng = createRng(competitors.rngState)
-  competitors.baselineVolume *= 1.0002 // slow secular growth
-  const wobble = 0.9 + rng() * 0.2 // +/-10%
+  const wobble = 0.92 + rng() * 0.16 // +/-8%
   competitors.rngState = Math.floor(rng() * 2 ** 31)
-  return competitors.baselineVolume * wobble
+  return wobble
+}
+
+export function marketGrowth(year: number): number {
+  return 1 + Math.max(0, year - MARKET_BASE_YEAR) * MARKET_GROWTH_PER_YEAR
+}
+
+/** 0-1 share of the people in the market who have heard of the company. */
+export function awareness(populationServed: number): number {
+  return populationServed / (populationServed + HALF_AWARENESS_REACH)
+}
+
+/** Of the aware buyers in a segment, the fraction who pick this car over the rivals' - rising
+ * steeply for a better-matched car. */
+function captureShare(appeal: number): number {
+  const a = appeal * appeal
+  return a / (a + RIVAL_COUNT * RIVAL_APPEAL * RIVAL_APPEAL)
+}
+
+/** How many of a segment's buyers can and will pay this price: a small bonus for undercutting
+ * what they expect, falling off steeply above it - 25% over expected keeps ~54% of buyers,
+ * double keeps ~8%. */
+export function affordability(price: number, expectedPrice: number): number {
+  const ratio = price / Math.max(1, expectedPrice)
+  return ratio <= 1 ? 1 + (1 - ratio) * 0.3 : Math.exp(-2.5 * (ratio - 1))
+}
+
+/** Expected (fractional) cars per day this model would sell today with unlimited stock. */
+export function dailyDemand(
+  model: CarModel,
+  body: BodyStyleDefinition | undefined,
+  segments: MarketSegmentDefinition[],
+  company: CompanyState,
+  year: number,
+  conditions: MarketConditions,
+): number {
+  const growth = marketGrowth(year)
+  const aware = awareness(company.populationServed)
+  let demand = 0
+  for (const segment of segments) {
+    const appeal = scoreAppeal(model, body, segment, conditions)
+    const classBoost = body ? (conditions.classDemandMultiplier[body.carClass] ?? 1) : 1
+    demand += segment.marketCarsPerDay * growth * classBoost * aware * captureShare(appeal) * affordability(model.salePrice, segment.expectedPrice)
+  }
+  const reputationFactor = 0.5 + company.reputationPercent / 100
+  return demand * reputationFactor * model.marketingEfficiencyMultiplier * conditions.demandMultiplier * conditions.modelMultiplier(model)
 }
 
 /**
- * The daily sell-through simulation. For every on-sale model with stock, scores it against every
- * market segment, converts the best-fit score into demand, sells min(demand, inventory), deposits
- * the revenue, and nudges reputation/market share. Never sells more units than a model has in
- * stock. Direct port of MarketSimulator.cs (including the reputation-drift mechanic).
+ * The daily sell-through simulation. For every on-sale, released model with stock, works out the
+ * day's demand (see dailyDemand), sells whole cars (carrying the fraction to tomorrow), deposits
+ * the revenue, and nudges reputation, reach and market share.
  */
 export function onMarketDayTick(
   models: CarModel[],
@@ -79,10 +143,10 @@ export function onMarketDayTick(
   today: GameDate,
   company: CompanyState,
   competitors: CompetitorState,
+  conditions: MarketConditions = NEUTRAL_MARKET_CONDITIONS,
 ): void {
-  let ourVolumeToday = 0
   let reliabilityWeightedByVolume = 0
-  let soldTodayAcrossAllModels = 0
+  let soldToday = 0
 
   for (const model of models) {
     if (!model.isOnSale || model.inventory <= 0 || isInDevelopment(model)) {
@@ -92,24 +156,7 @@ export function onMarketDayTick(
       continue
     }
 
-    const body = resolveBody(model)
-    let demand = 0
-
-    for (const segment of segments) {
-      const appeal = scoreAppeal(model, body, segment)
-      const segmentPopulation = company.populationServed * segment.populationShare
-      const reputationFactor = 0.5 + company.reputationPercent / 100
-      demand +=
-        segment.baseDemandPerDay *
-        appeal *
-        reputationFactor *
-        model.marketingEfficiencyMultiplier *
-        clamp01(segmentPopulation / 500_000)
-    }
-
-    if (model.isDebutModel && model.totalSold < DEBUT_BONUS_SALES_CAP) {
-      demand += DEBUT_BONUS_UNITS_PER_DAY
-    }
+    const demand = dailyDemand(model, resolveBody(model), segments, company, today.year, conditions)
 
     // Whole cars only, with the leftover fraction carried to tomorrow (see CarModel.demandCarry).
     const totalDemand = demand + (model.demandCarry ?? 0)
@@ -126,9 +173,8 @@ export function onMarketDayTick(
       model.totalSold += unitsSold
       model.lifetimeEarnings += revenue
       model.lastDayRevenue = revenue
-      ourVolumeToday += unitsSold
       reliabilityWeightedByVolume += model.stats.reliabilityPercent * unitsSold
-      soldTodayAcrossAllModels += unitsSold
+      soldToday += unitsSold
 
       depositRecorded(bank, ledger, revenue, 'Sales', today)
       company.totalCarsSoldAllModels += unitsSold
@@ -136,30 +182,36 @@ export function onMarketDayTick(
     }
   }
 
-  const competitorVolume = getTodayCompetitorVolume(competitors)
-  const totalVolume = ourVolumeToday + competitorVolume
-  const targetShare = totalVolume <= 0 ? company.marketSharePercent : (ourVolumeToday / totalVolume) * 100
+  // Market share: our cars against everything every maker sold today.
+  const totalMarket = segments.reduce((sum, s) => sum + s.marketCarsPerDay, 0) * marketGrowth(today.year) * nextWobble(competitors)
+  const targetShare = totalMarket <= 0 ? 0 : (soldToday / (totalMarket + soldToday)) * 100
   company.marketSharePercent = lerp(company.marketSharePercent, targetShare, 0.05)
 
   // Reputation drifts slowly toward the reliability of whatever actually sold today - shipping
-  // reliable cars builds it, shipping unreliable ones erodes it. No sales today leaves it
-  // untouched rather than decaying toward zero for lack of data.
-  if (soldTodayAcrossAllModels > 0) {
-    const targetReputation = reliabilityWeightedByVolume / soldTodayAcrossAllModels
-    company.reputationPercent = lerp(company.reputationPercent, targetReputation, 0.02)
+  // reliable cars builds it, shipping unreliable ones erodes it. No sales leaves it untouched.
+  if (soldToday > 0) {
+    company.reputationPercent = lerp(company.reputationPercent, reliabilityWeightedByVolume / soldToday, 0.02)
   }
 
-  // Word of mouth: every unit actually sold brings new people into the company's reach, tapering
-  // off as populationServed approaches POPULATION_CEILING. Selling nothing today grows nothing -
-  // matches the deliberate choice to start a new company with almost no reach (gameConfig.ts).
-  if (soldTodayAcrossAllModels > 0) {
-    const headroom = clamp01(1 - company.populationServed / POPULATION_CEILING)
-    company.populationServed += soldTodayAcrossAllModels * WORD_OF_MOUTH_REACH_PER_UNIT_SOLD * headroom
-  }
+  // Word of mouth: every car sold brings new people into the company's reach, tapering off near
+  // POPULATION_CEILING.
+  if (soldToday > 0) growReach(company, soldToday * WORD_OF_MOUTH_REACH_PER_UNIT_SOLD)
 }
 
-/** 0-1 fit score: how well a model's price/power/reliability/economy matches a segment's preferences. */
-function scoreAppeal(model: CarModel, body: BodyStyleDefinition | undefined, segment: MarketSegmentDefinition): number {
+/** Adds people to the company's reach (word of mouth, ad campaigns), tapering near the ceiling. */
+export function growReach(company: CompanyState, people: number): void {
+  const headroom = clamp01(1 - company.populationServed / POPULATION_CEILING)
+  company.populationServed += people * headroom
+}
+
+/** 0-1 fit score: how well a model's price/power/reliability/economy matches a segment's
+ * preferences, with today's history events re-weighting what buyers care about. */
+export function scoreAppeal(
+  model: CarModel,
+  body: BodyStyleDefinition | undefined,
+  segment: MarketSegmentDefinition,
+  conditions: MarketConditions = NEUTRAL_MARKET_CONDITIONS,
+): number {
   const classMatch = body !== undefined && body.carClass === segment.preferredClass ? 1 : 0.35
 
   const priceScore = clamp01(1 - clamp01((model.salePrice - segment.expectedPrice) / Math.max(1, segment.expectedPrice)))
@@ -168,15 +220,15 @@ function scoreAppeal(model: CarModel, body: BodyStyleDefinition | undefined, seg
   const reliabilityScore = inverseLerp(25, 99, model.stats.reliabilityPercent)
   const economyScore = 1 - inverseLerp(4, 20, model.stats.fuelConsumptionL100Km)
 
+  const weightPower = segment.weightPower * conditions.powerWeightMultiplier
+  const weightFuel = segment.weightFuelEconomy * conditions.fuelEconomyWeightMultiplier
+
   const weighted =
-    segment.weightPower * powerScore +
+    weightPower * powerScore +
     segment.weightReliability * reliabilityScore +
-    segment.weightFuelEconomy * economyScore +
+    weightFuel * economyScore +
     segment.weightPrice * priceScore
 
-  const weightSum = Math.max(
-    0.01,
-    segment.weightPower + segment.weightReliability + segment.weightFuelEconomy + segment.weightPrice,
-  )
+  const weightSum = Math.max(0.01, weightPower + segment.weightReliability + weightFuel + segment.weightPrice)
   return classMatch * clamp01(weighted / weightSum)
 }

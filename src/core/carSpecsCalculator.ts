@@ -86,7 +86,9 @@ export function calculateCarSpecs(
       : classificationTags.reduce((sum, t) => sum + t.priceMultiplier, 0) / classificationTags.length
   // A design that matches its own classification tags earns the full tag-adjusted price; one that
   // misses badly still keeps 70% of it - fit shapes price, it doesn't gate the design entirely.
-  const suggestedPrice = unitCost * 2.4 * tagPriceMultiplier * (0.7 + 0.3 * (fitPercent / 100))
+  // ~45% markup over cost for a mid-market design - real carmakers work on thin margins, so the
+  // money comes from volume.
+  const suggestedPrice = unitCost * 1.45 * tagPriceMultiplier * (0.7 + 0.3 * (fitPercent / 100))
 
   const rating = computeRating(powerHp, reliability, fuelConsumption, zeroToHundred)
 

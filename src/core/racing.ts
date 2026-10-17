@@ -67,7 +67,7 @@ export interface RacingState {
   rngState: number
 }
 
-export const RACING_REGISTRATION_COST = 40_000_000
+export const RACING_REGISTRATION_COST = 8_000_000
 
 export function createRacingState(seed = 555): RacingState {
   return { isRegistered: false, teamName: '', pendingEntry: null, history: [], rngState: seed }

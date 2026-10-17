@@ -13,8 +13,6 @@ export interface GameConfig {
   researchPointsPerDay: number
   /** Total addressable population at game start (the HUD's people-icon figure). */
   startingPopulation: number
-  /** Starting daily sales volume assumed for all rival manufacturers combined. */
-  startingCompetitorDailyVolume: number
   racingUnlockYear: number
   autosaveOnMonthRollover: boolean
 
@@ -27,7 +25,7 @@ export interface GameConfig {
 }
 
 export const DEFAULT_GAME_CONFIG: GameConfig = {
-  startingCapital: 250_000,
+  startingCapital: 45_000_000,
   startYear: 1970,
   startMonth: 1,
   startDay: 1,
@@ -38,18 +36,13 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
   // come in while a car is in development (see world.ts's advanceOneDay).
   startingResearchPoints: 0,
   researchPointsPerDay: 4,
-  // Deliberately tiny - the player explicitly chose to start with almost no reach rather than a
-  // pre-established 448.6K audience. Sales demand in market.ts scales with this directly. It no
-  // longer just sits flat forever, though: onMarketDayTick grows it via word-of-mouth from actual
-  // sales, and a company's debut model gets a flat demand bonus precisely so it can rack up those
-  // first sales despite starting with next to no reach - see market.ts's DEBUT_BONUS_UNITS_PER_DAY
-  // and WORD_OF_MOUTH_REACH_PER_UNIT_SOLD.
-  startingPopulation: 100,
-  startingCompetitorDailyVolume: 900,
+  // People who have heard of the company on day one - see market.ts's awareness(). Grows from
+  // word of mouth (every car sold) and ad campaigns.
+  startingPopulation: 20_000,
   racingUnlockYear: 1978,
   autosaveOnMonthRollover: true,
 
   overdraftDailyInterestRate: 0.003,
-  bankruptcyBalanceThreshold: -150_000,
+  bankruptcyBalanceThreshold: -5_000_000,
   bankruptcyGraceDays: 14,
 }

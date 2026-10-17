@@ -61,11 +61,11 @@ export interface StaffState {
 }
 
 const BASE_SALARY_BY_ROLE: Record<EmployeeRole, number> = {
-  Engineer: 3500,
-  Assembler: 3000,
-  Designer: 3200,
-  Marketer: 2800,
-  Logistician: 2800,
+  Engineer: 35_000,
+  Assembler: 30_000,
+  Designer: 32_000,
+  Marketer: 28_000,
+  Logistician: 28_000,
 }
 
 const MAX_CANDIDATE_POOL = 5
@@ -133,16 +133,6 @@ export function monthlyWageBill(staff: StaffState): number {
   return staff.employees.reduce((sum, e) => sum + e.monthlySalary, 0)
 }
 
-/** How large a production run a newly finalized model can target (CarModel.plannedProductionRun -
- * see vehicleService.ts's finalizeDesign). Scales with total headcount regardless of role, not
- * just Assemblers - a bigger roster overall means a bigger operation, even if the production-speed
- * bonus itself is Assembler-specific. Replaces the old budget-slider formula
- * (50_000 + budgetLevel01 * 450_000 * (1 + experienceLevel * 0.05)); this covers a comparable
- * range across the roster's 3-22 slot span (see data/hqLevels.ts). */
-export function maxProductionBatch(staff: StaffState): number {
-  return Math.round(50_000 + staff.employees.length * 25_000)
-}
-
 function sumRoleOutput(staff: StaffState, perks: EmployeePerkDefinition[], role: EmployeeRole, perSkillPoint: number): number {
   let total = 0
   for (const e of staff.employees) {
@@ -167,7 +157,7 @@ function sumPerkFlatBonus(
   return total
 }
 
-/** Assemblers speed up the factory - feeds onProductionDayTick's speedMultiplier, same role/signature onProductionDayTick already had. Capped so a maxed-out roster can't push production speed to absurd multiples. */
+/** Assemblers speed up every production line (see factory.ts's onFactoryDayTick). Capped so a maxed-out roster can't push production speed to absurd multiples. */
 export function productionSpeedBonusPercent(staff: StaffState, perks: EmployeePerkDefinition[]): number {
   return Math.min(60, sumRoleOutput(staff, perks, 'Assembler', 0.8))
 }
@@ -188,7 +178,7 @@ export function marketingDiscountPercent(staff: StaffState, perks: EmployeePerkD
   return Math.min(60, sumRoleOutput(staff, perks, 'Marketer', 1.2) + sumPerkFlatBonus(staff, perks, 'Marketer', 'marketingDiscountPercent'))
 }
 
-/** Logisticians cut per-unit production cost (see production.ts's onProductionDayTick). */
+/** Logisticians cut per-unit production cost (see factory.ts's onFactoryDayTick). */
 export function unitCostReductionPercent(staff: StaffState, perks: EmployeePerkDefinition[]): number {
   return Math.min(50, sumRoleOutput(staff, perks, 'Logistician', 1.0) + sumPerkFlatBonus(staff, perks, 'Logistician', 'unitCostReductionPercent'))
 }
@@ -217,7 +207,15 @@ export function onStaffDayTick(staff: StaffState, perks: EmployeePerkDefinition[
 /** Call on month rollover (day === 1): wages are a mandatory expense - the company can't just skip
  * payroll, so this can push the balance negative rather than silently failing when cash is short.
  * Also refreshes the applicant pool, same cadence as wages. */
-export function onStaffMonthTick(staff: StaffState, names: string[], perks: EmployeePerkDefinition[], bank: BankState, ledger: LedgerState, today: GameDate): void {
-  payMandatory(bank, ledger, monthlyWageBill(staff), 'Staff', today)
+export function onStaffMonthTick(
+  staff: StaffState,
+  names: string[],
+  perks: EmployeePerkDefinition[],
+  bank: BankState,
+  ledger: LedgerState,
+  today: GameDate,
+  costMultiplier = 1,
+): void {
+  payMandatory(bank, ledger, monthlyWageBill(staff) * costMultiplier, 'Staff', today)
   refreshCandidates(staff, names, perks)
 }

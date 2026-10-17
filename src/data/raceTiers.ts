@@ -1,9 +1,8 @@
 import type { RaceTierDefinition } from '../core/racing'
 
 /** The four race tiers offered on the "ENTER A RACE" screen - same small-fixed-table,
- * unlocked-by-year shape as PROMOTION_TIERS/LOAN_TIERS, not a scheduled calendar. Fees/prizes
- * scale up proportionately to RACING_REGISTRATION_COST ($40M) across the timeline the rest of the
- * game already spans (research nodes run 1968-2026, promo tiers unlock through 1991). */
+ * unlocked-by-year shape as PROMOTION_TIERS/LOAN_TIERS, not a scheduled calendar. Fees/prizes are
+ * sized against the $8M team registration (core/racing.ts) and a company that started with $45M. */
 export const RACE_TIERS: RaceTierDefinition[] = [
   {
     id: 'local-circuit',

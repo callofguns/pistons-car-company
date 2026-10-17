@@ -3,6 +3,7 @@ import {
   buildSaveData,
   isCompatibleSave,
   listSlots,
+  listSlotInfo,
   loadWorld,
   migrateLegacySaveIfNeeded,
   saveToStorage,
@@ -125,9 +126,9 @@ describe('save/load round trip', () => {
   // existing player's save (see save.ts's doc comment on isCompatibleSave). Adding `news` as an
   // optional field was deliberately NOT supposed to require a bump; this test fails loudly if a
   // future change does it anyway.
-  it('keeps the save schema at version 3 (news was added without a schema bump)', () => {
+  it('writes save schema version 4 (the Stage 3 economy)', () => {
     const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
-    expect(buildSaveData(world).schemaVersion).toBe(3)
+    expect(buildSaveData(world).schemaVersion).toBe(4)
   })
 
   it('round-trips a pending race entry and race history', () => {
@@ -257,5 +258,27 @@ describe('save slots', () => {
     migrateLegacySaveIfNeeded(storage)
 
     expect(tryLoadFromStorage(storage, 0)!.companyName).toBe('Current Co')
+  })
+})
+
+describe('older-version saves', () => {
+  it('shows a pre-Stage-3 save as an older version instead of loading it', () => {
+    const storage = createMemoryStorage()
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG, 'Old Co')
+    const data = { ...buildSaveData(world), schemaVersion: 3 }
+    saveToStorage(data, storage, 1)
+    const slots = listSlotInfo(storage)
+    expect(slots[0].kind).toBe('empty')
+    expect(slots[1].kind).toBe('old')
+  })
+
+  it('round-trips difficulty and the factory', () => {
+    const storage = createMemoryStorage()
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG, 'Hard Co', 'hard')
+    world.factory.lines[0].level = 3
+    saveToStorage(buildSaveData(world), storage, 0)
+    const loaded = loadWorld(DEFAULT_GAME_CONFIG, CATALOG, tryLoadFromStorage(storage, 0)!)
+    expect(loaded.company.difficulty).toBe('hard')
+    expect(loaded.factory.lines[0].level).toBe(3)
   })
 })

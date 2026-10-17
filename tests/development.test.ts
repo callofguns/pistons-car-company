@@ -4,7 +4,6 @@ import { DEFAULT_GAME_CONFIG } from '../src/core/gameConfig'
 import { CATALOG } from '../src/data/catalog'
 import { beginNewDesign, selectBody, toggleClassificationTag, finalizeDesign } from '../src/core/vehicleService'
 import { developmentDaysFor, isInDevelopment, MAX_DEVELOPMENT_DAYS, MIN_DEVELOPMENT_DAYS } from '../src/core/development'
-import { maxProductionBatch } from '../src/core/staff'
 import type { Employee } from '../src/core/staff'
 
 const tick = (world: ReturnType<typeof createNewWorld>, days: number) => {
@@ -19,7 +18,7 @@ function worldWithNewCar() {
   toggleClassificationTag(world.vehicles, 'budget')
   toggleClassificationTag(world.vehicles, 'sport')
   world.vehicles.currentSession!.name = 'Test'
-  const model = finalizeDesign(world.vehicles, CATALOG.bodies, world.research.modifiers, world.time.currentDate, maxProductionBatch(world.staff))!
+  const model = finalizeDesign(world.vehicles, CATALOG.bodies, world.research.modifiers, world.time.currentDate)!
   return { world, model }
 }
 
@@ -58,9 +57,12 @@ describe('research points and development', () => {
     expect(world.research.points).toBe(DEFAULT_GAME_CONFIG.researchPointsPerDay * days)
     expect(world.news.entries.some((e) => e.type === 'ModelReleased')).toBe(true)
 
+    // Released straight onto the idle starting line - order some cars and they get built.
+    expect(world.factory.lines[0].modelId).toBe(model.id)
+    world.factory.lines[0].orderRemaining = 100
     tick(world, 10)
     expect(world.research.points).toBe(DEFAULT_GAME_CONFIG.researchPointsPerDay * days) // stopped
-    expect(model.totalProduced).toBeGreaterThan(0) // production started after release
+    expect(model.totalProduced).toBeGreaterThan(0)
   })
 
   it('Engineers raise the daily rate while developing', () => {

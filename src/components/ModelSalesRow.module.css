@@ -51,3 +51,7 @@
 .developing {
   color: #8fb4ff;
 }
+
+.noStock {
+  color: var(--color-trim);
+}

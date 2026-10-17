@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { grouped } from '../core/numberFormat'
+import { carsOnOrder } from '../core/factory'
 import { useT } from '../i18n/useT'
 import { CarCarousel } from '../components/CarCarousel'
 import { AdvisorPanel } from '../components/AdvisorPanel'
@@ -16,6 +17,7 @@ export function SalesStatisticsScreen() {
   const payload = useUiStore((s) => s.payload)
   useGameStore((s) => s.revision)
   const models = useGameStore((s) => s.world.vehicles.models)
+  const factory = useGameStore((s) => s.world.factory)
   const setOnSale = useGameStore((s) => s.setOnSale)
   const { t, tp, fmt } = useT()
 
@@ -40,7 +42,7 @@ export function SalesStatisticsScreen() {
   }
 
   const model = models[Math.min(index, models.length - 1)]
-  const leftToSell = Math.max(0, model.plannedProductionRun - model.totalSold)
+  const onOrder = carsOnOrder(factory, model.id)
 
   return (
     <div className={`${styles.screen} ${styles.columns}`}>
@@ -66,11 +68,9 @@ export function SalesStatisticsScreen() {
       </div>
 
       <div className={`${styles.column} ${styles.card}`}>
-        <StatRow
-          label={t('salesStats.labelTotalSold')}
-          value={t('salesStats.totalSold', { sold: grouped(model.totalSold), planned: grouped(model.plannedProductionRun) })}
-        />
-        <StatRow label={t('salesStats.labelLeftToSell')} value={grouped(leftToSell)} />
+        <StatRow label={t('salesStats.labelTotalSold')} value={grouped(model.totalSold)} />
+        <StatRow label={t('salesStats.labelInStock')} value={grouped(model.inventory)} />
+        <StatRow label={t('salesStats.labelOnOrder')} value={grouped(onOrder)} />
         <StatRow label={t('salesStats.labelSalesIncome')} value={fmt.money(model.lastDayRevenue)} />
         <StatRow label={t('salesStats.labelEarnings')} value={fmt.money(model.lifetimeEarnings)} />
         <StatRow
