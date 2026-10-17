@@ -6,8 +6,8 @@ import type { ScreenId } from './screenId'
 /** Real time is clamped to this per frame so a backgrounded tab resuming doesn't simulate thousands of days catching up - Unity gets this for free from Time.maximumDeltaTime, this is the explicit web equivalent. */
 const MAX_DELTA_SECONDS = 1
 
-/** Game time only advances while the player is looking at the main dashboard - every other screen (design wizard, Research, Employees, ...) pauses the clock so nothing changes behind your back while you're mid-decision. */
-const DASHBOARD_SCREEN: ScreenId = 'OfficeHub'
+/** Game time only advances on the main dashboard and Sales Statistics (so you can watch sales live) - every other screen (design wizard, Research, Employees, ...) pauses the clock so nothing changes behind your back while you're mid-decision. */
+const RUNNING_SCREENS: ScreenId[] = ['OfficeHub', 'SalesStatistics']
 
 /**
  * Drives the world clock from requestAnimationFrame, the web equivalent of SimulationRunner.cs's
@@ -30,7 +30,7 @@ export function useSimulationLoop(): void {
     const frame = (timestampMs: number) => {
       const { world } = useGameStore.getState()
       const screen = useUiStore.getState().currentScreen
-      world.time.isPaused = screen !== DASHBOARD_SCREEN || world.time.manuallyPaused
+      world.time.isPaused = !RUNNING_SCREENS.includes(screen) || world.time.manuallyPaused
 
       if (lastTimestampMs !== null) {
         const deltaSeconds = Math.min(MAX_DELTA_SECONDS, (timestampMs - lastTimestampMs) / 1000)
