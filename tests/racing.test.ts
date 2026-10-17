@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { unlockedByYear } from '../src/core/unlocks'
 import {
   createRacingState,
   registerTeam,
@@ -46,7 +47,7 @@ function buildModel(tagIds: string[] = []) {
   const bank = createBank(1_000_000)
   const ledger = createLedgerState()
   beginNewDesign(vehicles)
-  selectBody(vehicles, body, bank, ledger, 1978, makeDate(1978, 1, 1))
+  selectBody(vehicles, body, bank, ledger, unlockedByYear(1978), makeDate(1978, 1, 1))
   for (const tagId of tagIds) toggleClassificationTag(vehicles, tagId)
   setEngineSpec(vehicles, DEFAULT_ENGINE_SPEC)
   setNameAndCategory(vehicles, 'Test Racer', 'TEST')

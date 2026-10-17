@@ -11,6 +11,7 @@ import {
   type ModelDesignSession,
 } from './vehicles'
 import type { GameDate } from './gameDate'
+import { bodyItem, engineItem, type UnlockCheck } from './unlocks'
 import { DESIGN_STEPS, defaultOptionId, type ComponentOption } from '../data/designSteps'
 import { ENGINE_PRESETS, findEnginePreset } from '../data/enginePresets'
 import { findClassificationTag } from '../data/classifications'
@@ -57,9 +58,9 @@ export function beginRestyling(vehicles: VehicleState, source: CarModel): void {
  * preset overall if somehow none qualify. Must exclude locked presets - ComponentSlotCard only cycles through unlocked
  * options, so defaulting to a locked one would leave the Engine step's card showing a different
  * engine than the one actually committed to the session. */
-function defaultEnginePresetFor(body: BodyStyleDefinition, currentYear: number) {
+function defaultEnginePresetFor(body: BodyStyleDefinition, isUnlocked: UnlockCheck) {
   const candidates = ENGINE_PRESETS.filter(
-    (p) => p.spec.displacementLiters <= body.engineBayCapacityLiters && p.unlockYear <= currentYear,
+    (p) => p.spec.displacementLiters <= body.engineBayCapacityLiters && isUnlocked(engineItem(p)),
   )
   const standard = candidates.find((p) => p.id === 'standard-i4')
   if (standard) return standard
@@ -76,13 +77,12 @@ export function selectBody(
   body: BodyStyleDefinition,
   bank: BankState,
   ledger: LedgerState,
-  currentYear: number,
+  isUnlocked: UnlockCheck,
   today: GameDate,
 ): boolean {
   if (!vehicles.currentSession) beginNewDesign(vehicles)
-  // Bodies have always carried an unlockYear, but nothing enforced it - every body was selectable
-  // from day one.
-  if (body.unlockYear > currentYear) return false
+  // Newer bodies have to be researched first (see core/unlocks.ts).
+  if (!isUnlocked(bodyItem(body))) return false
 
   if (!isBodyTooled(vehicles, body.id)) {
     // Was a bare tryWithdraw() - tooling spend never touched the ledger, even though 'Production'
@@ -112,9 +112,9 @@ export function selectBody(
   const existingPresetStillFits =
     existingPreset !== undefined &&
     existingPreset.spec.displacementLiters <= body.engineBayCapacityLiters &&
-    existingPreset.unlockYear <= currentYear
+    isUnlocked(engineItem(existingPreset))
   if (!existingPresetStillFits) {
-    const preset = defaultEnginePresetFor(body, currentYear)
+    const preset = defaultEnginePresetFor(body, isUnlocked)
     session.enginePresetId = preset.id
     session.engine = { ...preset.spec }
   }

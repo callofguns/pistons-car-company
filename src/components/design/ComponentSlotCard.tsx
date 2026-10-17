@@ -19,7 +19,7 @@ import {
   Wind,
   type LucideProps,
 } from 'lucide-react'
-import type { ComponentSlot } from '../../data/designSteps'
+import type { ComponentOption, ComponentSlot } from '../../data/designSteps'
 import { plainCurrency } from '../../core/numberFormat'
 import { useT } from '../../i18n/useT'
 import styles from './ComponentSlotCard.module.css'
@@ -45,22 +45,21 @@ const SLOT_ICONS: Record<string, ComponentType<LucideProps>> = {
 interface ComponentSlotCardProps {
   slot: ComponentSlot
   selectedOptionId: string | undefined
-  /** Options past the current in-game year are excluded from cycling - only the nearest one is
-   * hinted at, matching the reference's "locked until year X" cards. */
-  currentYear: number
+  /** Options not yet researched are excluded from cycling - only the nearest one is hinted at. */
+  isOptionUnlocked: (option: ComponentOption) => boolean
   onSelect: (optionId: string) => void
 }
 
 /** One part picker in the design wizard's right-hand list, laid out like the reference: slot name,
  * the chosen option, a "‹ 1/N ›" switcher and a faint part icon. The (i) corner button flips in
  * the option's description, price and next unlock. */
-export function ComponentSlotCard({ slot, selectedOptionId, currentYear, onSelect }: ComponentSlotCardProps) {
+export function ComponentSlotCard({ slot, selectedOptionId, isOptionUnlocked, onSelect }: ComponentSlotCardProps) {
   const { t } = useT()
   const [showInfo, setShowInfo] = useState(false)
-  const unlocked = slot.options.filter((o) => o.unlockYear <= currentYear)
-  const locked = slot.options.filter((o) => o.unlockYear > currentYear).sort((a, b) => a.unlockYear - b.unlockYear)
+  const unlocked = slot.options.filter(isOptionUnlocked)
+  const locked = slot.options.filter((o) => !isOptionUnlocked(o)).sort((a, b) => a.unlockYear - b.unlockYear)
 
-  if (unlocked.length === 0) return null // shouldn't happen - every slot's first option unlocks at 1950
+  if (unlocked.length === 0) return null // shouldn't happen - every slot's first option is free
 
   const index = Math.max(0, unlocked.findIndex((o) => o.id === selectedOptionId))
   const option = unlocked[index]
@@ -89,7 +88,7 @@ export function ComponentSlotCard({ slot, selectedOptionId, currentYear, onSelec
           {nextLocked && (
             <span className={styles.lockedHint}>
               <Lock size={11} />
-              {t('component.unlocksIn', { label: nextLocked.label, year: nextLocked.unlockYear })}
+              {t('component.unlocksIn', { label: nextLocked.label })}
             </span>
           )}
         </div>

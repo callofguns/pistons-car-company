@@ -14,6 +14,7 @@ import {
 } from '../core/save'
 import { takeLoan as coreTakeLoan } from '../core/economy'
 import { startResearch as coreStartResearch } from '../core/research'
+import { unlockedByResearch } from '../core/unlocks'
 import {
   hireEmployee as coreHireEmployee,
   fireEmployee as coreFireEmployee,
@@ -209,7 +210,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const { world, catalog } = get()
       const body = catalog.bodies.find((b) => b.id === bodyId)
       if (!body) return false
-      const ok = coreSelectBody(world.vehicles, body, world.bank, world.ledger, world.time.currentDate.year, world.time.currentDate)
+      const ok = coreSelectBody(world.vehicles, body, world.bank, world.ledger, unlockedByResearch(world.research), world.time.currentDate)
       bump()
       return ok
     },

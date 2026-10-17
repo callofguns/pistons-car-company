@@ -18,6 +18,7 @@ import { translateDesignStep } from '../i18n/designSteps'
 import { MeterBar } from '../components/MeterBar'
 import { Button } from '../components/Primitives'
 import { ComponentSlotCard } from '../components/design/ComponentSlotCard'
+import { engineItem, partItem, unlockedByResearch } from '../core/unlocks'
 import { ClassificationPicker } from '../components/design/ClassificationPicker'
 import { RatingResult } from '../components/design/RatingResult'
 import { PriceSlider } from '../components/design/PriceSlider'
@@ -121,7 +122,7 @@ export function CarDesignScreen() {
   const goHome = useUiStore((s) => s.goHome)
   useGameStore((s) => s.revision)
   const session = useGameStore((s) => s.world.vehicles.currentSession)
-  const currentYear = useGameStore((s) => s.world.time.currentDate.year)
+  const research = useGameStore((s) => s.world.research)
   const toggleClassificationTag = useGameStore((s) => s.toggleClassificationTag)
   const setComponentSelection = useGameStore((s) => s.setComponentSelection)
   const setEnginePreset = useGameStore((s) => s.setEnginePreset)
@@ -132,6 +133,7 @@ export function CarDesignScreen() {
   const { t } = useT()
 
   const body = CATALOG.bodies.find((b) => b.id === session?.selectedBodyId)
+  const isUnlocked = unlockedByResearch(research)
 
   const [stepIndex, setStepIndex] = useState(0)
   const [name, setName] = useState(() => generateDefaultName(body?.carClass, t))
@@ -324,7 +326,7 @@ export function CarDesignScreen() {
             <ComponentSlotCard
               slot={enginePresetSlot(body.engineBayCapacityLiters, t('carDesign.step.engine.title'), t)}
               selectedOptionId={session.enginePresetId ?? undefined}
-              currentYear={currentYear}
+              isOptionUnlocked={(option) => isUnlocked(engineItem(option))}
               onSelect={setEnginePreset}
             />
           )}
@@ -334,7 +336,7 @@ export function CarDesignScreen() {
               key={slot.id}
               slot={slot}
               selectedOptionId={session.componentSelections[slot.id]}
-              currentYear={currentYear}
+              isOptionUnlocked={(option) => isUnlocked(partItem(slot.id, option))}
               onSelect={(optionId) => setComponentSelection(slot.id, optionId)}
             />
           ))}

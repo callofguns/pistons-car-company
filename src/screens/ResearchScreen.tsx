@@ -5,7 +5,7 @@ import { researchPointsBonus } from '../core/staff'
 import { useGameStore } from '../store/useGameStore'
 import { CATALOG } from '../data/catalog'
 import { nodesInCategory } from '../core/catalog'
-import { canStartResearch, getNodeState, getProgress01, currentMoneyCost, isResearched, type ResearchCategory } from '../core/research'
+import { canStartResearch, getNodeState, getProgress01, currentMoneyCost, currentScienceCost, isResearched, type ResearchCategory } from '../core/research'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
 import { ResearchNodeCard } from '../components/ResearchNodeCard'
@@ -69,18 +69,24 @@ export function ResearchScreen() {
             : t('research.pointsIdle')}
         </p>
         <div className={styles.grid}>
-          {nodes.map((node) => (
-            <ResearchNodeCard
-              key={node.id}
-              node={node}
-              icon={<SelectedIcon size={28} strokeWidth={1.6} />}
-              state={getNodeState(research, node, currentYear)}
-              progress01={getProgress01(research, node.id)}
-              moneyCost={currentMoneyCost(research, node, currentYear)}
-              affordable={canStartResearch(research, node, bank, currentYear)}
-              onAction={() => startResearch(node.id)}
-            />
-          ))}
+          {nodes.map((node) => {
+            const state = getNodeState(research, node, currentYear)
+            // A card too far ahead shows its normal price, not today's (unbuyable) breakthrough one.
+            const costYear = state === 'TooEarly' ? node.availableYear : currentYear
+            return (
+              <ResearchNodeCard
+                key={node.id}
+                node={node}
+                icon={<SelectedIcon size={28} strokeWidth={1.6} />}
+                state={state}
+                progress01={getProgress01(research, node.id)}
+                moneyCost={currentMoneyCost(node, costYear)}
+                scienceCost={currentScienceCost(node, costYear)}
+                affordable={canStartResearch(research, node, bank, currentYear)}
+                onAction={() => startResearch(node.id)}
+              />
+            )
+          })}
         </div>
       </div>
     </div>

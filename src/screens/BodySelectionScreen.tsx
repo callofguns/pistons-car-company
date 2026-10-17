@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { bodyItem, unlockedByResearch } from '../core/unlocks'
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Lock, Wrench } from 'lucide-react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
@@ -26,7 +27,7 @@ export function BodySelectionScreen() {
   useGameStore((s) => s.revision)
   const selectBody = useGameStore((s) => s.selectBody)
   const tooledBodyIds = useGameStore((s) => s.world.vehicles.tooledBodyIds)
-  const currentYear = useGameStore((s) => s.world.time.currentDate.year)
+  const research = useGameStore((s) => s.world.research)
 
   const [index, setIndex] = useState(0)
   const [error, setError] = useState(false)
@@ -36,7 +37,7 @@ export function BodySelectionScreen() {
   const bodies = CATALOG.bodies
   const body = bodies[index]
   const alreadyTooled = tooledBodyIds.includes(body.id)
-  const locked = body.unlockYear > currentYear
+  const locked = !unlockedByResearch(research)(bodyItem(body))
   const bodyName = t(`data.body.${body.id}.name` as MessageKey)
 
   const go = (delta: number) => {

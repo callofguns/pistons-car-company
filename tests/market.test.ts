@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { unlockedByYear } from '../src/core/unlocks'
 import { onMarketDayTick, createCompetitorState } from '../src/core/market'
 import { createBank } from '../src/core/economy'
 import { createLedgerState } from '../src/core/ledger'
@@ -49,7 +50,7 @@ function buildModel(inventory: number) {
   const vehicles = createVehicleState()
 
   beginNewDesign(vehicles)
-  selectBody(vehicles, body, bank, ledger, 1974, today)
+  selectBody(vehicles, body, bank, ledger, unlockedByYear(1974), today)
   setEngineSpec(vehicles, DEFAULT_ENGINE_SPEC)
   setNameAndCategory(vehicles, 'Test Model', 'TEST')
   const model = finalizeDesign(vehicles, [body], new TechModifiers(), today, 1_000_000)

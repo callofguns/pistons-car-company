@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { unlockedByYear } from '../src/core/unlocks'
 import { createNewWorld, tickWorld } from '../src/core/world'
 import { DEFAULT_GAME_CONFIG } from '../src/core/gameConfig'
 import { CATALOG } from '../src/data/catalog'
@@ -14,7 +15,7 @@ function worldWithNewCar() {
   const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG)
   world.bank.balance = 10_000_000
   beginNewDesign(world.vehicles)
-  selectBody(world.vehicles, CATALOG.bodies[0], world.bank, world.ledger, 1970, world.time.currentDate)
+  selectBody(world.vehicles, CATALOG.bodies[0], world.bank, world.ledger, unlockedByYear(1970), world.time.currentDate)
   toggleClassificationTag(world.vehicles, 'budget')
   toggleClassificationTag(world.vehicles, 'sport')
   world.vehicles.currentSession!.name = 'Test'

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { unlockedByYear } from '../src/core/unlocks'
 import {
   buildSaveData,
   isCompatibleSave,
@@ -64,7 +65,7 @@ describe('save/load round trip', () => {
     const bank = createBank(1_000_000)
     const ledger = createLedgerState()
     beginNewDesign(vehicles)
-    selectBody(vehicles, body, bank, ledger, 1974, makeDate(1974, 1, 1))
+    selectBody(vehicles, body, bank, ledger, unlockedByYear(1974), makeDate(1974, 1, 1))
     setEngineSpec(vehicles, DEFAULT_ENGINE_SPEC)
     setNameAndCategory(vehicles, 'Coupe B200', 'TEST')
     const model = finalizeDesign(vehicles, [body], new TechModifiers(), makeDate(1974, 1, 1), 100_000)

@@ -33,7 +33,7 @@ describe('id-derived i18n keys exist for every data table entry', () => {
   })
 
   it('researchNodes.ts', () => {
-    for (const node of RESEARCH_NODES) assertKeyExists(`data.research.${node.id}.name`)
+    for (const node of RESEARCH_NODES.filter((n) => !n.unlocks)) assertKeyExists(`data.research.${node.id}.name`)
   })
 
   it('designSteps.ts - step title/breadcrumb', () => {
@@ -90,31 +90,16 @@ describe('id-derived i18n keys exist for every data table entry', () => {
       'data.research.engine-fuel-system.name',
       'data.research.bodies-aerodynamic-shell.name',
       'data.research.bodies-lightweight-chassis.name',
-      'data.research.bodies-composite-panels.name',
       'data.research.bodies-reinforced-frame.name',
       'data.research.bodies-modular-platform.name',
       'data.research.undercarriage-suspension-tuning.name',
-      'data.research.undercarriage-disc-brakes.name',
-      'data.research.undercarriage-alloy-wheels.name',
       'data.research.undercarriage-independent-rear-suspension.name',
       'data.research.undercarriage-anti-roll-bars.name',
-      'data.research.appearance-two-tone-paint.name',
-      'data.research.appearance-chrome-trim.name',
-      'data.research.appearance-led-headlights.name',
-      'data.research.appearance-alloy-rims.name',
-      'data.research.appearance-custom-livery.name',
-      'data.research.interior-leather-seats.name',
-      'data.research.interior-climate-control.name',
-      'data.research.interior-sound-insulation.name',
-      'data.research.interior-digital-dashboard.name',
-      'data.research.interior-premium-audio.name',
       'data.research.safety-seatbelt-pretensioners.name',
-      'data.research.safety-airbags.name',
       'data.research.safety-abs-braking.name',
-      'data.research.safety-crumple-zones.name',
       'data.research.safety-stability-control.name',
     ]
-    const actualIds = RESEARCH_NODES.map((n) => `data.research.${n.id}.name`)
+    const actualIds = RESEARCH_NODES.filter((n) => !n.unlocks).map((n) => `data.research.${n.id}.name`)
     expect(actualIds).toEqual(expectedIds)
   })
 })

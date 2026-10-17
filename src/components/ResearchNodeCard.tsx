@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { FlaskConical, Info, TriangleAlert } from 'lucide-react'
-import type { ResearchNodeDefinition, ResearchNodeState } from '../core/research'
+import { BREAKTHROUGH_MAX_YEARS_EARLY, type ResearchNodeDefinition, type ResearchNodeState } from '../core/research'
+import { researchNodeName } from '../i18n/research'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
 import { Button } from './Primitives'
@@ -11,6 +12,7 @@ interface ResearchNodeCardProps {
   state: ResearchNodeState
   progress01: number
   moneyCost: number
+  scienceCost: number
   /** False when the company is short on research points or cash for this node right now. */
   affordable: boolean
   icon: ReactNode
@@ -19,6 +21,7 @@ interface ResearchNodeCardProps {
 
 const STATE_LABEL_KEY: Record<ResearchNodeState, MessageKey> = {
   Locked: 'research.state.Locked',
+  TooEarly: 'research.state.TooEarly',
   AvailableNormal: 'research.state.AvailableNormal',
   AvailableBreakthrough: 'research.state.AvailableBreakthrough',
   InProgress: 'research.state.InProgress',
@@ -29,15 +32,15 @@ const STATE_LABEL_KEY: Record<ResearchNodeState, MessageKey> = {
  * progress %, name, research-point + money cost, and an action button whose label/color follow
  * ResearchNodeState. The (i) button flips the card to show what the research actually does.
  * Direct port of ResearchNodeCardView.cs. */
-export function ResearchNodeCard({ node, state, progress01, moneyCost, affordable, icon, onAction }: ResearchNodeCardProps) {
+export function ResearchNodeCard({ node, state, progress01, moneyCost, scienceCost, affordable, icon, onAction }: ResearchNodeCardProps) {
   const { t, fmt } = useT()
   const [showInfo, setShowInfo] = useState(false)
   // Was enabled even when unaffordable, so a tap silently did nothing.
   const interactable = (state === 'AvailableNormal' || state === 'AvailableBreakthrough') && affordable
   const variant = state === 'AvailableBreakthrough' ? 'danger' : state === 'AvailableNormal' ? 'primary' : 'secondary'
-  const name = t(`data.research.${node.id}.name` as MessageKey)
+  const name = researchNodeName(node, t)
   const early = state === 'AvailableBreakthrough'
-  const dim = state === 'Locked'
+  const dim = state === 'Locked' || state === 'TooEarly'
 
   return (
     <div className={`${styles.card} ${dim ? styles.dim : ''} ${state === 'Researched' ? styles.done : ''}`}>
@@ -65,6 +68,8 @@ export function ResearchNodeCard({ node, state, progress01, moneyCost, affordabl
 
       {showInfo ? (
         <ul className={styles.effects}>
+          {node.unlocks && <li>{t(`research.unlocks.${node.unlocks.kind}` as MessageKey)}</li>}
+          {node.prerequisiteId && state === 'Locked' && <li>{t('research.needsPrevious')}</li>}
           {node.effects.map((effect) => (
             <li key={effect.target}>
               {t(`research.effect.${effect.target}` as MessageKey, {
@@ -78,7 +83,7 @@ export function ResearchNodeCard({ node, state, progress01, moneyCost, affordabl
         <div className={styles.costRow}>
           <span className={styles.science}>
             <FlaskConical size={15} />
-            {node.scienceCost}
+            {scienceCost}
           </span>
           <span className={styles.money}>{fmt.money(moneyCost)}</span>
         </div>
@@ -91,7 +96,7 @@ export function ResearchNodeCard({ node, state, progress01, moneyCost, affordabl
       )}
 
       <Button variant={variant} className={styles.action} disabled={!interactable} onClick={onAction}>
-        {t(STATE_LABEL_KEY[state])}
+        {t(STATE_LABEL_KEY[state], { year: node.availableYear - BREAKTHROUGH_MAX_YEARS_EARLY })}
       </Button>
     </div>
   )

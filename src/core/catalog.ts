@@ -27,5 +27,5 @@ export function findBody(catalog: Catalog, id: string): BodyStyleDefinition | un
 }
 
 export function nodesInCategory(catalog: Catalog, category: ResearchCategory): ResearchNodeDefinition[] {
-  return catalog.researchNodes.filter((n) => n.category === category)
+  return catalog.researchNodes.filter((n) => n.category === category).sort((a, b) => a.availableYear - b.availableYear)
 }

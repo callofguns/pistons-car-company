@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { unlockedByYear } from '../src/core/unlocks'
 import { advanceOneDay, createNewWorld } from '../src/core/world'
 import { DEFAULT_GAME_CONFIG } from '../src/core/gameConfig'
 import { CATALOG } from '../src/data/catalog'
@@ -28,7 +29,7 @@ function buildWinningModel() {
   const bank = createBank(1_000_000)
   const ledger = createLedgerState()
   beginNewDesign(vehicles)
-  selectBody(vehicles, body, bank, ledger, 1980, makeDate(1980, 1, 1))
+  selectBody(vehicles, body, bank, ledger, unlockedByYear(1980), makeDate(1980, 1, 1))
   setEngineSpec(vehicles, DEFAULT_ENGINE_SPEC)
   setNameAndCategory(vehicles, 'Test Racer', 'TEST')
   const model = finalizeDesign(vehicles, [body], new TechModifiers(), makeDate(1980, 1, 1), 1_000_000)

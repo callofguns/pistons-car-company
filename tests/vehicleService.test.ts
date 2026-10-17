@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { unlockedByYear } from '../src/core/unlocks'
 import {
   createVehicleState,
   beginNewDesign,
@@ -45,15 +46,15 @@ describe('selectBody', () => {
     beginNewDesign(vehicles)
     const futureBody: BodyStyleDefinition = { ...bigBody, id: 'future-body', unlockYear: 1980, productionEquipmentCost: 50_000 }
 
-    expect(selectBody(vehicles, futureBody, bank, ledger, 1974, TODAY)).toBe(false)
+    expect(selectBody(vehicles, futureBody, bank, ledger, unlockedByYear(1974), TODAY)).toBe(false)
     expect(bank.balance).toBe(1_000_000)
-    expect(selectBody(vehicles, futureBody, bank, ledger, 1980, makeDate(1980, 1, 1))).toBe(true)
+    expect(selectBody(vehicles, futureBody, bank, ledger, unlockedByYear(1980), makeDate(1980, 1, 1))).toBe(true)
   })
 
   it('defaults to the Standard I4 when it fits', () => {
     const vehicles = createVehicleState()
     beginNewDesign(vehicles)
-    selectBody(vehicles, bigBody, createBank(1_000_000), createLedgerState(), 1974, TODAY)
+    selectBody(vehicles, bigBody, createBank(1_000_000), createLedgerState(), unlockedByYear(1974), TODAY)
     expect(vehicles.currentSession!.enginePresetId).toBe('standard-i4')
   })
 
@@ -63,7 +64,7 @@ describe('selectBody', () => {
     const ledger = createLedgerState()
     beginNewDesign(vehicles)
 
-    selectBody(vehicles, bigBody, bank, ledger, 1974, TODAY)
+    selectBody(vehicles, bigBody, bank, ledger, unlockedByYear(1974), TODAY)
 
     const session = vehicles.currentSession!
     const totalSlots = DESIGN_STEPS.flatMap((s) => s.slots).length
@@ -81,11 +82,11 @@ describe('selectBody', () => {
     const ledger = createLedgerState()
     beginNewDesign(vehicles)
 
-    selectBody(vehicles, bigBody, bank, ledger, 1974, TODAY)
+    selectBody(vehicles, bigBody, bank, ledger, unlockedByYear(1974), TODAY)
     setEnginePreset(vehicles, 'muscle-v8') // 5.0L - fits the 7L body, would not fit the 1.2L one
     expect(vehicles.currentSession!.engine.displacementLiters).toBe(5.0)
 
-    selectBody(vehicles, smallBody, bank, ledger, 1974, TODAY)
+    selectBody(vehicles, smallBody, bank, ledger, unlockedByYear(1974), TODAY)
 
     expect(vehicles.currentSession!.engine.displacementLiters).toBeLessThanOrEqual(smallBody.engineBayCapacityLiters)
     const preset = findEnginePreset(vehicles.currentSession!.enginePresetId!)
@@ -98,9 +99,9 @@ describe('selectBody', () => {
     const ledger = createLedgerState()
     beginNewDesign(vehicles)
 
-    selectBody(vehicles, bigBody, bank, ledger, 1974, TODAY)
+    selectBody(vehicles, bigBody, bank, ledger, unlockedByYear(1974), TODAY)
     setEnginePreset(vehicles, 'standard-i4') // 1.6L - fits both bodies
-    selectBody(vehicles, bigBody, bank, ledger, 1974, TODAY) // re-selecting the same body shouldn't reset it
+    selectBody(vehicles, bigBody, bank, ledger, unlockedByYear(1974), TODAY) // re-selecting the same body shouldn't reset it
 
     expect(vehicles.currentSession!.enginePresetId).toBe('standard-i4')
   })
