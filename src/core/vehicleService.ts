@@ -1,4 +1,6 @@
 import { developmentDaysFor } from './development'
+
+const RESTYLE_MIN_DEVELOPMENT_DAYS = 10
 import { calculateCarSpecs, type DesignChoices } from './carSpecsCalculator'
 import { tryWithdrawRecorded, type BankState } from './economy'
 import type { LedgerState } from './ledger'
@@ -257,7 +259,9 @@ export function finalizeDesign(
     marketingEfficiencyMultiplier: 1,
   }
 
-  const developmentDays = developmentDaysFor(stats.unitCost, session.classificationTagIds)
+  // A restyle reuses the old car's engineering, so it's ready in about half the time.
+  const fullDays = developmentDaysFor(stats.unitCost, session.classificationTagIds)
+  const developmentDays = session.sourceModelId ? Math.max(RESTYLE_MIN_DEVELOPMENT_DAYS, Math.round(fullDays / 2)) : fullDays
   model.developmentDaysRemaining = developmentDays
   model.developmentDaysTotal = developmentDays
 

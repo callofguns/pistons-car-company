@@ -1,4 +1,5 @@
 import type { Catalog } from './catalog'
+import { freshness } from './aging'
 import { activeEvents, combineEvents, eventChangesToday, type EventEffects } from './events'
 import { createCompanyState, createRumorState, postResearchRumor, postSaleRumor, type CompanyState, type RumorState } from './company'
 import { applyOverdraftInterest, checkBankruptcy, createBank, onLoanMonthTick, payMandatory, type BankState } from './economy'
@@ -80,7 +81,8 @@ export function marketConditionsFor(world: World, events: EventEffects): MarketC
     fuelEconomyWeightMultiplier: events.fuelEconomyWeightMultiplier,
     powerWeightMultiplier: events.powerWeightMultiplier,
     classDemandMultiplier: events.classDemandMultiplier,
-    modelMultiplier: events.modelMultiplier,
+    // Laws in force x how fresh the design still is.
+    modelMultiplier: (model) => events.modelMultiplier(model) * freshness(model, world.time.currentDate),
   }
 }
 

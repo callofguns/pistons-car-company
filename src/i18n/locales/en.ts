@@ -314,6 +314,9 @@ export const en = {
   // sales statistics screen
   'salesStats.noModels': 'No models to report on yet.',
   'salesStats.advisorMessage': 'Boss! Here is the sales statistics of the current model',
+  'salesStats.advisorOld': 'This design is getting old, so it sells less every year. Create a restyling on the Models screen to make it fresh again.',
+  'salesStats.labelFreshness': 'Freshness',
+  'salesStats.freshnessValue': '{percent}% · {years} yrs old',
   'salesStats.labelTotalSold': 'Total sold',
   'salesStats.labelInStock': 'In stock',
   'salesStats.labelOnOrder': 'On order at the Factory',

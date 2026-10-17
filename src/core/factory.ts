@@ -33,11 +33,11 @@ export interface LineLevelDefinition {
 }
 
 export const LINE_LEVELS: LineLevelDefinition[] = [
-  { level: 1, carsPerDay: 20, upgradeCost: 0, monthlyUpkeep: 150_000 },
-  { level: 2, carsPerDay: 40, upgradeCost: 3_000_000, monthlyUpkeep: 250_000 },
-  { level: 3, carsPerDay: 80, upgradeCost: 8_000_000, monthlyUpkeep: 450_000 },
-  { level: 4, carsPerDay: 160, upgradeCost: 20_000_000, monthlyUpkeep: 800_000 },
-  { level: 5, carsPerDay: 320, upgradeCost: 50_000_000, monthlyUpkeep: 1_500_000 },
+  { level: 1, carsPerDay: 20, upgradeCost: 0, monthlyUpkeep: 300_000 },
+  { level: 2, carsPerDay: 40, upgradeCost: 3_000_000, monthlyUpkeep: 500_000 },
+  { level: 3, carsPerDay: 80, upgradeCost: 8_000_000, monthlyUpkeep: 900_000 },
+  { level: 4, carsPerDay: 160, upgradeCost: 20_000_000, monthlyUpkeep: 1_600_000 },
+  { level: 5, carsPerDay: 320, upgradeCost: 50_000_000, monthlyUpkeep: 3_000_000 },
 ]
 
 /** Cost to build an additional level-1 line. */

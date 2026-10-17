@@ -105,7 +105,7 @@ function captureShare(appeal: number): number {
  * double keeps ~8%. */
 export function affordability(price: number, expectedPrice: number): number {
   const ratio = price / Math.max(1, expectedPrice)
-  return ratio <= 1 ? 1 + (1 - ratio) * 0.3 : Math.exp(-2.5 * (ratio - 1))
+  return ratio <= 1 ? 1 + (1 - ratio) * 0.3 : Math.exp(-4 * (ratio - 1))
 }
 
 /** Expected (fractional) cars per day this model would sell today with unlimited stock. */

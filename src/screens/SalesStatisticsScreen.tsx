@@ -3,6 +3,8 @@ import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { grouped } from '../core/numberFormat'
 import { carsOnOrder } from '../core/factory'
+import { freshness, modelAgeYears } from '../core/aging'
+import { isInDevelopment } from '../core/development'
 import { useT } from '../i18n/useT'
 import { CarCarousel } from '../components/CarCarousel'
 import { AdvisorPanel } from '../components/AdvisorPanel'
@@ -18,6 +20,7 @@ export function SalesStatisticsScreen() {
   useGameStore((s) => s.revision)
   const models = useGameStore((s) => s.world.vehicles.models)
   const factory = useGameStore((s) => s.world.factory)
+  const today = useGameStore((s) => s.world.time.currentDate)
   const setOnSale = useGameStore((s) => s.setOnSale)
   const { t, tp, fmt } = useT()
 
@@ -43,12 +46,14 @@ export function SalesStatisticsScreen() {
 
   const model = models[Math.min(index, models.length - 1)]
   const onOrder = carsOnOrder(factory, model.id)
+  const fresh = isInDevelopment(model) ? 1 : freshness(model, today)
+  const ageYears = isInDevelopment(model) ? 0 : modelAgeYears(model, today)
 
   return (
     <div className={`${styles.screen} ${styles.columns}`}>
       <div className={styles.column}>
         {/* Ben Gross is a proper noun, not translated - see EmployeesScreen for the same rule. */}
-        <AdvisorPanel name="Ben Gross" message={t('salesStats.advisorMessage')} />
+        <AdvisorPanel name="Ben Gross" message={fresh < 0.8 ? t('salesStats.advisorOld') : t('salesStats.advisorMessage')} />
         <CarCarousel
           model={model}
           indexOneBased={index + 1}
@@ -69,6 +74,7 @@ export function SalesStatisticsScreen() {
 
       <div className={`${styles.column} ${styles.card}`}>
         <StatRow label={t('salesStats.labelTotalSold')} value={grouped(model.totalSold)} />
+        <StatRow label={t('salesStats.labelFreshness')} value={t('salesStats.freshnessValue', { percent: Math.round(fresh * 100), years: ageYears.toFixed(1) })} />
         <StatRow label={t('salesStats.labelInStock')} value={grouped(model.inventory)} />
         <StatRow label={t('salesStats.labelOnOrder')} value={grouped(onOrder)} />
         <StatRow label={t('salesStats.labelSalesIncome')} value={fmt.money(model.lastDayRevenue)} />

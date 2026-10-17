@@ -88,7 +88,7 @@ export function calculateCarSpecs(
   // misses badly still keeps 70% of it - fit shapes price, it doesn't gate the design entirely.
   // ~45% markup over cost for a mid-market design - real carmakers work on thin margins, so the
   // money comes from volume.
-  const suggestedPrice = unitCost * 1.45 * tagPriceMultiplier * (0.7 + 0.3 * (fitPercent / 100))
+  const suggestedPrice = unitCost * 1.3 * tagPriceMultiplier * (0.7 + 0.3 * (fitPercent / 100))
 
   const rating = computeRating(powerHp, reliability, fuelConsumption, zeroToHundred)
 
