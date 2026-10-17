@@ -9,8 +9,11 @@ import path from 'node:path'
 // Update this if the repo is created under a different name.
 const REPO_NAME = 'pistons-car-company'
 
+// ITCH=1 builds a copy for itch.io: relative paths, since itch serves games from a sub-folder.
+const forItch = Boolean(process.env.ITCH)
+
 export default defineConfig({
-  base: process.env.GITHUB_PAGES ? `/${REPO_NAME}/` : '/',
+  base: forItch ? './' : process.env.GITHUB_PAGES ? `/${REPO_NAME}/` : '/',
   plugins: [
     react(),
     VitePWA({
