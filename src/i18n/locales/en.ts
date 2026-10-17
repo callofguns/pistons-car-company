@@ -330,6 +330,18 @@ export const en = {
   'component.previousLabel': 'Previous {label}',
   'component.nextLabel': 'Next {label}',
   'component.unlocksIn': '{label} unlocks {year}',
+  'component.info': 'About {label}',
+  'carDesign.specifications': 'Specifications',
+  'carDesign.previousStep': 'Previous step',
+  'carDesign.nextStep': 'Next step',
+  'carDesign.parts': 'Parts',
+  'carDesign.topSpeed': 'Top speed',
+  'specs.torque': '{value} NM',
+  'specs.peakTorqueAt': 'Peak torque at',
+  'specs.rpm': '{value} RPM',
+  'specs.fuelUse': 'Fuel use',
+  'carDesign.designFit': 'Design fit',
+  'carDesign.kmh': '{value} km/h',
 
   // classification tags (Class/Type picker) - label+description per tag. Note 'medium' here is a
   // DIFFERENT key/word than data.loanTier.medium.name or data.promoTier.medium.name even though

@@ -27,7 +27,7 @@ export function PromotionScreen() {
     return (
       <div className={styles.screen}>
         <Heading>{t('promotion.selectMethod')}</Heading>
-        <div className={styles.grid}>
+        <div className={styles.tierRow}>
           {CATALOG.promotionTiers.map((tier) => (
             <PromotionTierCard
               key={tier.id}

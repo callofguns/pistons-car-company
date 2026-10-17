@@ -1,0 +1,109 @@
+/* The "showroom" layout shared by the design wizard and Model Lineup, like the reference: three
+   columns over the factory backdrop - a list | the car | a list. The page itself never scrolls (it
+   is exactly the space under the top bar); only the two side lists do. */
+.page {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(200px, 24%) minmax(0, 1fr) minmax(220px, 26%);
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-5) var(--space-4);
+  overflow: hidden;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.side,
+.center {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- side columns ---------- */
+
+.sideHeader,
+.partsHeader {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  height: 40px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* The light "SPECIFICATIONS" dropdown bar from the reference. */
+.sideHeader {
+  border: 1px solid #fff;
+  background: linear-gradient(to bottom, #eef2fb, #c9d2e6);
+  color: #13204a;
+  box-shadow: var(--shadow-button);
+}
+
+.partsHeader {
+  padding: 0;
+  background: rgba(10, 18, 48, 0.8);
+  border: 1px solid var(--color-border);
+}
+
+.partsArrow {
+  width: 34px;
+  height: 100%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius);
+  background: linear-gradient(to bottom, #6a7290, #4b5370);
+  color: #fff;
+}
+
+.partsArrow:disabled {
+  opacity: 0.35;
+}
+
+.sideList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: var(--space-2);
+  padding-right: 2px;
+}
+
+
+@media (max-height: 560px) {
+  .page {
+    grid-template-columns: minmax(170px, 23%) minmax(0, 1fr) minmax(190px, 26%);
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3) var(--space-2);
+  }
+  .sideHeader,
+  .partsHeader {
+    height: 30px;
+    font-size: 0.75rem;
+  }
+  .sideList {
+    gap: 4px;
+    margin-top: 4px;
+  }
+}

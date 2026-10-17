@@ -73,7 +73,7 @@ export function NewsScreen() {
 
       <Heading>{t('news.screenTitle')}</Heading>
 
-      <div className={newsStyles.list}>
+      <div className={`${styles.fill} ${newsStyles.list}`}>
         {entries.length === 0 && <span className={styles.empty}>{t('news.empty')}</span>}
         {entries.map((entry) => (
           <div key={entry.id} className={`${newsStyles.row} ${!entry.read ? newsStyles.unread : ''}`}>

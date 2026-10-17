@@ -1,66 +1,75 @@
 .card {
-  background: var(--color-panel-glass);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-large);
-  padding: var(--space-3);
+  position: relative;
+  flex: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  background: rgba(10, 18, 48, 0.72);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
-.label {
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+/* The big faint part icon on the right, like the reference's line-art sketches. */
+.art {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  width: 64px;
+  height: 64px;
+  transform: translateY(-50%);
+  color: rgba(200, 220, 255, 0.28);
+  pointer-events: none;
 }
 
-.cycler {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.arrow {
-  width: 36px;
-  height: 36px;
-  flex: none;
+.infoButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  border-radius: 0 var(--radius) 0 var(--radius);
+  background: var(--color-accent);
+  color: #fff;
 }
 
-.optionInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 0;
-}
-
-.optionName {
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.index {
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-}
-
-.description {
+.label {
+  position: relative;
   color: var(--color-text-secondary);
   font-size: 0.8rem;
 }
 
-.costDelta {
-  color: var(--color-green);
-  font-size: 0.85rem;
+.optionName {
+  position: relative;
   font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding-right: 64px;
+}
+
+.costDelta {
+  position: relative;
+  color: var(--color-green);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.details {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 60px;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
 }
 
 .lockedHint {
@@ -68,5 +77,57 @@
   align-items: center;
   gap: 4px;
   color: var(--color-text-disabled);
-  font-size: 0.75rem;
+}
+
+.cycler {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: 2px;
+}
+
+.arrow {
+  width: 30px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-primary);
+}
+
+.arrow:disabled {
+  opacity: 0.3;
+}
+
+.index {
+  min-width: 2.5em;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+@media (max-height: 560px) {
+  .card {
+    padding: 6px var(--space-2);
+  }
+
+  .art {
+    width: 44px;
+    height: 44px;
+    right: 14px;
+  }
+
+  .optionName {
+    font-size: 0.8rem;
+    padding-right: 46px;
+  }
+
+  .label {
+    font-size: 0.7rem;
+  }
 }

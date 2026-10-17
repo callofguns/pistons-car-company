@@ -22,7 +22,9 @@ export function TopHud() {
   const back = useUiStore((s) => s.back)
   // Office Hub is always entered with an empty back-stack (see goHome('OfficeHub') call sites),
   // so it never shows the arrow - every screen opened from it does.
-  const canGoBack = useUiStore((s) => s.history.length > 0)
+  const historyBack = useUiStore((s) => s.history.length > 0)
+  const hudOverride = useUiStore((s) => s.hudOverride)
+  const canGoBack = historyBack || hudOverride !== null
 
   // Subscribing to revision is enough to re-render this bar whenever anything in the world
   // changes; the actual values are read fresh from world below.
@@ -52,14 +54,14 @@ export function TopHud() {
     <div className={styles.bar}>
       <div className={styles.left}>
         {canGoBack && (
-          <Button className={styles.squareButton} onClick={back} aria-label={t('common.back')}>
+          <Button className={styles.squareButton} onClick={hudOverride?.onBack ?? back} aria-label={t('common.back')}>
             <ArrowLeft size={22} strokeWidth={2.5} />
           </Button>
         )}
         {currentScreen !== 'OfficeHub' && (
           <div className={styles.titleColumn}>
-            <span className={styles.menuLabel}>{t('common.menu')}</span>
-            <span className={styles.screenTitle}>{t(SCREEN_TITLE_KEYS[currentScreen])}</span>
+            <span className={styles.menuLabel}>{hudOverride?.menuLabel ?? t('common.menu')}</span>
+            <span className={styles.screenTitle}>{hudOverride?.title ?? t(SCREEN_TITLE_KEYS[currentScreen])}</span>
           </div>
         )}
       </div>

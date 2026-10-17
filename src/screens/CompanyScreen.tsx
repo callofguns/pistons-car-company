@@ -25,31 +25,18 @@ export function CompanyScreen() {
 
   return (
     <div className={styles.columnsPage}>
-      <div className={`${styles.column} ${styles.columnMedium} ${styles.card}`}>
+      {/* Who you are: the HQ drawing, name, city, and the next upgrade. */}
+      <div className={`${styles.column} ${styles.card} ${companyStyles.identity}`}>
         <OfficeArt level={company.hqLevel} className={companyStyles.office} title={t(level.displayNameKey)} />
-        <Heading style={{ textAlign: 'center' }}>{company.companyName}</Heading>
-        <span style={{ textAlign: 'center', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
-          {company.homeCity}
-        </span>
-
-        <StatRow label={t('company.autoReleased')} value={String(company.autoReleasedCount)} />
-        <StatRow label={t('company.totalSold')} value={fmt.compact(company.totalCarsSoldAllModels)} />
-        <StatRow label={t('company.marketShare')} value={fmt.percent(company.marketSharePercent, 0)} />
-        <StatRow label={t('company.earned')} value={fmt.money(company.lifetimeEarnings)} />
-
-        <h3 className={styles.sectionTitle} style={{ marginTop: 'var(--space-3)' }}>
-          {t('company.hqTitle')}
-        </h3>
-        <StatRow label={t('company.hqLevel')} value={t(level.displayNameKey)} />
-        <StatRow label={t('company.hqSlots')} value={String(level.slots)} />
-        <StatRow label={t('company.hqOverhead')} value={t('employees.perMonth', { amount: fmt.money(level.monthlyOverhead) })} />
+        <Heading style={{ textAlign: 'center', fontSize: '1.1rem' }}>{company.companyName}</Heading>
+        <span className={companyStyles.city}>{company.homeCity}</span>
 
         {next ? (
           <>
-            <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
+            <span className={companyStyles.nextLevel}>
               {t('company.hqNextLevel', { name: t(next.displayNameKey), slots: next.slots, cost: fmt.money(next.upgradeCost) })}
             </span>
-            {hqError && <span style={{ color: 'var(--color-danger)' }}>{t('company.hqNotEnoughCash')}</span>}
+            {hqError && <span style={{ color: 'var(--color-danger)', fontSize: '0.8rem' }}>{t('company.hqNotEnoughCash')}</span>}
             <Button
               variant="primary"
               onClick={() => {
@@ -60,18 +47,31 @@ export function CompanyScreen() {
             </Button>
           </>
         ) : (
-          <span style={{ color: 'var(--color-text-secondary)' }}>{t('company.hqMaxLevel')}</span>
+          <span className={companyStyles.nextLevel}>{t('company.hqMaxLevel')}</span>
         )}
       </div>
 
+      {/* The numbers. */}
+      <div className={`${styles.column} ${styles.card}`}>
+        <StatRow label={t('company.autoReleased')} value={String(company.autoReleasedCount)} />
+        <StatRow label={t('company.totalSold')} value={fmt.compact(company.totalCarsSoldAllModels)} />
+        <StatRow label={t('company.marketShare')} value={fmt.percent(company.marketSharePercent, 0)} />
+        <StatRow label={t('company.earned')} value={fmt.money(company.lifetimeEarnings)} />
+        <h3 className={styles.sectionTitle} style={{ marginTop: 'var(--space-2)' }}>
+          {t('company.hqTitle')}
+        </h3>
+        <StatRow label={t('company.hqLevel')} value={t(level.displayNameKey)} />
+        <StatRow label={t('company.hqSlots')} value={String(level.slots)} />
+        <StatRow label={t('company.hqOverhead')} value={t('employees.perMonth', { amount: fmt.money(level.monthlyOverhead) })} />
+      </div>
+
+      {/* Gossip feed - scrolls on its own. */}
       <div className={`${styles.column} ${styles.card}`}>
         <h3 className={styles.sectionTitle}>{t('company.rumors')}</h3>
-        <div style={{ overflowY: 'auto' }}>
-          {rumors.recent.length === 0 && <span className={styles.empty}>{t('company.noRumors')}</span>}
-          {rumors.recent.slice(0, 8).map((text, i) => (
-            <RumorRow key={i} text={text} />
-          ))}
-        </div>
+        {rumors.recent.length === 0 && <span className={styles.empty}>{t('company.noRumors')}</span>}
+        {rumors.recent.slice(0, 8).map((text, i) => (
+          <RumorRow key={i} text={text} />
+        ))}
       </div>
     </div>
   )

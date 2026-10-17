@@ -78,7 +78,7 @@ export function TeamCreationScreen() {
       </Button>
 
       {racing.isRegistered && (
-        <div className={styles.card} style={{ width: '100%' }}>
+        <div className={`${styles.card} ${styles.fill}`} style={{ width: '100%' }}>
           {racing.pendingEntry ? (
             <span style={{ color: 'var(--color-text-secondary)' }}>
               {t('team.pendingEntry', { tier: raceTierName(racing.pendingEntry.tierId, t), model: racing.pendingEntry.modelName })}

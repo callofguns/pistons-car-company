@@ -16,6 +16,27 @@
   flex-shrink: 0;
 }
 
+/* The one part of a .screen allowed to take the leftover height and scroll inside itself (a
+   News feed, race results) - so the screen around it never has to. */
+.screen > .fill {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Promotion/Race tier cards: one row, sharing the width equally, instead of wrapping onto a
+   second row that pushes the page into scrolling. */
+.tierRow {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.tierRow > * {
+  width: auto;
+}
+
 /* Vertically centers a short screen's content, but - unlike plain justify-content:center - never
    pushes the top of a tall screen out of reach above the scroll area on a short phone. */
 .verticallyCentered {
@@ -56,13 +77,17 @@
 /* Modifier for screens that use .columns as their outermost element (Research, Company) instead
    of nesting it inside .screen (Model Lineup) - carries the padding/scroll .screen would normally
    provide, so those screens don't need to inline it themselves. */
+/* A page that is two or three columns side by side (Staff, Company, Research). The page itself
+   never scrolls - each column fills the height under the top bar and scrolls on its own if its
+   content is taller. */
 .columnsPage {
   composes: columns;
-  padding: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  overflow: hidden;
+}
+
+.columnsPage > .column {
   overflow-y: auto;
-  /* Each column (often a .card) is as tall as its content and the page scrolls - stretching them
-     to the page height instead clipped the bottom of a tall card (Company's Upgrade button). */
-  align-items: flex-start;
 }
 
 .column {
@@ -84,6 +109,11 @@
 }
 
 @media (max-height: 560px) {
+  .columnsPage {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-3);
+  }
+
   .columnNarrow {
     max-width: 140px;
   }
@@ -131,4 +161,9 @@
   .card {
     padding: var(--space-3);
   }
+}
+
+/* A showroom side-panel header that's just a label (no dropdown/arrows) - centered. */
+.staticHeader {
+  justify-content: center;
 }

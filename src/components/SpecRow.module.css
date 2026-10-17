@@ -1,0 +1,49 @@
+.specRow {
+  flex: none;
+  display: grid;
+  grid-template-columns: 22px auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  padding: 7px var(--space-3);
+  background: rgba(10, 18, 48, 0.72);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.specIcon {
+  color: var(--color-text-secondary);
+}
+
+.specLabel {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.specValue {
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-height: 560px) {
+  .specRow {
+    grid-template-columns: 16px auto minmax(0, 1fr);
+    gap: 6px;
+    padding: 4px var(--space-2);
+  }
+  .specRow svg {
+    width: 14px;
+    height: 14px;
+  }
+  .specLabel {
+    font-size: 0.7rem;
+  }
+  .specValue {
+    font-size: 0.75rem;
+  }
+}

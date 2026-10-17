@@ -5,6 +5,7 @@
   border-radius: 999px;
   overflow: hidden;
   height: 18px;
+  width: 100%;
 }
 
 .fill {

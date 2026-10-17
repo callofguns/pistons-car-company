@@ -28,7 +28,7 @@ export function RaceEntryScreen() {
     return (
       <div className={styles.screen}>
         <Heading>{t('race.selectTier')}</Heading>
-        <div className={styles.grid}>
+        <div className={styles.tierRow}>
           {CATALOG.raceTiers.map((tier) => (
             <RaceTierCard key={tier.id} tier={tier} unlocked={isRaceTierUnlocked(tier, currentYear)} onSelect={() => setTierId(tier.id)} />
           ))}

@@ -41,14 +41,14 @@ export function BankScreen() {
   const incomeCategories = Object.entries(ledger.monthIncomeByCategory) as [TransactionCategory, number][]
 
   return (
-    <div className={styles.screen}>
+    <div className={`${styles.screen} ${bankStyles.page}`}>
       <div className={bankStyles.balance}>
         <span className={styles.sectionTitle}>{t('bank.cashBalance')}</span>
         <span className={`${bankStyles.balanceValue} ${bank.balance < 0 ? bankStyles.negative : ''}`}>{plainCurrency(bank.balance)}</span>
         {bank.balance < 0 && <span style={{ color: 'var(--color-danger)' }}>{t('bank.overdraftWarning')}</span>}
       </div>
 
-      <div className={bankStyles.columns}>
+      <div className={`${styles.fill} ${bankStyles.columns}`}>
         <div className={styles.card}>
           <h3 className={styles.sectionTitle}>{t('bank.thisMonth')}</h3>
           <StatRow label={t('bank.income')} value={fmt.money(income)} />

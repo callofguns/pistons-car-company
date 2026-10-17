@@ -1,8 +1,13 @@
+.page {
+  overflow: hidden;
+}
+
 .balance {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  column-gap: var(--space-3);
 }
 
 .balanceValue {
@@ -19,14 +24,18 @@
 /* This month's books on the left, loans on the right; stacks on narrow screens. */
 .columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
   gap: var(--space-4);
-  align-items: start;
+}
+
+.columns > * {
+  overflow-y: auto;
 }
 
 .loans {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: var(--space-3);
 }
 
@@ -59,6 +68,18 @@
 
 @media (max-height: 560px) {
   .balanceValue {
-    font-size: 1.6rem;
+    font-size: 1.3rem;
+  }
+
+  .columns {
+    gap: var(--space-2);
+  }
+
+  .loanCard {
+    padding: var(--space-2);
+  }
+
+  .loanAmount {
+    font-size: 1rem;
   }
 }

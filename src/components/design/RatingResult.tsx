@@ -29,7 +29,7 @@ export function RatingResult({ title, value0to5, advisorName, message }: RatingR
         })}
       </div>
       <span className={styles.score}>{value0to5.toFixed(1)} / 5</span>
-      <AdvisorPanel name={advisorName} message={message} />
+      <AdvisorPanel name={advisorName} message={message} stacked />
     </div>
   )
 }

@@ -3,14 +3,12 @@ import type { ScreenId } from './screenId'
 import type { MessageKey } from '../i18n/keys'
 
 /** Main Menu is the title screen, before a session is really "in progress" - the persistent stat
- * bar was asked to come back off of it specifically. The design wizard (CarDesign) also runs
- * full-screen without it, as its own focused flow with its own back navigation and cost readout.
- * Every other screen, including Office Hub and Body Selection (like the reference), keeps it. */
+ * bar was asked to come back off of it specifically. Every in-game screen, including Office Hub,
+ * Body Selection and the design wizard (like the reference), keeps it. */
 const SCREENS_WITHOUT_HUD = new Set<ScreenId>([
   'MainMenu',
   'CompanyNaming',
   'SaveSlots',
-  'CarDesign',
   // Reachable from the Main Menu, where world is a blank unsaved createNewWorld() - the HUD would
   // otherwise render stats (company name, cash, date) for a company that doesn't exist. News is
   // also reachable from Office Hub with a real world loaded, but SCREENS_WITHOUT_HUD is per-screen
@@ -47,7 +45,17 @@ export const SCREEN_TITLE_KEYS: Record<ScreenId, MessageKey> = {
   News: 'news.screenTitle',
 }
 
+/** Lets a screen with its own internal steps (the design wizard) take over the top bar's title
+ * and back arrow, so Back walks back through its steps instead of leaving the screen. */
+export interface HudOverride {
+  menuLabel: string
+  title: string
+  onBack: () => void
+}
+
 interface UiStore {
+  hudOverride: HudOverride | null
+  setHudOverride: (override: HudOverride | null) => void
   currentScreen: ScreenId
   /** Optional navigation context, e.g. a CarModel id to jump straight to in Sales Statistics or Model Lineup. */
   payload: unknown
@@ -65,6 +73,8 @@ interface UiStore {
  * UIRouter.cs's Show/Back/GoHome API onto a Zustand store instead of a MonoBehaviour.
  */
 export const useUiStore = create<UiStore>((set, get) => ({
+  hudOverride: null,
+  setHudOverride: (hudOverride) => set({ hudOverride }),
   currentScreen: 'MainMenu',
   payload: undefined,
   history: [],

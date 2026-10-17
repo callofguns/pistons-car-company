@@ -5,13 +5,20 @@ import { useActiveTutorialStep } from '../store/useTutorialStore'
 import { grouped, plainCurrency } from '../core/numberFormat'
 import { useT } from '../i18n/useT'
 import { formatCategoryTag } from '../i18n/vehicles'
+import { Banknote, Calendar, Car, ChartColumn, Factory, Star, Tag } from 'lucide-react'
 import { CarCarousel } from '../components/CarCarousel'
-import { StatRow } from '../components/StatRow'
+import { SpecRow } from '../components/SpecRow'
+import { SpecSheet } from '../components/SpecSheet'
 import { TutorialCard } from '../components/TutorialCard'
-import { Button, Heading } from '../components/Primitives'
+import { Button } from '../components/Primitives'
+import { FactoryBackdrop } from '../art/FactoryBackdrop'
 import styles from './screen.module.css'
+import layout from './showroom.module.css'
+import lineupStyles from './ModelLineupScreen.module.css'
 
-/** The full spec-sheet browser matching the reference's "Coupe B250 / LUXURY + SPORT / 10/10" screen, with "CREATE RESTYLING" to spin up a new design pre-filled from the current model. */
+/** The model browser in the showroom layout: spec sheet on the left, the car (with its carousel) in
+ * the middle, sales figures on the right, and "CREATE RESTYLING" to spin up a new design pre-filled
+ * from the current model. Only the side lists scroll. */
 export function ModelLineupScreen() {
   const show = useUiStore((s) => s.show)
   const payload = useUiStore((s) => s.payload)
@@ -46,64 +53,65 @@ export function ModelLineupScreen() {
   const s = model.stats
 
   return (
-    <div className={styles.screen}>
-      {tutorialStep && <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />}
-      <CarCarousel
-        model={model}
-        indexOneBased={index + 1}
-        total={models.length}
-        onPrevious={() => setIndex((i) => Math.max(0, i - 1))}
-        onNext={() => setIndex((i) => Math.min(models.length - 1, i + 1))}
-      />
-      <Heading style={{ textAlign: 'center' }}>{model.name}</Heading>
-      <span style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>{formatCategoryTag(model, locale)}</span>
+    <div className={layout.page}>
+      <FactoryBackdrop className={layout.backdrop} />
 
-      <div className={styles.columns}>
-        <div className={`${styles.column} ${styles.card}`}>
-          <StatRow label={t('modelLineup.labelPower')} value={t('modelLineup.power', { value: Math.round(s.powerHp) })} />
-          <StatRow
-            label={t('modelLineup.labelTorque')}
-            value={t('modelLineup.torque', { value: Math.round(s.torqueNm), rpm: Math.round(s.torqueRpm) })}
-          />
-          <StatRow
-            label={t('modelLineup.labelEngineVolume')}
-            value={t('modelLineup.engineVolume', { value: model.engine.displacementLiters.toFixed(1) })}
-          />
-          <StatRow
-            label={t('modelLineup.labelFuelConsumption')}
-            value={t('modelLineup.fuelConsumption', { value: s.fuelConsumptionL100Km.toFixed(1) })}
-          />
-          <StatRow
-            label={t('modelLineup.labelReliability')}
-            value={t('modelLineup.reliability', { value: Math.round(s.reliabilityPercent) })}
-          />
-          <StatRow label={t('modelLineup.labelEmissions')} value={t('modelLineup.emissions', { value: Math.round(s.emissionsGKm) })} />
-          <StatRow label={t('modelLineup.labelRepairCost')} value={plainCurrency(s.repairCost)} />
-          <StatRow label={t('modelLineup.labelWeight')} value={t('modelLineup.weight', { value: Math.round(s.weightKg) })} />
-          <StatRow label={t('modelLineup.labelMaxRpm')} value={`${Math.round(s.maxRpm)}`} />
-          <StatRow
-            label={t('modelLineup.labelZeroToHundred')}
-            value={t('modelLineup.zeroToHundred', { value: s.zeroToHundredSec.toFixed(1) })}
-          />
+      <aside className={layout.side}>
+        <div className={`${layout.sideHeader} ${styles.staticHeader}`}>
+          <span>{t('carDesign.specifications')}</span>
         </div>
-        <div className={`${styles.column} ${styles.card}`}>
-          <StatRow label={t('modelLineup.labelRating')} value={String(s.rating)} />
-          <StatRow label={t('modelLineup.labelCarsSold')} value={grouped(model.totalSold)} />
-          <StatRow label={t('modelLineup.labelEarnings')} value={fmt.money(model.lifetimeEarnings)} />
-          <StatRow label={t('modelLineup.labelYearOfIssue')} value={fmt.date(model.issueDate)} />
-          <StatRow label={t('modelLineup.labelCostPrice')} value={plainCurrency(model.unitCost)} />
-          <StatRow label={t('modelLineup.labelPrice')} value={plainCurrency(model.salePrice)} />
+        <div className={layout.sideList}>
+          <SpecSheet stats={s} engineLiters={model.engine.displacementLiters} />
         </div>
-      </div>
+      </aside>
 
-      <Button
-        onClick={() => {
-          beginRestyling(model.id)
-          show('BodySelection')
-        }}
-      >
-        {t('modelLineup.createRestyling')}
-      </Button>
+      <section className={`${layout.center} ${lineupStyles.center}`}>
+        <span className={lineupStyles.name}>{model.name}</span>
+        <span className={lineupStyles.tag}>{formatCategoryTag(model, locale)}</span>
+        <div className={lineupStyles.stage}>
+          <CarCarousel
+            fill
+            model={model}
+            indexOneBased={index + 1}
+            total={models.length}
+            onPrevious={() => setIndex((i) => Math.max(0, i - 1))}
+            onNext={() => setIndex((i) => Math.min(models.length - 1, i + 1))}
+          />
+          {tutorialStep && (
+            <div className={lineupStyles.tutorial}>
+              <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />
+            </div>
+          )}
+        </div>
+        <Button
+          variant="primary"
+          className={lineupStyles.restyle}
+          onClick={() => {
+            beginRestyling(model.id)
+            show('BodySelection')
+          }}
+        >
+          {t('modelLineup.createRestyling')}
+        </Button>
+      </section>
+
+      <aside className={layout.side}>
+        <div className={`${layout.sideHeader} ${styles.staticHeader}`}>
+          <span>{t('nav.models')}</span>
+        </div>
+        <div className={layout.sideList}>
+          <SpecRow Icon={Star} label={t('modelLineup.labelRating')} value={String(s.rating)} />
+          <SpecRow Icon={Car} label={t('modelLineup.labelCarsSold')} value={grouped(model.totalSold)} />
+          <SpecRow Icon={Banknote} label={t('modelLineup.labelEarnings')} value={fmt.money(model.lifetimeEarnings)} />
+          <SpecRow Icon={Calendar} label={t('modelLineup.labelYearOfIssue')} value={fmt.date(model.issueDate)} />
+          <SpecRow Icon={Factory} label={t('modelLineup.labelCostPrice')} value={plainCurrency(model.unitCost)} />
+          <SpecRow Icon={Tag} label={t('modelLineup.labelPrice')} value={plainCurrency(model.salePrice)} />
+          <Button className={lineupStyles.statsButton} onClick={() => show('SalesStatistics', model.id)}>
+            <ChartColumn size={16} />
+            {t('screen.salesStatistics.title')}
+          </Button>
+        </div>
+      </aside>
     </div>
   )
 }

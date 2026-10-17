@@ -55,3 +55,21 @@
     height: 40px;
   }
 }
+
+.fill {
+  height: 100%;
+}
+
+.fill .previewArea {
+  height: 100%;
+}
+
+.fill .previewBox {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+.fill .car {
+  max-width: 560px;
+}
