@@ -1,6 +1,6 @@
 {
   "name": "pistons-car-company",
-  "version": "1.7.0-alpha",
+  "version": "2.0.0-beta",
   "private": true,
   "type": "module",
   "scripts": {
