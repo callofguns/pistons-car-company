@@ -8,6 +8,7 @@ import { RUMOR_TEMPLATES } from './rumorTemplates'
 import { HQ_LEVELS } from './hqLevels'
 import { EMPLOYEE_PERKS } from './employeePerks'
 import { EMPLOYEE_NAMES } from './employeeNames'
+import { HISTORY_EVENTS } from './historyEvents'
 
 /** All authored content, assembled. Loaded once at app startup. */
 export const CATALOG: Catalog = {
@@ -20,4 +21,5 @@ export const CATALOG: Catalog = {
   hqLevels: HQ_LEVELS,
   employeePerks: EMPLOYEE_PERKS,
   employeeNames: EMPLOYEE_NAMES,
+  historyEvents: HISTORY_EVENTS,
 }

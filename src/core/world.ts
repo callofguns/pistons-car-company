@@ -1,4 +1,5 @@
 import type { Catalog } from './catalog'
+import { activeEvents, combineEvents, eventChangesToday, type EventEffects } from './events'
 import { createCompanyState, createRumorState, postResearchRumor, postSaleRumor, type CompanyState, type RumorState } from './company'
 import { applyOverdraftInterest, checkBankruptcy, createBank, onLoanMonthTick, payMandatory, type BankState } from './economy'
 import type { GameConfig } from './gameConfig'
@@ -68,13 +69,18 @@ export function createNewWorld(config: GameConfig, catalog: Catalog, companyName
 }
 
 /** Today's market conditions: difficulty plus (later) history events and per-model factors. */
-export function marketConditionsFor(world: World): MarketConditions {
+/** Today's history events, added up. */
+export function eventEffectsFor(world: World, catalog: Catalog): EventEffects {
+  return combineEvents(activeEvents(catalog.historyEvents, world.time.currentDate))
+}
+
+export function marketConditionsFor(world: World, events: EventEffects): MarketConditions {
   return {
-    demandMultiplier: difficultySettings(world.company.difficulty).demandMultiplier,
-    fuelEconomyWeightMultiplier: 1,
-    powerWeightMultiplier: 1,
-    classDemandMultiplier: {},
-    modelMultiplier: () => 1,
+    demandMultiplier: difficultySettings(world.company.difficulty).demandMultiplier * events.demandMultiplier,
+    fuelEconomyWeightMultiplier: events.fuelEconomyWeightMultiplier,
+    powerWeightMultiplier: events.powerWeightMultiplier,
+    classDemandMultiplier: events.classDemandMultiplier,
+    modelMultiplier: events.modelMultiplier,
   }
 }
 
@@ -84,6 +90,10 @@ export function marketConditionsFor(world: World): MarketConditions {
  * balance. Monthly bills (wages, HQ overhead, line upkeep, storage, loans) land on day 1. */
 export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig, today: GameDate): void {
   const difficulty = difficultySettings(world.company.difficulty)
+  const changes = eventChangesToday(catalog.historyEvents, today)
+  for (const event of changes.started) postNews(world.news, 'HistoryEventStarted', today, { eventId: event.id })
+  for (const event of changes.ended) postNews(world.news, 'HistoryEventEnded', today, { eventId: event.id })
+  const events = eventEffectsFor(world, catalog)
 
   // Research points are earned only on days when at least one car is in development (Engineers
   // raise the rate) - researching itself keeps progressing either way.
@@ -101,8 +111,8 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
 
   onStaffDayTick(world.staff, catalog.employeePerks)
   const built = onFactoryDayTick(world.factory, world.vehicles.models, world.bank, world.ledger, today, {
-    speedMultiplier: 1 + productionSpeedBonusPercent(world.staff, catalog.employeePerks) / 100,
-    unitCostMultiplier: difficulty.costMultiplier * (1 - Math.min(90, unitCostReductionPercent(world.staff, catalog.employeePerks)) / 100),
+    speedMultiplier: (1 + productionSpeedBonusPercent(world.staff, catalog.employeePerks) / 100) * events.productionSpeedMultiplier,
+    unitCostMultiplier: difficulty.costMultiplier * events.productionCostMultiplier * (1 - Math.min(90, unitCostReductionPercent(world.staff, catalog.employeePerks)) / 100),
   })
   for (const model of world.vehicles.models) if (built.has(model.id)) model.outOfStockNotified = false
 
@@ -123,7 +133,7 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
     today,
     world.company,
     world.competitors,
-    marketConditionsFor(world),
+    marketConditionsFor(world, events),
   )
 
   world.vehicles.models.forEach((model, i) => {

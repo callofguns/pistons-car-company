@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { ComponentType } from 'react'
 import {
   Banknote,
@@ -6,6 +6,7 @@ import {
   Car,
   ChartColumn,
   Flag,
+  Globe,
   FlaskConical,
   Landmark,
   Megaphone,
@@ -21,6 +22,8 @@ import type { NewsEventType } from '../core/news'
 import { useGameStore } from '../store/useGameStore'
 import { useT } from '../i18n/useT'
 import { renderNewsHeadline } from '../i18n/news'
+import type { MessageKey } from '../i18n/keys'
+import { activeEvents } from '../core/events'
 import { tryLoadFromStorage } from '../core/save'
 import type { NewsEntry } from '../core/news'
 import { Heading } from '../components/Primitives'
@@ -53,6 +56,9 @@ export function NewsScreen() {
   useGameStore((s) => s.revision)
   const liveNews = useGameStore((s) => s.world.news)
   const markAllNewsRead = useGameStore((s) => s.markAllNewsRead)
+  const today = useGameStore((s) => s.world.time.currentDate)
+  const catalog = useGameStore((s) => s.catalog)
+  const [openEventId, setOpenEventId] = useState<string | null>(null)
   const { t, fmt } = useT()
 
   const menuPayload = asMenuPayload(payload)
@@ -73,6 +79,8 @@ export function NewsScreen() {
       <BackButton />
 
       <Heading>{t('news.screenTitle')}</Heading>
+
+      {!menuPayload && <ActiveEvents events={activeEvents(catalog.historyEvents, today).map((e) => e.id)} openId={openEventId} onToggle={(id) => setOpenEventId((v) => (v === id ? null : id))} />}
 
       <div className={`${styles.fill} ${newsStyles.list}`}>
         {entries.length === 0 && <span className={styles.empty}>{t('news.empty')}</span>}
@@ -104,6 +112,30 @@ const NEWS_ICONS: Partial<Record<NewsEventType, { Icon: ComponentType<LucideProp
   RacingTeamRegistered: { Icon: Flag, color: 'var(--color-trim)' },
   RaceCompleted: { Icon: Trophy, color: 'var(--color-trim)' },
   HQUpgraded: { Icon: Building2, color: 'var(--color-accent-hover)' },
+  HistoryEventStarted: { Icon: Globe, color: 'var(--color-trim)' },
+  HistoryEventEnded: { Icon: Globe, color: 'var(--color-text-secondary)' },
+}
+
+/** "Happening now": every history event currently affecting the market, as chips - tap one to
+ * read what it does. */
+function ActiveEvents({ events, openId, onToggle }: { events: string[]; openId: string | null; onToggle: (id: string) => void }) {
+  const { t } = useT()
+  if (events.length === 0) return null
+  const open = openId && events.includes(openId) ? openId : null
+  return (
+    <div className={newsStyles.events}>
+      <span className={newsStyles.eventsLabel}>
+        <Globe size={14} />
+        {t('news.activeEvents')}
+      </span>
+      {events.map((id) => (
+        <button key={id} className={`${newsStyles.eventChip} ${open === id ? newsStyles.eventChipOpen : ''}`} onClick={() => onToggle(id)} aria-pressed={open === id}>
+          {t(`data.historyEvent.${id}.name` as MessageKey)}
+        </button>
+      ))}
+      {open && <span className={newsStyles.eventDescription}>{t(`data.historyEvent.${open}.description` as MessageKey)}</span>}
+    </div>
+  )
 }
 
 /** A colored icon per kind of headline, so the feed scans at a glance. */

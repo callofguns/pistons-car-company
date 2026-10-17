@@ -38,6 +38,13 @@ const BY_CATEGORY: Partial<Record<ResearchCategory, NodeSpec[]>> = {
   ],
 }
 
+/** Emission-cutting research, timed for the emission laws in data/historyEvents.ts. Not chained. */
+const EMISSIONS_NODES: (NodeSpec & { year: number })[] = [
+  { name: 'Catalytic Converter', effect: { target: 'Emissions', amount: -0.2 }, year: 1974 },
+  { name: 'Exhaust Gas Recirculation', effect: { target: 'Emissions', amount: -0.15 }, year: 1990 },
+  { name: 'Direct Injection', effect: { target: 'Emissions', amount: -0.15 }, year: 2006 },
+]
+
 /** Which research tab each design step's part unlocks live in. */
 const STEP_CATEGORY: Record<string, ResearchCategory> = {
   Safety: 'Safety',
@@ -170,6 +177,20 @@ function buildResearchNodes(): ResearchNodeDefinition[] {
       year += 2
       index += 1
     }
+  }
+
+  for (const spec of EMISSIONS_NODES) {
+    nodes.push({
+      id: `engine-${slug(spec.name)}`,
+      displayName: spec.name,
+      category: 'Engine',
+      availableYear: spec.year,
+      prerequisiteId: null,
+      scienceCost: 40 + Math.round((spec.year - 1970) * 1.5),
+      moneyCost: 2_000_000 + (spec.year - 1970) * 50_000,
+      durationDays: 15,
+      effects: [spec.effect],
+    })
   }
 
   return nodes

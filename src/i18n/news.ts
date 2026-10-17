@@ -69,6 +69,13 @@ export function renderNewsHeadline(entry: NewsEntry, t: ReturnType<typeof useT>[
     }
     case 'HQUpgraded':
       return t('news.hqUpgraded', { level: hqLevelName(Number(entry.params.level), t) })
+    case 'HistoryEventStarted':
+      return t('news.historyEventStarted', {
+        name: t(`data.historyEvent.${entry.params.eventId}.name` as MessageKey),
+        description: t(`data.historyEvent.${entry.params.eventId}.description` as MessageKey),
+      })
+    case 'HistoryEventEnded':
+      return t('news.historyEventEnded', { name: t(`data.historyEvent.${entry.params.eventId}.name` as MessageKey) })
     default: {
       const exhaustive: never = entry.type
       return exhaustive

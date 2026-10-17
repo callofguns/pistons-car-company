@@ -6,6 +6,7 @@ import type { RumorTemplateSet } from './company'
 import type { RaceTierDefinition } from './racing'
 import type { HQLevelDefinition } from './hq'
 import type { EmployeePerkDefinition } from './staff'
+import type { HistoryEventDefinition } from './events'
 
 /** All authored content in one place - the TS equivalent of DefinitionCatalog.cs, just a plain object instead of a ScriptableObject asset. Loaded once from src/data/, never mutated at runtime. */
 export interface Catalog {
@@ -20,6 +21,8 @@ export interface Catalog {
   /** Applicant/employee name pool - see staff.ts's generateCandidate. Catalog-wired (rather than
    * imported directly into staff.ts) so staff.ts stays as fixture-testable as racing.ts. */
   employeeNames: string[]
+  /** Real-world history (oil crises, recessions, new laws) - see core/events.ts. */
+  historyEvents: HistoryEventDefinition[]
 }
 
 export function findBody(catalog: Catalog, id: string): BodyStyleDefinition | undefined {

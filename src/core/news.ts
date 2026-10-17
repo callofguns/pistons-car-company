@@ -27,6 +27,8 @@ export type NewsEventType =
   | 'RacingTeamRegistered'
   | 'RaceCompleted'
   | 'HQUpgraded'
+  | 'HistoryEventStarted'
+  | 'HistoryEventEnded'
 
 export interface NewsEntry {
   id: string
