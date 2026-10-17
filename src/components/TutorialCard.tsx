@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import type { TutorialStep } from '../data/tutorialSteps'
 import { TUTORIAL_STEPS } from '../data/tutorialSteps'
 import { useT } from '../i18n/useT'
@@ -20,6 +21,14 @@ export function TutorialCard({ step, onNext, onSkip }: TutorialCardProps) {
   const { t } = useT()
   const stepNumber = TUTORIAL_STEPS.findIndex((s) => s.id === step.id) + 1
   const isLastStep = stepNumber === TUTORIAL_STEPS.length
+
+  // On a short landscape phone this card can push the button it's pointing at below the fold -
+  // scroll it into view so "tap the highlighted button" is never asking for something off-screen.
+  useEffect(() => {
+    if (!step.targetId) return
+    const target = document.querySelector(`[data-tutorial-target="${step.targetId}"]`)
+    target?.scrollIntoView({ block: 'nearest' })
+  }, [step.targetId])
 
   return (
     <div className={styles.card}>

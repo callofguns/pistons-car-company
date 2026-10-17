@@ -44,7 +44,6 @@ export const en = {
   'menu.play': 'PLAY ({companyName})',
   'menu.saves': 'SAVES',
   'menu.news': 'NEWS',
-  'menu.language': 'LANGUAGE',
 
   // save slots screen
   'saveSlots.overwriteHeading': 'CHOOSE A SLOT TO OVERWRITE',
@@ -645,9 +644,6 @@ export const en = {
 
   'hud.inDebt': 'IN DEBT',
 
-  // language screen
-  'language.screenTitle': 'Language',
-  'language.pseudoOption': 'Pseudo (dev)',
 
   // stats.* - pluralized, _one/_other sibling pairs (see plural() in ./t.ts). Seeded here ahead of
   // their PR 2 call sites (SalesStatisticsScreen) since they fix two live pluralization bugs

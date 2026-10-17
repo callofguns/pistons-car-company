@@ -31,6 +31,7 @@
 .costPrice {
   margin-left: auto;
   text-align: right;
+  flex: none;
 }
 
 .costPriceLabel {
@@ -46,11 +47,10 @@
 }
 
 .body {
-  flex: 1;
+  flex: 1 0 auto;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
-  min-height: 0;
   /* Now that this screen runs full-screen (no top HUD eating vertical space), .body has real
      room to spare - center its content as a block instead of letting it cling to the top with a
      dead gap below, so the extra height actually reads as "used" rather than empty. align-content

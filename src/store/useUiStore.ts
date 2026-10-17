@@ -17,7 +17,6 @@ const SCREENS_WITHOUT_HUD = new Set<ScreenId>([
   // otherwise render stats (company name, cash, date) for a company that doesn't exist. News is
   // also reachable from Office Hub with a real world loaded, but SCREENS_WITHOUT_HUD is per-screen
   // not per-context, and this screen has its own back button either way (see NewsScreen.tsx).
-  'Language',
   'News',
 ])
 
@@ -45,9 +44,8 @@ export const SCREEN_TITLE_KEYS: Record<ScreenId, MessageKey> = {
   TeamCreation: 'screen.teamCreation.title',
   Bank: 'screen.bank.title',
   RaceEntry: 'screen.raceEntry.title',
-  // Not actually shown - both are in SCREENS_WITHOUT_HUD - but this is a
+  // Not actually shown - it's in SCREENS_WITHOUT_HUD - but this is a
   // Record<ScreenId, MessageKey>, so every screen needs an entry regardless.
-  Language: 'language.screenTitle',
   News: 'news.screenTitle',
 }
 

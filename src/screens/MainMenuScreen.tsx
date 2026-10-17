@@ -29,13 +29,14 @@ function findMostRecentSlot(): RecentSlot | null {
  * bottom-right corner. */
 export function MainMenuScreen() {
   const show = useUiStore((s) => s.show)
+  const goHome = useUiStore((s) => s.goHome)
   const loadSlot = useGameStore((s) => s.loadSlot)
   const { t } = useT()
 
   const mostRecent = findMostRecentSlot()
 
   const handlePlay = () => {
-    if (mostRecent && loadSlot(mostRecent.index)) show('OfficeHub')
+    if (mostRecent && loadSlot(mostRecent.index)) goHome('OfficeHub')
   }
 
   return (
@@ -60,9 +61,6 @@ export function MainMenuScreen() {
             played most recently, same slot PLAY resumes. See NewsScreen.tsx's payload handling. */}
         <Button variant="ghost" disabled={!mostRecent} onClick={() => mostRecent && show('News', { slotIndex: mostRecent.index })}>
           {t('menu.news')}
-        </Button>
-        <Button variant="ghost" onClick={() => show('Language')}>
-          {t('menu.language')}
         </Button>
       </div>
 

@@ -1,15 +1,8 @@
 import type { Locale } from './locale'
 import type { MessageKey, PluralKey } from './keys'
 import { en } from './locales/en'
-import { es } from './locales/es'
-import { fr } from './locales/fr'
 
-/** All three catalogs bundled eagerly (~10 KB gzipped total - noise next to the app's 5 self-
- * hosted font files, see tokens.css). Lazy-loading would make setLocale async and force an
- * English flash on cold start for a non-EN player in an app that already precaches everything
- * offline anyway - not worth it for this catalog size. Revisit only if a much larger locale
- * (e.g. a CJK one, which would also need a font change) lands. */
-const CATALOGS: Record<Locale, Record<MessageKey, string>> = { en, es, fr }
+const CATALOGS: Record<Locale, Record<MessageKey, string>> = { en }
 
 function catalogOf(locale: Locale): Record<MessageKey, string> {
   return CATALOGS[locale]

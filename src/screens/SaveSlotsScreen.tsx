@@ -31,6 +31,7 @@ function asNewGamePayload(payload: unknown): NewGamePayload | null {
 export function SaveSlotsScreen() {
   const back = useUiStore((s) => s.back)
   const show = useUiStore((s) => s.show)
+  const goHome = useUiStore((s) => s.goHome)
   const payload = useUiStore((s) => s.payload)
   const loadSlot = useGameStore((s) => s.loadSlot)
   const startNewGameInSlot = useGameStore((s) => s.startNewGameInSlot)
@@ -46,7 +47,7 @@ export function SaveSlotsScreen() {
     if (newGame) {
       if (data === null || confirmingIndex === index) {
         startNewGameInSlot(index, newGame.pendingCompanyName)
-        show('OfficeHub')
+        goHome('OfficeHub')
         return
       }
       setConfirmingIndex(index)
@@ -54,7 +55,7 @@ export function SaveSlotsScreen() {
     }
 
     if (data === null) return // nothing to continue in an empty slot
-    if (loadSlot(index)) show('OfficeHub')
+    if (loadSlot(index)) goHome('OfficeHub')
   }
 
   const handleDeleteClick = (index: number) => {
@@ -100,7 +101,7 @@ export function SaveSlotsScreen() {
                   <>
                     <span className={slotStyles.name}>{data.companyName}</span>
                     <span className={slotStyles.meta}>
-                      {fmt.date(makeDate(data.year, data.month, data.day))} · {fmt.compact(data.cashBalance)}
+                      {fmt.date(makeDate(data.year, data.month, data.day))} · {fmt.money(data.cashBalance)}
                     </span>
                     {confirmingIndex === index && <span className={slotStyles.confirm}>{t('saveSlots.tapAgainToOverwrite')}</span>}
                   </>

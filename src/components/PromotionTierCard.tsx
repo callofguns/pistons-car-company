@@ -32,7 +32,7 @@ export function PromotionTierCard({ tier, unlocked, onSelect }: PromotionTierCar
           <span>{t(CHANNEL_LABEL_KEY[channel])}</span>
         </div>
       ))}
-      <div className={styles.cost}>{fmt.compact(tier.cost)}</div>
+      <div className={styles.cost}>{fmt.money(tier.cost)}</div>
       <Button variant="primary" disabled={!unlocked} onClick={onSelect}>
         {t('promotion.select')}
       </Button>

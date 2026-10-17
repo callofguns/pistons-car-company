@@ -50,17 +50,19 @@ export function beginRestyling(vehicles: VehicleState, source: CarModel): void {
   }
 }
 
-/** Picks the best-fit preset engine for a body's bay capacity and the current year - the largest-
- * displacement preset that both fits and is unlocked, falling back to the smallest-displacement
- * preset overall if somehow none qualify (shouldn't happen: economy-i3 unlocks in 1950 and fits
- * every body). Must exclude locked presets - ComponentSlotCard only cycles through unlocked
+/** Picks a sensible, affordable starting engine for a new design: the everyday Standard I4 when it
+ * fits the bay, otherwise the smallest-displacement preset that fits and is unlocked. (Was the
+ * largest that fit, which handed every Budget car a V6 by default.) Falls back to the smallest
+ * preset overall if somehow none qualify. Must exclude locked presets - ComponentSlotCard only cycles through unlocked
  * options, so defaulting to a locked one would leave the Engine step's card showing a different
  * engine than the one actually committed to the session. */
 function defaultEnginePresetFor(body: BodyStyleDefinition, currentYear: number) {
   const candidates = ENGINE_PRESETS.filter(
     (p) => p.spec.displacementLiters <= body.engineBayCapacityLiters && p.unlockYear <= currentYear,
   )
-  const sorted = [...candidates].sort((a, b) => b.spec.displacementLiters - a.spec.displacementLiters)
+  const standard = candidates.find((p) => p.id === 'standard-i4')
+  if (standard) return standard
+  const sorted = [...candidates].sort((a, b) => a.spec.displacementLiters - b.spec.displacementLiters)
   if (sorted.length > 0) return sorted[0]
   return [...ENGINE_PRESETS].sort((a, b) => a.spec.displacementLiters - b.spec.displacementLiters)[0]
 }

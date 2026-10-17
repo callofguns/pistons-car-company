@@ -42,9 +42,11 @@ export function EmployeeRow({ employee, actionLabel, actionVariant = 'secondary'
         )}
       </div>
 
-      <MeterBar value01={employee.skill / MAX_EMPLOYEE_SKILL} displayValue={`${employee.skill}/${MAX_EMPLOYEE_SKILL}`} />
+      <div className={styles.skill}>
+        <MeterBar value01={employee.skill / MAX_EMPLOYEE_SKILL} displayValue={`${employee.skill}/${MAX_EMPLOYEE_SKILL}`} />
+      </div>
 
-      <span className={styles.salary}>{t('employees.perMonth', { amount: fmt.compact(employee.monthlySalary) })}</span>
+      <span className={styles.salary}>{t('employees.perMonth', { amount: fmt.money(employee.monthlySalary) })}</span>
 
       <Button variant={actionVariant} disabled={actionDisabled} onClick={onAction}>
         {actionLabel}

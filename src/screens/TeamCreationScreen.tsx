@@ -57,7 +57,7 @@ export function TeamCreationScreen() {
         </Button>
       </div>
 
-      <span style={{ color: 'var(--color-green)' }}>{fmt.compact(RACING_REGISTRATION_COST)}</span>
+      <span style={{ color: 'var(--color-green)' }}>{fmt.money(RACING_REGISTRATION_COST)}</span>
 
       {!racing.isRegistered && !unlocked && <span style={{ color: 'var(--color-text-secondary)' }}>{t('team.locked')}</span>}
 
@@ -90,7 +90,7 @@ export function TeamCreationScreen() {
                 {t('team.resultRow', { tier: raceTierName(result.tierId, t), position: result.position, fieldSize: result.fieldSize })}
               </span>
               <span style={{ color: result.prize > 0 ? 'var(--color-green)' : 'var(--color-text-disabled)' }}>
-                {result.prize > 0 ? t('team.resultPrize', { prize: fmt.compact(result.prize) }) : t('team.resultNoPrize')}
+                {result.prize > 0 ? t('team.resultPrize', { prize: fmt.money(result.prize) }) : t('team.resultNoPrize')}
               </span>
             </div>
           ))}

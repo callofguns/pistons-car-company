@@ -19,7 +19,7 @@ describe('numberFormat', () => {
   })
 
   it('space-groups thousands with no suffix', () => {
-    expect(grouped(97257)).toBe('97 257')
+    expect(grouped(97257)).toBe('97,257')
   })
 
   it('does not group a value under one thousand', () => {
@@ -27,11 +27,15 @@ describe('numberFormat', () => {
   })
 
   it('space-groups every triad in a large value', () => {
-    expect(grouped(1_234_567)).toBe('1 234 567')
+    expect(grouped(1_234_567)).toBe('1,234,567')
   })
 
-  it('prefixes a dollar sign without grouping', () => {
-    expect(plainCurrency(27902)).toBe('$27902')
+  it('prefixes a dollar sign and groups thousands', () => {
+    expect(plainCurrency(27902)).toBe('$27,902')
+  })
+
+  it('puts a negative sign before the dollar sign', () => {
+    expect(plainCurrency(-1500)).toBe('-$1,500')
   })
 
   it('gives positive deltas a plus sign', () => {

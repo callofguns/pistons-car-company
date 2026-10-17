@@ -33,17 +33,17 @@ export function CompanyScreen() {
         <StatRow label={t('company.autoReleased')} value={String(company.autoReleasedCount)} />
         <StatRow label={t('company.totalSold')} value={fmt.compact(company.totalCarsSoldAllModels)} />
         <StatRow label={t('company.marketShare')} value={fmt.percent(company.marketSharePercent, 0)} />
-        <StatRow label={t('company.earned')} value={fmt.compact(company.lifetimeEarnings)} />
+        <StatRow label={t('company.earned')} value={fmt.money(company.lifetimeEarnings)} />
 
         <Heading style={{ fontSize: '1.1rem', marginTop: 'var(--space-3)' }}>{t('company.hqTitle')}</Heading>
         <StatRow label={t('company.hqLevel')} value={t(level.displayNameKey)} />
         <StatRow label={t('company.hqSlots')} value={String(level.slots)} />
-        <StatRow label={t('company.hqOverhead')} value={t('employees.perMonth', { amount: fmt.compact(level.monthlyOverhead) })} />
+        <StatRow label={t('company.hqOverhead')} value={t('employees.perMonth', { amount: fmt.money(level.monthlyOverhead) })} />
 
         {next ? (
           <>
             <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
-              {t('company.hqNextLevel', { name: t(next.displayNameKey), slots: next.slots, cost: fmt.compact(next.upgradeCost) })}
+              {t('company.hqNextLevel', { name: t(next.displayNameKey), slots: next.slots, cost: fmt.money(next.upgradeCost) })}
             </span>
             {hqError && <span style={{ color: 'var(--color-danger)' }}>{t('company.hqNotEnoughCash')}</span>}
             <Button

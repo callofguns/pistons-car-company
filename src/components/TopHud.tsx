@@ -6,13 +6,17 @@ import { HudPill } from './HudPill'
 import styles from './TopHud.module.css'
 
 /**
- * The persistent chrome bar: back/home + current screen title (left), stat pills (center),
- * finance + playback controls (right). Direct port of TopHudView.cs.
+ * The persistent chrome bar: back arrow + current screen title (left), stat pills (center),
+ * finance, playback and main-menu controls (right). Direct port of TopHudView.cs.
  */
 export function TopHud() {
   const currentScreen = useUiStore((s) => s.currentScreen)
   const goHome = useUiStore((s) => s.goHome)
   const show = useUiStore((s) => s.show)
+  const back = useUiStore((s) => s.back)
+  // Office Hub is always entered with an empty back-stack (see goHome('OfficeHub') call sites),
+  // so it never shows the arrow - every screen opened from it does.
+  const canGoBack = useUiStore((s) => s.history.length > 0)
 
   // Subscribing to revision is enough to re-render this bar whenever anything in the world
   // changes; the actual values are read fresh from world below.
@@ -26,10 +30,9 @@ export function TopHud() {
 
   const { company, time, bank } = world
 
-  // Exits the current session back to the title screen (Continue/New Game/...), from anywhere -
-  // not just Office Hub, which is why it's not called "home" in code even though the icon still
-  // reads that way to the player. Saves first so Continue on Main Menu picks this session back up
-  // exactly where it left off, same as if the tab had just been closed here. goHome() clears
+  // Exits the current session back to the title screen, from anywhere. Saves first so Continue on
+  // Main Menu picks this session back up exactly where it left off, same as if the tab had just
+  // been closed here. goHome() clears
   // history/payload outright, so nothing stale is left for the CarDesign/BodySelection screens'
   // own back buttons to wander back into later.
   const goToMainMenu = () => {
@@ -40,9 +43,11 @@ export function TopHud() {
   return (
     <div className={styles.bar}>
       <div className={styles.left}>
-        <Button className={styles.iconButton} onClick={goToMainMenu} aria-label={t('common.mainMenu')}>
-          🏠
-        </Button>
+        {canGoBack && (
+          <Button className={styles.iconButton} onClick={back} aria-label={t('common.back')}>
+            ‹
+          </Button>
+        )}
         <div className={styles.titleColumn}>
           <span className={styles.menuLabel}>{t('common.menu')}</span>
           <span className={styles.screenTitle}>{t(SCREEN_TITLE_KEYS[currentScreen])}</span>
@@ -52,7 +57,7 @@ export function TopHud() {
       <div className={styles.pills}>
         <HudPill icon="👑" value={fmt.percent(company.reputationPercent, 1)} />
         <HudPill icon="👥" value={fmt.compact(company.populationServed)} />
-        <HudPill icon="💰" value={fmt.compact(bank.balance)} />
+        <HudPill icon="💰" value={fmt.money(bank.balance)} />
         <HudPill icon="🗓️" value={fmt.date(time.currentDate)} />
         {/* A negative balance is a genuine emergency (it's what feeds the bankruptcy countdown) -
             this pill only appears then, on top of the balance pill above, so it stands out. */}
@@ -83,6 +88,9 @@ export function TopHud() {
           aria-label={t('common.fastForward')}
         >
           ⏩
+        </Button>
+        <Button className={styles.iconButton} onClick={goToMainMenu} aria-label={t('common.mainMenu')}>
+          🏠
         </Button>
       </div>
     </div>

@@ -13,7 +13,7 @@ export function ModelSalesRow({ model, onClick }: ModelSalesRowProps) {
   return (
     <Row gap={3} style={{ background: 'var(--color-panel-light)', borderRadius: 'var(--radius)', padding: '8px 12px' }}>
       <span style={{ flex: 1, fontWeight: 600 }}>{model.name}</span>
-      <span style={{ color: 'var(--color-trim)' }}>{fmt.compact(model.lifetimeEarnings)}</span>
+      <span style={{ color: 'var(--color-trim)' }}>{fmt.money(model.lifetimeEarnings)}</span>
       <Button onClick={onClick} aria-label={t('common.viewModelSales', { modelName: model.name })}>
         ›
       </Button>

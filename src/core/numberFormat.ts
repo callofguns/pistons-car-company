@@ -2,11 +2,10 @@
  * Centralized number-to-string formatting. Every component that prints a number should go
  * through here so formatting stays consistent - direct port of NumberFormatter.cs.
  *
- * This file stays English-only and locale-free on purpose (see src/i18n/'s module doc for why):
- * every function here is either (a) deliberately never localized - plainCurrency's ungrouped
- * "$27902" is retro art direction, not a formatting default - or (b) the canonical/English
- * renderer that src/i18n/format.ts wraps with a locale-aware sibling, sharing splitMagnitude()
- * below as the one source of truth for magnitude thresholds so the two renderers can't drift.
+ * Money always carries a "$": plainCurrency() for exact amounts ("$27,902" - car prices, part
+ * costs, loan figures) and src/i18n/format.ts's fmt.money() for large compacted ones ("$250.0 K" -
+ * company cash, research, wages). splitMagnitude() below is the one source of truth for the
+ * K/M/B thresholds so compact() and fmt.money()/fmt.compact() can't drift.
  */
 
 /** Compacts large magnitudes with a K/M/B suffix and one decimal place, e.g. 4_800_000_000 -> "4.8 B". */
@@ -32,17 +31,16 @@ export function splitMagnitude(value: number): { sign: string; mantissa: number;
   return { sign, mantissa: abs, magnitude: 'unit' }
 }
 
-/** Space-grouped whole number with no suffix, e.g. 97257 -> "97 257". Regex-based rather than
- * routing through Intl/toLocaleString, so this stays a plain English-locale-shaped formatter that
- * src/i18n/format.ts's locale-aware renderer wraps rather than duplicates. */
+/** Comma-grouped whole number with no suffix, e.g. 97257 -> "97,257". Regex-based rather than
+ * Intl/toLocaleString so the output never varies between browsers. */
 export function grouped(value: number): string {
-  return String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  return String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
-/** Dollar-prefixed retail price, ungrouped to match the reference ("$27902"). Deliberate retro art
- * direction, not a locale default - never localize this (see src/i18n/format.ts's doc comment). */
+/** Exact dollar amount, comma-grouped, sign before the "$": 27902 -> "$27,902", -500 -> "-$500". */
 export function plainCurrency(value: number): string {
-  return `$${Math.round(value)}`
+  const rounded = Math.round(value)
+  return `${rounded < 0 ? '-' : ''}$${grouped(Math.abs(rounded))}`
 }
 
 /** Whole-number-ish percent with a trailing '%', e.g. 15.5 -> "15.5%". */

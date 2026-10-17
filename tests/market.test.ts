@@ -142,4 +142,22 @@ describe('onMarketDayTick', () => {
 
     expect(company.populationServed).toBe(100)
   })
+
+  it('carries fractional demand forward, so under-one-car-a-day demand still sells over time', () => {
+    const { vehicles, model, bank } = buildModel(1000)
+    model.isDebutModel = false
+    // Small enough reach that a single day's demand is well under one car.
+    const company = createCompanyState('Test Co', 'Testville', 2_500)
+    const ledger = createLedgerState()
+    const competitors = createCompetitorState(100)
+
+    onMarketDayTick(vehicles.models, [tinyReachSegment], (m) => resolveBody([body], m), bank, ledger, TODAY, company, competitors)
+    expect(model.totalSold).toBe(0)
+    expect(model.demandCarry).toBeGreaterThan(0)
+
+    for (let day = 0; day < 60; day++) {
+      onMarketDayTick(vehicles.models, [tinyReachSegment], (m) => resolveBody([body], m), bank, ledger, TODAY, company, competitors)
+    }
+    expect(model.totalSold).toBeGreaterThan(0)
+  })
 })

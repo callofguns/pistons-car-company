@@ -25,8 +25,7 @@ import { startCampaign as coreStartCampaign } from '../core/marketing'
 import { markAllNewsRead as coreMarkAllNewsRead, postNews } from '../core/news'
 import { registerTeam as coreRegisterTeam, enterRace as coreEnterRace } from '../core/racing'
 import { upgradeHq as coreUpgradeHq, hqSlotCap } from '../core/hq'
-import { loadSettings } from '../core/settings'
-import { resolveInitialLocale } from '../i18n/locale'
+import { DEFAULT_LOCALE } from '../i18n/locale'
 import { getRumorTemplates } from '../i18n/rumors'
 import {
   beginNewDesign as coreBeginNewDesign,
@@ -118,12 +117,7 @@ interface GameStore {
 
 export const useGameStore = create<GameStore>((set, get) => {
   const config = DEFAULT_GAME_CONFIG
-  // Rumor templates specifically (not the rest of the catalog, which isn't localized yet) are
-  // swapped for the player's already-resolved locale right at store creation - not just on a
-  // later explicit language change via useSettingsStore.setLocale - so a returning French player's
-  // very first rumor of the session is already in French rather than English until they happen to
-  // revisit the Language screen.
-  const catalog: Catalog = { ...CATALOG, rumorTemplates: getRumorTemplates(resolveInitialLocale(loadSettings()?.locale)) }
+  const catalog: Catalog = { ...CATALOG, rumorTemplates: getRumorTemplates(DEFAULT_LOCALE) }
 
   // Runs once, before anything (Main Menu's Continue-button check, Save Slots' listing) reads
   // slot data - see save.ts's migrateLegacySaveIfNeeded for why.

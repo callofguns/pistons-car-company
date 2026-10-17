@@ -184,7 +184,12 @@ export function CarDesignScreen() {
       setNameAndCategory(name.trim(), tagLabel)
       setCustomPrice(price ?? stats?.suggestedPrice ?? 0)
       const modelId = finalizeDesign()
-      if (modelId) show('ModelLineup', modelId)
+      if (modelId) {
+        // Drop the Body Selection / wizard screens from the back-stack, so Back on the new model's
+        // page returns to the Office instead of re-entering a design session that no longer exists.
+        goHome('OfficeHub')
+        show('ModelLineup', modelId)
+      }
       return
     }
     setStepIndex((i) => Math.min(WIZARD_STEPS.length - 1, i + 1))

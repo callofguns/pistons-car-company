@@ -38,7 +38,7 @@ export function EmployeesScreen() {
         <Heading style={{ fontSize: '1.1rem' }}>{t('employees.roster', { count: staff.employees.length, cap: slotCap })}</Heading>
 
         <div className={styles.grid}>
-          <StatRow label={t('employees.wageBill')} value={t('employees.perMonth', { amount: fmt.compact(monthlyWageBill(staff)) })} />
+          <StatRow label={t('employees.wageBill')} value={t('employees.perMonth', { amount: fmt.money(monthlyWageBill(staff)) })} />
           <StatRow label={t('employees.prodSpeed')} value={signedPercent(productionSpeedBonusPercent(staff, perks))} />
           <StatRow label={t('employees.researchBonus')} value={`+${grouped(Math.round(researchPointsBonus(staff, perks)))}`} />
           <StatRow label={t('employees.prodQuality')} value={signedPercent(qualityBonusPercent(staff, perks))} />

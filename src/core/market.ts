@@ -110,7 +110,11 @@ export function onMarketDayTick(
       demand += DEBUT_BONUS_UNITS_PER_DAY
     }
 
-    const unitsSold = Math.min(model.inventory, Math.round(demand))
+    // Whole cars only, with the leftover fraction carried to tomorrow (see CarModel.demandCarry).
+    const totalDemand = demand + (model.demandCarry ?? 0)
+    const wholeDemand = Math.floor(totalDemand)
+    model.demandCarry = totalDemand - wholeDemand
+    const unitsSold = Math.min(model.inventory, wholeDemand)
     model.currentDailySalesRatePercent = model.inventory <= 0 ? 0 : (100 * unitsSold) / model.inventory
     model.lastDayUnitsSold = unitsSold
     model.lastDayRevenue = 0

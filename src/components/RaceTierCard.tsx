@@ -20,11 +20,11 @@ export function RaceTierCard({ tier, unlocked, onSelect }: RaceTierCardProps) {
       <div className={styles.title}>{t(tier.displayNameKey)}</div>
       <div className={styles.row}>
         <span>{t('race.entryFee')}</span>
-        <span>{fmt.compact(tier.entryFee)}</span>
+        <span>{fmt.money(tier.entryFee)}</span>
       </div>
       <div className={styles.row}>
         <span>{t('race.firstPrize')}</span>
-        <span className={styles.prize}>{fmt.compact(tier.firstPrize)}</span>
+        <span className={styles.prize}>{fmt.money(tier.firstPrize)}</span>
       </div>
       <div className={styles.row}>
         <span>{t('race.fieldSize')}</span>

@@ -37,3 +37,17 @@
   color: var(--color-text-secondary);
   font-size: 0.9rem;
 }
+
+/* A landscape phone has ~330px of height for the whole Body Selection screen - a 160px preview
+   pushed CONTINUE below the fold. */
+@media (max-height: 560px) {
+  .previewBox {
+    min-height: 88px;
+    font-size: 2.25rem;
+  }
+
+  .arrow {
+    width: 40px;
+    height: 40px;
+  }
+}

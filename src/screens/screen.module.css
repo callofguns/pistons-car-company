@@ -8,6 +8,20 @@
   gap: var(--space-4);
 }
 
+/* Without this, a flex child whose content is taller than its share of the screen gets squashed
+   and its content paints over whatever comes next (the classification grid over CONTINUE, the
+   Safety meter over CONTINUE on a landscape phone). Letting the .screen scroll instead is always
+   readable and tappable. */
+.screen > * {
+  flex-shrink: 0;
+}
+
+/* Vertically centers a short screen's content, but - unlike plain justify-content:center - never
+   pushes the top of a tall screen out of reach above the scroll area on a short phone. */
+.verticallyCentered {
+  justify-content: safe center;
+}
+
 .centered {
   align-items: center;
   text-align: center;
@@ -24,6 +38,13 @@
   gap: var(--space-5);
   flex: 1;
   min-height: 0;
+}
+
+/* Nested inside a scrolling .screen (Model Lineup), .columns must not shrink either - its own
+   flex:1 above would otherwise override the .screen > * rule (same specificity, later in file) and
+   let the stat rows slide underneath the button below them. */
+.screen > .columns {
+  flex: 1 0 auto;
 }
 
 /* Modifier for screens that use .columns as their outermost element (Research, Company) instead

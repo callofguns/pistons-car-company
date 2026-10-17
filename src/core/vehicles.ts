@@ -107,6 +107,11 @@ export interface CarModel {
    * debut boost the very first car could sit unsold indefinitely and the company could never earn
    * the sales that grow its reach in the first place. See onMarketDayTick for how it tapers off. */
   isDebutModel: boolean
+  /** Fraction of a car of demand left over from previous days (0-1). Daily demand is fractional,
+   * and rounding it each day on its own turned a steady 0.4 cars/day into 0 sales forever - this
+   * carries the remainder forward so 0.4/day sells a car every 2-3 days instead. Optional so
+   * saves from before it existed still load (treated as 0). */
+  demandCarry?: number
 }
 
 /** Transient wizard state for the Body Selection -> Car Design (Classification -> Safety -> Engine

@@ -61,19 +61,19 @@ export function BankScreen() {
       )}
 
       <Heading style={{ fontSize: '1.1rem' }}>{t('bank.thisMonth')}</Heading>
-      <StatRow label={t('bank.income')} value={fmt.compact(income)} />
+      <StatRow label={t('bank.income')} value={fmt.money(income)} />
       {incomeCategories.map(([category, amount]) => (
-        <StatRow key={category} label={`  ${t(CATEGORY_LABEL_KEY[category])}`} value={fmt.compact(amount)} />
+        <StatRow key={category} label={`  ${t(CATEGORY_LABEL_KEY[category])}`} value={fmt.money(amount)} />
       ))}
-      <StatRow label={t('bank.expenses')} value={fmt.compact(expense)} />
+      <StatRow label={t('bank.expenses')} value={fmt.money(expense)} />
       {expenseCategories.map(([category, amount]) => (
-        <StatRow key={category} label={`  ${t(CATEGORY_LABEL_KEY[category])}`} value={fmt.compact(amount)} />
+        <StatRow key={category} label={`  ${t(CATEGORY_LABEL_KEY[category])}`} value={fmt.money(amount)} />
       ))}
       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
         <span style={{ color: 'var(--color-text-secondary)' }}>{t('bank.netProfit')}</span>
         <span style={{ fontWeight: 700, color: netProfit >= 0 ? 'var(--color-green)' : 'var(--color-danger)' }}>
           {netProfit >= 0 ? '+' : ''}
-          {fmt.compact(netProfit)}
+          {fmt.money(netProfit)}
         </span>
       </div>
 

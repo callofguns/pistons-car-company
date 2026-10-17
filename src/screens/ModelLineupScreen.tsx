@@ -88,7 +88,7 @@ export function ModelLineupScreen() {
         <div className={styles.column}>
           <StatRow label={t('modelLineup.labelRating')} value={String(s.rating)} />
           <StatRow label={t('modelLineup.labelCarsSold')} value={grouped(model.totalSold)} />
-          <StatRow label={t('modelLineup.labelEarnings')} value={fmt.compact(model.lifetimeEarnings)} />
+          <StatRow label={t('modelLineup.labelEarnings')} value={fmt.money(model.lifetimeEarnings)} />
           <StatRow label={t('modelLineup.labelYearOfIssue')} value={fmt.date(model.issueDate)} />
           <StatRow label={t('modelLineup.labelCostPrice')} value={plainCurrency(model.unitCost)} />
           <StatRow label={t('modelLineup.labelPrice')} value={plainCurrency(model.salePrice)} />

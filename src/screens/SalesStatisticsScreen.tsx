@@ -58,8 +58,8 @@ export function SalesStatisticsScreen() {
         value={t('salesStats.totalSold', { sold: grouped(model.totalSold), planned: grouped(model.plannedProductionRun) })}
       />
       <StatRow label={t('salesStats.labelLeftToSell')} value={grouped(leftToSell)} />
-      <StatRow label={t('salesStats.labelSalesIncome')} value={fmt.compact(model.lastDayRevenue)} />
-      <StatRow label={t('salesStats.labelEarnings')} value={fmt.compact(model.lifetimeEarnings)} />
+      <StatRow label={t('salesStats.labelSalesIncome')} value={fmt.money(model.lastDayRevenue)} />
+      <StatRow label={t('salesStats.labelEarnings')} value={fmt.money(model.lifetimeEarnings)} />
       <StatRow
         label={t('salesStats.labelMarketingDuration')}
         value={model.marketingActive ? tp('stats.marketingDaysRemaining', model.marketingDaysRemaining) : t('salesStats.marketingInactive')}

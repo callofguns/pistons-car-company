@@ -54,6 +54,8 @@ export interface Formatters {
   /** e.g. "4,8 M" in fr, vs core's compact()'s "4.8 M". Same thresholds (splitMagnitude), locale
    * decimal separator and translated suffix. */
   compact(value: number): string
+  /** compact() for money: "$250.0 K", "-$1.2 M", "$500". */
+  money(value: number): string
   /** e.g. "15,5 %" in fr. */
   percent(value: number, decimals?: number): string
   /** "8 Jan. 1970" in en (byte-identical to core's formatDate), "8 janv. 1970" in fr. */
@@ -66,11 +68,17 @@ export function formattersFor(locale: Locale): Formatters {
   let formatters = formattersCache.get(locale)
   if (formatters) return formatters
 
+  const compact = (value: number): string => {
+    const { sign, mantissa, magnitude } = splitMagnitude(value)
+    if (magnitude === 'unit') return `${sign}${Math.round(mantissa)}`
+    return `${sign}${decimalFormatFor(locale).format(mantissa)} ${translate(locale, MAGNITUDE_KEY[magnitude])}`
+  }
+
   formatters = {
-    compact(value) {
-      const { sign, mantissa, magnitude } = splitMagnitude(value)
-      if (magnitude === 'unit') return `${sign}${Math.round(mantissa)}`
-      return `${sign}${decimalFormatFor(locale).format(mantissa)} ${translate(locale, MAGNITUDE_KEY[magnitude])}`
+    compact,
+
+    money(value) {
+      return value < 0 ? `-$${compact(-value)}` : `$${compact(value)}`
     },
 
     percent(value, decimals = 1) {

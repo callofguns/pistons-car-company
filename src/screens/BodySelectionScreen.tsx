@@ -32,22 +32,15 @@ export function BodySelectionScreen() {
   const alreadyTooled = tooledBodyIds.includes(body.id)
 
   return (
-    <div
-      className={`${styles.screen} ${styles.centered} ${styles.narrow}`}
-      style={{ position: 'relative', justifyContent: 'center' }}
-    >
-      <Button
-        style={{ position: 'absolute', top: 'var(--space-4)', left: 'var(--space-4)', width: 44, height: 44, padding: 0 }}
-        onClick={back}
-        aria-label={t('common.back')}
-      >
+    <div className={`${styles.screen} ${styles.centered} ${styles.narrow} ${styles.verticallyCentered}`}>
+      <Button style={{ alignSelf: 'flex-start', width: 44, height: 44, padding: 0 }} onClick={back} aria-label={t('common.back')}>
         ‹
       </Button>
 
       {tutorialStep && <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />}
 
       <span style={{ color: 'var(--color-green)', fontSize: '1.1rem' }}>
-        {t('bodySelection.equipmentCost', { cost: alreadyTooled ? t('bodySelection.owned') : fmt.compact(body.productionEquipmentCost) })}
+        {t('bodySelection.equipmentCost', { cost: alreadyTooled ? t('bodySelection.owned') : fmt.money(body.productionEquipmentCost) })}
       </span>
 
       <div style={{ width: '100%' }}>

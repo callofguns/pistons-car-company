@@ -13,7 +13,7 @@ import styles from './screen.module.css'
  * pick which model enters it. Reached only from TeamCreationScreen's "ENTER A RACE" button, which
  * only renders once registered and with no entry already pending. */
 export function RaceEntryScreen() {
-  const show = useUiStore((s) => s.show)
+  const back = useUiStore((s) => s.back)
   useGameStore((s) => s.revision)
   const models = useGameStore((s) => s.world.vehicles.models)
   const currentYear = useGameStore((s) => s.world.time.currentDate.year)
@@ -66,7 +66,7 @@ export function RaceEntryScreen() {
         style={{ width: '100%' }}
         onClick={() => {
           if (enterRace(tierId, model.id)) {
-            show('TeamCreation')
+            back()
           } else {
             setError(true)
           }

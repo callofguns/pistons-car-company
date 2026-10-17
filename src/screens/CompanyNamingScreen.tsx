@@ -16,6 +16,7 @@ import namingStyles from './CompanyNamingScreen.module.css'
 export function CompanyNamingScreen() {
   const back = useUiStore((s) => s.back)
   const show = useUiStore((s) => s.show)
+  const goHome = useUiStore((s) => s.goHome)
   const startNewGameInSlot = useGameStore((s) => s.startNewGameInSlot)
   const startTutorial = useTutorialStore((s) => s.start)
 
@@ -35,7 +36,7 @@ export function CompanyNamingScreen() {
 
     startNewGameInSlot(emptySlotIndex, trimmed)
     startTutorial()
-    show('OfficeHub')
+    goHome('OfficeHub')
   }
 
   return (

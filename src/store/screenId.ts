@@ -15,5 +15,4 @@ export type ScreenId =
   | 'TeamCreation'
   | 'RaceEntry'
   | 'Bank'
-  | 'Language'
   | 'News'
