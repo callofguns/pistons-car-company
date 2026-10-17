@@ -5,7 +5,9 @@ import { useActiveTutorialStep } from '../store/useTutorialStore'
 import { grouped, plainCurrency } from '../core/numberFormat'
 import { useT } from '../i18n/useT'
 import { formatCategoryTag } from '../i18n/vehicles'
-import { Banknote, Calendar, Car, ChartColumn, Factory, Star, Tag } from 'lucide-react'
+import { Banknote, Calendar, Car, ChartColumn, Factory, Star, Tag, Wrench } from 'lucide-react'
+import { developmentProgress01, isInDevelopment } from '../core/development'
+import { MeterBar } from '../components/MeterBar'
 import { CarCarousel } from '../components/CarCarousel'
 import { SpecRow } from '../components/SpecRow'
 import { SpecSheet } from '../components/SpecSheet'
@@ -68,6 +70,15 @@ export function ModelLineupScreen() {
       <section className={`${layout.center} ${lineupStyles.center}`}>
         <span className={lineupStyles.name}>{model.name}</span>
         <span className={lineupStyles.tag}>{formatCategoryTag(model, locale)}</span>
+        {isInDevelopment(model) && (
+          <div className={lineupStyles.development}>
+            <span>
+              <Wrench size={13} />
+              {t('development.daysLeft', { days: model.developmentDaysRemaining ?? 0 })}
+            </span>
+            <MeterBar value01={developmentProgress01(model)} />
+          </div>
+        )}
         <div className={lineupStyles.stage}>
           <CarCarousel
             fill

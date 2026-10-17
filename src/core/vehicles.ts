@@ -112,6 +112,12 @@ export interface CarModel {
    * carries the remainder forward so 0.4/day sells a car every 2-3 days instead. Optional so
    * saves from before it existed still load (treated as 0). */
   demandCarry?: number
+  /** Days left before this design finishes development and can be built and sold (see
+   * core/development.ts). 0 or missing = released. Research points only come in while at least
+   * one model is in development. */
+  developmentDaysRemaining?: number
+  /** The full development length this model started with, for progress bars. */
+  developmentDaysTotal?: number
 }
 
 /** Transient wizard state for the Body Selection -> Car Design (Classification -> Safety -> Engine

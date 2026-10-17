@@ -1,3 +1,4 @@
+import { isInDevelopment } from './development'
 import { depositRecorded, type BankState } from './economy'
 import { createRng } from './prng'
 import type { LedgerState } from './ledger'
@@ -84,7 +85,7 @@ export function onMarketDayTick(
   let soldTodayAcrossAllModels = 0
 
   for (const model of models) {
-    if (!model.isOnSale || model.inventory <= 0) {
+    if (!model.isOnSale || model.inventory <= 0 || isInDevelopment(model)) {
       model.currentDailySalesRatePercent = 0
       model.lastDayUnitsSold = 0
       model.lastDayRevenue = 0

@@ -8,6 +8,7 @@ import { onMarketDayTick, createCompetitorState, type CompetitorState } from './
 import { onMarketingDayTick } from './marketing'
 import { createNewsState, postNews, type NewsState } from './news'
 import { onProductionDayTick } from './production'
+import { isInDevelopment, onDevelopmentDayTick } from './development'
 import { createRacingState, onRacingMonthTick, type RacingState } from './racing'
 import { onResearchDayTick, createResearchState, type ResearchState } from './research'
 import {
@@ -62,14 +63,21 @@ export function createNewWorld(config: GameConfig, catalog: Catalog, companyName
   }
 }
 
-/** Fixed daily tick order: research unlocks feed design, staff sets capacity, production fills stock, marketing/market sell it, then the financial-risk checks (overdraft interest, bankruptcy) run last so they see the day's final balance. Mirrors SimulationRunner.cs's system order exactly, extended with the new financial-risk systems. HQ overhead and staff wages are billed once a month (see the day===1 block below), not prorated daily. */
+/** Fixed daily tick order: research (points only while a car is in development) and development
+ * countdowns first, then staff sets capacity, production fills stock, marketing/market sell it,
+ * then the financial-risk checks (overdraft interest, bankruptcy) run last so they see the day's
+ * final balance. Mirrors SimulationRunner.cs's system order exactly, extended with the new financial-risk systems. HQ overhead and staff wages are billed once a month (see the day===1 block below), not prorated daily. */
 export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig, today: GameDate): void {
-  const completedResearch = onResearchDayTick(
-    world.research,
-    catalog.researchNodes,
-    config.researchPointsPerDay + researchPointsBonus(world.staff, catalog.employeePerks),
-  )
+  // Research points are earned only on days when at least one car is in development (Engineers
+  // raise the rate) - researching itself keeps progressing either way.
+  const developing = world.vehicles.models.some(isInDevelopment)
+  const researchPointsToday = developing ? config.researchPointsPerDay + researchPointsBonus(world.staff, catalog.employeePerks) : 0
+  const completedResearch = onResearchDayTick(world.research, catalog.researchNodes, researchPointsToday)
   for (const nodeId of completedResearch) postNews(world.news, 'ResearchCompleted', today, { nodeId })
+
+  for (const model of onDevelopmentDayTick(world.vehicles.models)) {
+    postNews(world.news, 'ModelReleased', today, { modelName: model.name, price: model.salePrice })
+  }
 
   onStaffDayTick(world.staff, catalog.employeePerks)
   onProductionDayTick(

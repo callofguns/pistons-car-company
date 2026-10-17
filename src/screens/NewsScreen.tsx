@@ -13,6 +13,7 @@ import {
   PackageCheck,
   TriangleAlert,
   Trophy,
+  Wrench,
   type LucideProps,
 } from 'lucide-react'
 import { useUiStore } from '../store/useUiStore'
@@ -90,6 +91,7 @@ export function NewsScreen() {
 }
 
 const NEWS_ICONS: Partial<Record<NewsEventType, { Icon: ComponentType<LucideProps>; color: string }>> = {
+  ModelDevelopmentStarted: { Icon: Wrench, color: '#8fb4ff' },
   ModelReleased: { Icon: Car, color: 'var(--color-accent-hover)' },
   ModelSoldOut: { Icon: PackageCheck, color: 'var(--color-green)' },
   ResearchCompleted: { Icon: FlaskConical, color: '#8fb4ff' },

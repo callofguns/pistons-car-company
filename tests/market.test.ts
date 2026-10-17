@@ -57,6 +57,7 @@ function buildModel(inventory: number) {
   const model = finalizeDesign(vehicles, [body], new TechModifiers(), today, 1_000_000)
   if (!model) throw new Error('finalizeDesign failed in test setup')
   model.inventory = inventory
+  model.developmentDaysRemaining = 0 // these tests are about selling a released car
 
   return { vehicles, model, bank }
 }

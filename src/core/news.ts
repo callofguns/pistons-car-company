@@ -14,6 +14,7 @@ import type { GameDate } from './gameDate'
  * showing a frozen mix of whatever language was active when each entry was generated.
  */
 export type NewsEventType =
+  | 'ModelDevelopmentStarted'
   | 'ModelReleased'
   | 'ModelSoldOut'
   | 'ResearchCompleted'

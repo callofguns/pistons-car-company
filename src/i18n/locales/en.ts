@@ -236,6 +236,11 @@ export const en = {
   'research.effect.ProductionCost': '{amount} production cost',
   'research.effect.RepairCost': '{amount} repair cost',
   'research.duration': '{days} days',
+  'research.pointsActive': 'Earning {points} research points a day while {count} car(s) develop.',
+  'research.pointsIdle': 'No research points coming in - you only earn them while a car is in development. Design a new car to start.',
+  'development.inDevelopment': 'In development',
+  'development.daysLeft': 'In development - {days} days left',
+  'development.daysShort': 'Developing · {days}d',
 
   // model lineup screen (spec sheet)
   'modelLineup.noModels': 'No models designed yet.',
@@ -648,7 +653,7 @@ export const en = {
     'Price above your Cost Price to turn a profit. The suggested price balances margin against what buyers in your segment expect - then tap the highlighted ✓ FINISH button to put it into production.',
   'tutorial.lineupFinale.title': "You're on the lot",
   'tutorial.lineupFinale.message':
-    'Your first car is in production and will start selling back at the Office. From here you can review its specs, adjust the price, or start a restyle any time. Good luck out there.',
+    'Your first car is now in development. While it develops you earn research points - spend them in Research. When development finishes, the factory starts building it and it goes on sale back at the Office. Good luck out there.',
 
   // screen.<id>.title - the persistent top bar's title (see TopHud.tsx); a Record<ScreenId,
   // MessageKey> in useUiStore.ts maps every screen id to one of these.
@@ -691,7 +696,8 @@ export const en = {
   // interpolate strings, never raw numbers needing their own locale formatting.
   'news.screenTitle': 'News',
   'news.empty': 'Nothing to report yet.',
-  'news.modelReleased': '{modelName} enters production at {price}.',
+  'news.modelDevelopmentStarted': '{modelName} is now in development - ready in {days} days. Research points come in while it develops.',
+  'news.modelReleased': '{modelName} finished development and enters production at {price}.',
   'news.modelSoldOut': '{modelName} has sold out its production run.',
   'news.researchCompleted': 'R&D completed: {tech}.',
   'news.loanTaken': 'Took out a loan of {principal}.',

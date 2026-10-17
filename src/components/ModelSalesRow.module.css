@@ -47,3 +47,7 @@
   grid-row: 1 / span 2;
   color: var(--color-text-secondary);
 }
+
+.developing {
+  color: #8fb4ff;
+}

@@ -1,3 +1,4 @@
+import { developmentDaysFor } from './development'
 import { calculateCarSpecs, type DesignChoices } from './carSpecsCalculator'
 import { tryWithdrawRecorded, type BankState } from './economy'
 import type { LedgerState } from './ledger'
@@ -258,6 +259,10 @@ export function finalizeDesign(
     marketingEfficiencyMultiplier: 1,
     isDebutModel: vehicles.models.length === 0,
   }
+
+  const developmentDays = developmentDaysFor(stats.unitCost, session.classificationTagIds)
+  model.developmentDaysRemaining = developmentDays
+  model.developmentDaysTotal = developmentDays
 
   vehicles.models.push(model)
   vehicles.currentSession = null

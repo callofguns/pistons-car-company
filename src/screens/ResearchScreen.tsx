@@ -1,9 +1,11 @@
 import { useState, type ComponentType } from 'react'
-import { Armchair, Car, CircleDot, Cog, Palette, ShieldCheck, type LucideProps } from 'lucide-react'
+import { Armchair, Car, CircleDot, Cog, FlaskConical, Palette, ShieldCheck, type LucideProps } from 'lucide-react'
+import { isInDevelopment } from '../core/development'
+import { researchPointsBonus } from '../core/staff'
 import { useGameStore } from '../store/useGameStore'
 import { CATALOG } from '../data/catalog'
 import { nodesInCategory } from '../core/catalog'
-import { getNodeState, getProgress01, currentMoneyCost, isResearched, type ResearchCategory } from '../core/research'
+import { canStartResearch, getNodeState, getProgress01, currentMoneyCost, isResearched, type ResearchCategory } from '../core/research'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
 import { ResearchNodeCard } from '../components/ResearchNodeCard'
@@ -26,11 +28,19 @@ export function ResearchScreen() {
   const research = useGameStore((s) => s.world.research)
   const currentYear = useGameStore((s) => s.world.time.currentDate.year)
   const startResearch = useGameStore((s) => s.startResearch)
+  const models = useGameStore((s) => s.world.vehicles.models)
+  const staff = useGameStore((s) => s.world.staff)
+  const bank = useGameStore((s) => s.world.bank)
+  const config = useGameStore((s) => s.config)
+  const catalog = useGameStore((s) => s.catalog)
   const { t } = useT()
 
   const [selected, setSelected] = useState<ResearchCategory>('Engine')
   const nodes = nodesInCategory(CATALOG, selected)
   const SelectedIcon = CATEGORIES.find((c) => c.id === selected)!.Icon
+  const developingCount = models.filter(isInDevelopment).length
+  // Same rate world.ts's advanceOneDay grants on a development day.
+  const pointsPerDay = Math.round(config.researchPointsPerDay + researchPointsBonus(staff, catalog.employeePerks))
 
   return (
     <div className={styles.page}>
@@ -52,6 +62,12 @@ export function ResearchScreen() {
       </nav>
 
       <div className={styles.blueprint}>
+        <p className={`${styles.pointsNote} ${developingCount > 0 ? styles.pointsActive : ''}`}>
+          <FlaskConical size={15} />
+          {developingCount > 0
+            ? t('research.pointsActive', { points: pointsPerDay, count: developingCount })
+            : t('research.pointsIdle')}
+        </p>
         <div className={styles.grid}>
           {nodes.map((node) => (
             <ResearchNodeCard
@@ -61,6 +77,7 @@ export function ResearchScreen() {
               state={getNodeState(research, node, currentYear)}
               progress01={getProgress01(research, node.id)}
               moneyCost={currentMoneyCost(research, node, currentYear)}
+              affordable={canStartResearch(research, node, bank, currentYear)}
               onAction={() => startResearch(node.id)}
             />
           ))}

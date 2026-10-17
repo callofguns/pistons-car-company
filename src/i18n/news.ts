@@ -29,6 +29,8 @@ function hqLevelName(level: number, t: ReturnType<typeof useT>['t']): string {
  * NewsEventType a compile error instead of a silent blank headline. */
 export function renderNewsHeadline(entry: NewsEntry, t: ReturnType<typeof useT>['t'], fmt: Formatters): string {
   switch (entry.type) {
+    case 'ModelDevelopmentStarted':
+      return t('news.modelDevelopmentStarted', { modelName: String(entry.params.modelName), days: Number(entry.params.days) })
     case 'ModelReleased':
       return t('news.modelReleased', {
         modelName: String(entry.params.modelName),

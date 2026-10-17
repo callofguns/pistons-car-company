@@ -243,7 +243,12 @@ export const useGameStore = create<GameStore>((set, get) => {
         maxProductionBatch(world.staff),
         qualityBonusPercent(world.staff, catalog.employeePerks),
       )
-      if (model) postNews(world.news, 'ModelReleased', world.time.currentDate, { modelName: model.name, price: model.salePrice })
+      if (model) {
+        postNews(world.news, 'ModelDevelopmentStarted', world.time.currentDate, {
+          modelName: model.name,
+          days: model.developmentDaysRemaining ?? 0,
+        })
+      }
       bump()
       return model?.id ?? null
     },

@@ -9,6 +9,7 @@ export interface GameConfig {
   /** Real seconds per in-game day. */
   secondsPerDay: number
   startingResearchPoints: number
+  /** Research points earned per day while at least one car is in development (none otherwise). */
   researchPointsPerDay: number
   /** Total addressable population at game start (the HUD's people-icon figure). */
   startingPopulation: number
@@ -33,7 +34,9 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
   defaultCompanyName: 'Helix',
   defaultHomeCity: 'Rome',
   secondsPerDay: 2,
-  startingResearchPoints: 245,
+  // A new company has no research budget until it develops its first car - research points only
+  // come in while a car is in development (see world.ts's advanceOneDay).
+  startingResearchPoints: 0,
   researchPointsPerDay: 4,
   // Deliberately tiny - the player explicitly chose to start with almost no reach rather than a
   // pre-established 448.6K audience. Sales demand in market.ts scales with this directly. It no

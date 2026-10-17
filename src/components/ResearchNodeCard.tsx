@@ -11,6 +11,8 @@ interface ResearchNodeCardProps {
   state: ResearchNodeState
   progress01: number
   moneyCost: number
+  /** False when the company is short on research points or cash for this node right now. */
+  affordable: boolean
   icon: ReactNode
   onAction: () => void
 }
@@ -27,10 +29,11 @@ const STATE_LABEL_KEY: Record<ResearchNodeState, MessageKey> = {
  * progress %, name, research-point + money cost, and an action button whose label/color follow
  * ResearchNodeState. The (i) button flips the card to show what the research actually does.
  * Direct port of ResearchNodeCardView.cs. */
-export function ResearchNodeCard({ node, state, progress01, moneyCost, icon, onAction }: ResearchNodeCardProps) {
+export function ResearchNodeCard({ node, state, progress01, moneyCost, affordable, icon, onAction }: ResearchNodeCardProps) {
   const { t, fmt } = useT()
   const [showInfo, setShowInfo] = useState(false)
-  const interactable = state === 'AvailableNormal' || state === 'AvailableBreakthrough'
+  // Was enabled even when unaffordable, so a tap silently did nothing.
+  const interactable = (state === 'AvailableNormal' || state === 'AvailableBreakthrough') && affordable
   const variant = state === 'AvailableBreakthrough' ? 'danger' : state === 'AvailableNormal' ? 'primary' : 'secondary'
   const name = t(`data.research.${node.id}.name` as MessageKey)
   const early = state === 'AvailableBreakthrough'

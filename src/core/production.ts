@@ -1,3 +1,4 @@
+import { isInDevelopment } from './development'
 import { canAfford, tryWithdrawRecorded, type BankState } from './economy'
 import type { LedgerState } from './ledger'
 import type { GameDate } from './gameDate'
@@ -25,6 +26,8 @@ export function onProductionDayTick(
   const costMultiplier = 1 - Math.min(90, Math.max(0, unitCostReductionPercent)) / 100
 
   for (const model of models) {
+    // Nothing can be built until the design has finished development.
+    if (isInDevelopment(model)) continue
     const remainingToBuild = model.plannedProductionRun - model.totalProduced
     if (remainingToBuild <= 0) continue
 
