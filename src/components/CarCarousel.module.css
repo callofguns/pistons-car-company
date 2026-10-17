@@ -8,7 +8,7 @@
   width: 48px;
   height: 48px;
   flex: none;
-  font-size: 1.25rem;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,31 +19,35 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
+  min-width: 0;
 }
 
+/* A spotlight on the showroom floor behind the car. */
 .previewBox {
   width: 100%;
-  min-height: 160px;
-  background: var(--color-panel-light);
-  border-radius: var(--radius);
+  height: 170px;
+  border-radius: var(--radius-large);
+  background: radial-gradient(ellipse 60% 70% at 50% 60%, rgba(120, 160, 255, 0.28), transparent 70%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
+}
+
+.car {
+  height: 100%;
+  width: 100%;
+  max-width: 420px;
 }
 
 .index {
   color: var(--color-text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
-/* A landscape phone has ~330px of height for the whole Body Selection screen - a 160px preview
-   pushed CONTINUE below the fold. */
 @media (max-height: 560px) {
   .previewBox {
-    min-height: 88px;
-    font-size: 2.25rem;
+    height: 96px;
   }
 
   .arrow {

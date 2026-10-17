@@ -1,13 +1,19 @@
+import { ArrowLeft, Banknote, Crown, FastForward, FlaskConical, Pause, Play, ShoppingCart, TriangleAlert, Users, Warehouse } from 'lucide-react'
 import { useGameStore } from '../store/useGameStore'
 import { screenWantsTopHud, SCREEN_TITLE_KEYS, useUiStore } from '../store/useUiStore'
 import { useT } from '../i18n/useT'
+import type { MessageKey } from '../i18n/keys'
 import { Button } from './Primitives'
 import { HudPill } from './HudPill'
 import styles from './TopHud.module.css'
 
+const ICON_SIZE = 16
+
 /**
- * The persistent chrome bar: back arrow + current screen title (left), stat pills (center),
- * finance, playback and main-menu controls (right). Direct port of TopHudView.cs.
+ * The persistent chrome bar, laid out like the reference: back arrow + current screen title
+ * (left); reputation, reach, day, a big year medallion, month, cash and research points (center),
+ * with the playback controls tucked under the year; the gold shop (Finance) and garage (main menu)
+ * buttons (right). Direct port of TopHudView.cs.
  */
 export function TopHud() {
   const currentScreen = useUiStore((s) => s.currentScreen)
@@ -28,13 +34,15 @@ export function TopHud() {
 
   if (!screenWantsTopHud(currentScreen)) return null
 
-  const { company, time, bank } = world
+  const { company, time, bank, research } = world
+  const inDebt = bank.balance < 0
+  const paused = time.manuallyPaused
+  const fast = !paused && time.speedMultiplier > 1
 
   // Exits the current session back to the title screen, from anywhere. Saves first so Continue on
   // Main Menu picks this session back up exactly where it left off, same as if the tab had just
-  // been closed here. goHome() clears
-  // history/payload outright, so nothing stale is left for the CarDesign/BodySelection screens'
-  // own back buttons to wander back into later.
+  // been closed here. goHome() clears history/payload outright, so nothing stale is left for the
+  // CarDesign/BodySelection screens' own back buttons to wander back into later.
   const goToMainMenu = () => {
     saveNow()
     goHome('MainMenu')
@@ -44,53 +52,93 @@ export function TopHud() {
     <div className={styles.bar}>
       <div className={styles.left}>
         {canGoBack && (
-          <Button className={styles.iconButton} onClick={back} aria-label={t('common.back')}>
-            ‹
+          <Button className={styles.squareButton} onClick={back} aria-label={t('common.back')}>
+            <ArrowLeft size={22} strokeWidth={2.5} />
           </Button>
         )}
-        <div className={styles.titleColumn}>
-          <span className={styles.menuLabel}>{t('common.menu')}</span>
-          <span className={styles.screenTitle}>{t(SCREEN_TITLE_KEYS[currentScreen])}</span>
-        </div>
+        {currentScreen !== 'OfficeHub' && (
+          <div className={styles.titleColumn}>
+            <span className={styles.menuLabel}>{t('common.menu')}</span>
+            <span className={styles.screenTitle}>{t(SCREEN_TITLE_KEYS[currentScreen])}</span>
+          </div>
+        )}
       </div>
 
-      <div className={styles.pills}>
-        <HudPill icon="👑" value={fmt.percent(company.reputationPercent, 1)} />
-        <HudPill icon="👥" value={fmt.compact(company.populationServed)} />
-        <HudPill icon="💰" value={fmt.money(bank.balance)} />
-        <HudPill icon="🗓️" value={fmt.date(time.currentDate)} />
+      <div className={styles.center}>
+        <HudPill
+          className={styles.widePill}
+          icon={<Crown size={ICON_SIZE} color="var(--color-trim)" fill="var(--color-trim)" />}
+          value={fmt.percent(company.reputationPercent, 0)}
+          label={t('hud.reputation')}
+        />
+        <HudPill
+          className={styles.widePill}
+          icon={<Users size={ICON_SIZE} color="#f59e4b" />}
+          value={fmt.compact(company.populationServed)}
+          label={t('hud.reach')}
+        />
+        <HudPill value={String(time.currentDate.day)} label={t('hud.day')} className={styles.centeredPill} />
+
+        <div className={styles.yearBlock}>
+          <div className={styles.year} aria-label={`${t('hud.year')}: ${time.currentDate.year}`}>
+            {time.currentDate.year}
+          </div>
+          <div className={styles.playback}>
+            <button
+              className={`${styles.playbackButton} ${paused ? styles.playbackActive : ''}`}
+              onClick={() => setPlaybackSpeed('paused')}
+              aria-label={t('common.pause')}
+              aria-pressed={paused}
+            >
+              <Pause size={11} fill="currentColor" />
+            </button>
+            <button
+              className={`${styles.playbackButton} ${!paused && !fast ? styles.playbackActive : ''}`}
+              onClick={() => setPlaybackSpeed('normal')}
+              aria-label={t('common.play')}
+              aria-pressed={!paused && !fast}
+            >
+              <Play size={11} fill="currentColor" />
+            </button>
+            <button
+              className={`${styles.playbackButton} ${fast ? styles.playbackActive : ''}`}
+              onClick={() => setPlaybackSpeed('fast')}
+              aria-label={t('common.fastForward')}
+              aria-pressed={fast}
+            >
+              <FastForward size={11} fill="currentColor" />
+            </button>
+          </div>
+        </div>
+
+        <HudPill
+          value={t(`month.${time.currentDate.month}.abbr` as MessageKey)}
+          label={t('hud.month')}
+          className={styles.centeredPill}
+        />
         {/* A negative balance is a genuine emergency (it's what feeds the bankruptcy countdown) -
-            this pill only appears then, on top of the balance pill above, so it stands out. */}
-        {bank.balance < 0 && <span className={styles.debtPill}>⚠ {t('hud.inDebt')}</span>}
+            the cash pill itself turns red, with a warning icon, rather than adding another pill. */}
+        <HudPill
+          className={styles.widePill}
+          icon={inDebt ? <TriangleAlert size={ICON_SIZE} color="var(--color-danger)" /> : <Banknote size={ICON_SIZE} color="var(--color-green)" />}
+          value={fmt.compact(bank.balance)}
+          label={inDebt ? `${t('hud.cash')} - ${t('hud.inDebt')}` : t('hud.cash')}
+          tone={inDebt ? 'danger' : 'normal'}
+        />
+        <HudPill
+          className={styles.widePill}
+          icon={<FlaskConical size={ICON_SIZE} color="#8fb4ff" />}
+          value={fmt.compact(research.points)}
+          label={t('hud.researchPoints')}
+        />
       </div>
 
       <div className={styles.right}>
-        <Button variant="gold" className={styles.iconButton} onClick={() => show('Bank')} aria-label={t('common.shop')}>
-          $
+        <Button variant="gold" className={styles.squareButton} onClick={() => show('Bank')} aria-label={t('common.shop')}>
+          <ShoppingCart size={22} strokeWidth={2.25} />
         </Button>
-        <Button
-          className={`${styles.iconButton} ${time.manuallyPaused ? styles.playbackActive : ''}`}
-          onClick={() => setPlaybackSpeed('paused')}
-          aria-label={t('common.pause')}
-        >
-          ⏸
-        </Button>
-        <Button
-          className={`${styles.iconButton} ${!time.manuallyPaused && time.speedMultiplier === 1 ? styles.playbackActive : ''}`}
-          onClick={() => setPlaybackSpeed('normal')}
-          aria-label={t('common.play')}
-        >
-          ▶
-        </Button>
-        <Button
-          className={`${styles.iconButton} ${!time.manuallyPaused && time.speedMultiplier > 1 ? styles.playbackActive : ''}`}
-          onClick={() => setPlaybackSpeed('fast')}
-          aria-label={t('common.fastForward')}
-        >
-          ⏩
-        </Button>
-        <Button className={styles.iconButton} onClick={goToMainMenu} aria-label={t('common.mainMenu')}>
-          🏠
+        <Button className={`${styles.squareButton} ${styles.garageButton}`} onClick={goToMainMenu} aria-label={t('common.mainMenu')}>
+          <Warehouse size={22} strokeWidth={2.25} />
         </Button>
       </div>
     </div>

@@ -56,6 +56,7 @@ export function PromotionScreen() {
     <div className={`${styles.screen} ${styles.centered} ${styles.narrow}`}>
       <Heading>{t('promotion.selectMethod')}</Heading>
       <CarCarousel
+        model={model}
         indexOneBased={index + 1}
         total={models.length}
         onPrevious={() => setCarIndex((i) => Math.max(0, i - 1))}

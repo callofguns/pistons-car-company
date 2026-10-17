@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Compass } from 'lucide-react'
 import type { TutorialStep } from '../data/tutorialSteps'
 import { TUTORIAL_STEPS } from '../data/tutorialSteps'
 import { useT } from '../i18n/useT'
@@ -33,7 +34,7 @@ export function TutorialCard({ step, onNext, onSkip }: TutorialCardProps) {
   return (
     <div className={styles.card}>
       <div className={styles.portrait} aria-hidden="true">
-        🧭
+        <Compass size={22} />
       </div>
       <div className={styles.body}>
         <div className={styles.headerRow}>

@@ -14,6 +14,39 @@
   justify-content: center;
 }
 
+.titleBlock {
+  min-width: 0;
+}
+
+/* The shell being designed, as a small reminder in the header. */
+.headerCar {
+  height: 44px;
+  width: 104px;
+  flex: none;
+  margin-left: var(--space-4);
+}
+
+.stepDots {
+  display: flex;
+  gap: 3px;
+  margin-left: auto;
+}
+
+.stepDot {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.stepDotDone {
+  background: var(--color-accent);
+}
+
+.stepDotActive {
+  background: var(--color-trim);
+}
+
 .breadcrumb {
   display: block;
   color: var(--color-text-secondary);
@@ -29,7 +62,7 @@
 }
 
 .costPrice {
-  margin-left: auto;
+  margin-left: var(--space-4);
   text-align: right;
   flex: none;
 }
@@ -103,17 +136,12 @@
 }
 
 .nameField input {
-  padding: var(--space-3);
-  border-radius: var(--radius);
-  border: none;
-  background: var(--color-panel-dark);
-  color: var(--color-text-primary);
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .comingSoon {
-  background: var(--color-panel-dark);
-  border: 1px dashed var(--color-text-disabled);
+  background: var(--color-panel-glass);
+  border: 1px dashed var(--color-border-strong);
   border-radius: var(--radius);
   padding: var(--space-3);
   color: var(--color-text-secondary);
@@ -123,4 +151,26 @@
 
 .continueButton {
   width: 100%;
+}
+
+@media (max-height: 560px) {
+  .headerCar {
+    height: 32px;
+    width: 76px;
+    margin-left: var(--space-2);
+  }
+
+  .stepDot {
+    width: 8px;
+  }
+}
+
+@media (max-width: 700px) {
+  .stepDots {
+    display: none;
+  }
+
+  .costPrice {
+    margin-left: auto;
+  }
 }

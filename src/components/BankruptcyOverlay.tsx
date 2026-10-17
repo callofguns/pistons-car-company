@@ -1,3 +1,4 @@
+import { TrendingDown } from 'lucide-react'
 import { useGameStore } from '../store/useGameStore'
 import { useT } from '../i18n/useT'
 import { Button, Heading } from './Primitives'
@@ -14,7 +15,7 @@ export function BankruptcyOverlay() {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'var(--color-background)',
+        background: 'var(--color-background) var(--background-gradient)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -25,7 +26,7 @@ export function BankruptcyOverlay() {
         zIndex: 1000,
       }}
     >
-      <span style={{ fontSize: '3rem' }}>💸</span>
+      <TrendingDown size={64} color="var(--color-danger)" />
       <Heading style={{ fontSize: '2rem', color: 'var(--color-danger)' }}>{t('bankruptcy.title')}</Heading>
       <p style={{ color: 'var(--color-text-secondary)', maxWidth: 480 }}>{t('bankruptcy.message')}</p>
       <Button variant="primary" onClick={restartAfterBankruptcy}>

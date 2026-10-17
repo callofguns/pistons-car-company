@@ -10,7 +10,7 @@
   align-items: flex-start;
   gap: var(--space-3);
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--color-panel-light);
+  border-bottom: 1px solid var(--color-border);
   text-align: left;
 }
 
@@ -22,8 +22,15 @@
 }
 
 .icon {
-  font-size: 1.2rem;
+  width: 34px;
+  height: 34px;
   flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-panel-glass);
+  border: 1px solid var(--color-border);
 }
 
 .body {
@@ -40,5 +47,5 @@
 
 .headline {
   font-size: 0.9rem;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }

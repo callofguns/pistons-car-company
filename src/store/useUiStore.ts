@@ -3,15 +3,13 @@ import type { ScreenId } from './screenId'
 import type { MessageKey } from '../i18n/keys'
 
 /** Main Menu is the title screen, before a session is really "in progress" - the persistent stat
- * bar was asked to come back off of it specifically. The whole car-building process (Body
- * Selection through the design wizard) also runs full-screen without it, as its own focused,
- * distraction-free flow - both screens own their own in-screen back navigation, so nothing is
- * lost by dropping the bar there. Every other screen, including Office Hub, keeps it visible. */
+ * bar was asked to come back off of it specifically. The design wizard (CarDesign) also runs
+ * full-screen without it, as its own focused flow with its own back navigation and cost readout.
+ * Every other screen, including Office Hub and Body Selection (like the reference), keeps it. */
 const SCREENS_WITHOUT_HUD = new Set<ScreenId>([
   'MainMenu',
   'CompanyNaming',
   'SaveSlots',
-  'BodySelection',
   'CarDesign',
   // Reachable from the Main Menu, where world is a blank unsaved createNewWorld() - the HUD would
   // otherwise render stats (company name, cash, date) for a company that doesn't exist. News is

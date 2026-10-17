@@ -5,6 +5,7 @@ import { useTutorialStore } from '../store/useTutorialStore'
 import { useT } from '../i18n/useT'
 import { listSlots } from '../core/save'
 import { Button, Heading } from '../components/Primitives'
+import { BackButton } from '../components/BackButton'
 import styles from './screen.module.css'
 import namingStyles from './CompanyNamingScreen.module.css'
 
@@ -14,7 +15,6 @@ import namingStyles from './CompanyNamingScreen.module.css'
  * screen instead of silently overwriting one, so the player explicitly picks what gets replaced.
  */
 export function CompanyNamingScreen() {
-  const back = useUiStore((s) => s.back)
   const show = useUiStore((s) => s.show)
   const goHome = useUiStore((s) => s.goHome)
   const startNewGameInSlot = useGameStore((s) => s.startNewGameInSlot)
@@ -44,13 +44,7 @@ export function CompanyNamingScreen() {
       className={`${styles.screen} ${styles.centered} ${styles.narrow}`}
       style={{ position: 'relative', justifyContent: 'center' }}
     >
-      <Button
-        style={{ position: 'absolute', top: 'var(--space-4)', left: 'var(--space-4)', width: 44, height: 44, padding: 0 }}
-        onClick={back}
-        aria-label={t('common.back')}
-      >
-        ‹
-      </Button>
+      <BackButton />
 
       <Heading>{t('companyNaming.heading')}</Heading>
 

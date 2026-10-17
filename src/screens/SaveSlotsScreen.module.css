@@ -22,9 +22,10 @@
   min-width: 0;
   min-height: 64px;
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-panel-light);
-  border-radius: var(--radius);
-  background: var(--color-panel-dark);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-panel-glass);
+  box-shadow: var(--shadow-panel);
   color: var(--color-text-primary);
   text-align: left;
 }
@@ -39,7 +40,7 @@
 }
 
 .name {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.05rem;
 }
 
@@ -56,12 +57,14 @@
 
 .deleteButton {
   flex: none;
-  width: 44px;
-  border: 1px solid var(--color-panel-light);
-  border-radius: var(--radius);
-  background: var(--color-panel-dark);
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-panel-glass);
   color: var(--color-text-secondary);
-  font-size: 1.1rem;
 }
 
 .deleteButton:hover {

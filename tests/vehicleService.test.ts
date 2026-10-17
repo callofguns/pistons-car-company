@@ -38,6 +38,25 @@ const smallBody: BodyStyleDefinition = {
 }
 
 describe('selectBody', () => {
+  it('refuses a body before its unlock year, without charging tooling', () => {
+    const vehicles = createVehicleState()
+    const bank = createBank(1_000_000)
+    const ledger = createLedgerState()
+    beginNewDesign(vehicles)
+    const futureBody: BodyStyleDefinition = { ...bigBody, id: 'future-body', unlockYear: 1980, productionEquipmentCost: 50_000 }
+
+    expect(selectBody(vehicles, futureBody, bank, ledger, 1974, TODAY)).toBe(false)
+    expect(bank.balance).toBe(1_000_000)
+    expect(selectBody(vehicles, futureBody, bank, ledger, 1980, makeDate(1980, 1, 1))).toBe(true)
+  })
+
+  it('defaults to the Standard I4 when it fits', () => {
+    const vehicles = createVehicleState()
+    beginNewDesign(vehicles)
+    selectBody(vehicles, bigBody, createBank(1_000_000), createLedgerState(), 1974, TODAY)
+    expect(vehicles.currentSession!.enginePresetId).toBe('standard-i4')
+  })
+
   it('seeds every component slot with a default option and a fitting, unlocked engine preset', () => {
     const vehicles = createVehicleState()
     const bank = createBank(1_000_000)

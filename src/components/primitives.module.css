@@ -1,13 +1,14 @@
 .panel {
-  background: var(--color-panel-dark);
-  border: 1px solid var(--color-panel-light);
-  border-radius: var(--radius);
+  background: var(--color-panel-glass);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
   padding: var(--space-4);
+  box-shadow: var(--shadow-panel);
 }
 
 .panelLight {
   background: var(--color-panel-light);
-  border-color: var(--color-panel-lighter);
+  border-color: var(--color-border-strong);
 }
 
 .row {
@@ -26,81 +27,73 @@
 .gap3 { gap: var(--space-3); }
 .gap4 { gap: var(--space-4); }
 
-/* The one signature element repeated on every screen: a brass bevel rule under every title,
-   sized to the title's own text rather than a fixed bar - see the design-direction brief this
-   came from ("chrome-bevel double-rule under every screen title"). inline-block makes the rule
-   track the rendered text width/position correctly regardless of whether the heading itself is
-   left-aligned, centered by a flex parent, or has text-align:center set directly on it. */
+/* Screen and section titles: the reference's clean uppercase sans with a little tracking, no
+   underline rule. inline-block so a flex parent can still center it. */
 .heading {
   display: inline-block;
-  position: relative;
   margin: 0;
-  padding-bottom: var(--space-2);
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.5rem;
+  font-weight: 600;
+  font-size: 1.35rem;
   line-height: 1.2;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--color-text-primary);
 }
 
-.heading::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 4px;
-  border-radius: 1px;
-  background: linear-gradient(to bottom, #f0dfa0 0%, var(--color-trim) 45%, #7a5f18 100%);
-}
-
+/* Every button: a raised, rounded navy tile with a faint light edge on top and a dark "base"
+   shadow under it, like the reference's chunky mobile-game buttons. Pressing sinks it onto that
+   base. */
 .button {
-  border: none;
+  border: 1px solid var(--color-border);
+  border-top-color: var(--color-border-strong);
   border-radius: var(--radius);
   padding: var(--space-3) var(--space-4);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 500;
+  letter-spacing: 0.03em;
   color: var(--color-text-primary);
-  background: var(--color-panel-light);
-  transition: filter var(--transition-fast), transform var(--transition-fast);
-  /* Cheap insurance against a translated label running long in a tight spot the button's specific
-     screen didn't otherwise account for: worst case becomes a wrapped label, not a
-     horizontally-scrolled screen. */
+  background: linear-gradient(to bottom, var(--color-panel-lighter), var(--color-panel-light));
+  box-shadow: var(--shadow-button);
+  transition: filter var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  /* Worst case for a long label in a tight spot is a wrapped label, not a horizontally-scrolled
+     screen. */
   max-width: 100%;
   overflow-wrap: anywhere;
 }
 
 .button:hover:not(:disabled) {
-  filter: brightness(1.18);
+  filter: brightness(1.15);
 }
 
 .button:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(3, 8, 28, 0.55), 0 3px 8px rgba(3, 8, 28, 0.35);
 }
 
 .primary {
-  background: var(--color-accent);
-  font-weight: 700;
-}
-
-.primary:hover:not(:disabled) {
-  background: var(--color-accent-hover);
-  filter: none;
+  background: linear-gradient(to bottom, #3f80f2, var(--color-accent) 60%, #2560cf);
+  border-color: rgba(120, 170, 255, 0.55);
+  border-top-color: rgba(190, 215, 255, 0.8);
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .danger {
-  background: var(--color-danger);
-  font-weight: 700;
+  background: linear-gradient(to bottom, #f36c69, var(--color-danger) 60%, #d63e3b);
+  border-color: rgba(255, 150, 150, 0.5);
+  font-weight: 600;
 }
 
 .gold {
-  background: var(--color-trim);
-  color: var(--color-background);
-  font-weight: 700;
+  background: linear-gradient(to bottom, #f8ca62, var(--color-trim) 60%, #d99a1f);
+  border-color: rgba(255, 220, 140, 0.7);
+  color: #2a1d05;
+  font-weight: 600;
 }
 
+/* Quiet secondary action - flat glass, no raised base. */
 .ghost {
-  background: var(--color-panel-dark);
-  border: 1px solid var(--color-panel-light);
+  background: var(--color-panel-glass);
+  box-shadow: none;
 }

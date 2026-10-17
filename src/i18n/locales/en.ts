@@ -59,8 +59,8 @@ export const en = {
   // words, but ALL CAPS there (MainMenuScreen.module.css's .buttons has no text-transform either,
   // so the casing has to be literal) - keeping them as distinct keys is exactly the
   // Small/Medium/Large lesson from data.loanTier vs data.classification, applied to nav labels.
-  'nav.research': 'R&D',
-  'nav.promotion': 'Promo',
+  'nav.research': 'Research',
+  'nav.promotion': 'Promotion',
   'nav.models': 'Models',
   'nav.racing': 'Racing',
   'nav.staff': 'Staff',
@@ -70,7 +70,8 @@ export const en = {
   // office hub
   'officeHub.sales': 'SALES',
   'officeHub.noModels': 'No models yet - design your first car.',
-  'officeHub.createCar': '+ CREATE CAR',
+  'officeHub.createCar': 'Create car',
+  'officeHub.soldToday': 'today',
 
   // bank / finance screen
   'bank.cashBalance': 'Cash balance',
@@ -153,9 +154,10 @@ export const en = {
   'data.promoChannel.Internet': 'Internet',
   'data.promoChannel.Cinemas': 'Cinemas',
   'promotion.select': 'SELECT',
-  'promotion.unlocksInYears': '{year} y.',
+  'promotion.unlocksInYears': 'Unlocks in {year}',
 
   // team creation (racing) screen
+  'team.randomName': 'Random team name',
   'team.registration': 'TEAM REGISTRATION',
   'team.registerBlurb': 'Register your racing team and restore the garage to compete in events',
   'team.namePlaceholder': 'Enter team name',
@@ -220,11 +222,20 @@ export const en = {
   'data.researchCategory.Safety': 'Safety',
 
   // research node card action-button state labels
-  'research.state.Locked': 'LOCKED',
+  'research.state.Locked': 'UNAVAILABLE',
   'research.state.AvailableNormal': 'RESEARCH',
   'research.state.AvailableBreakthrough': 'BREAKTHROUGH',
   'research.state.InProgress': 'RESEARCHING…',
   'research.state.Researched': 'RESEARCHED',
+  'research.info': 'What does {name} do?',
+  'research.earlyWarning': 'Not due until {year} - researching it now is a breakthrough and costs more.',
+  'research.effect.Power': '{amount} power',
+  'research.effect.Reliability': '{amount} reliability',
+  'research.effect.FuelEconomy': '{amount} fuel economy',
+  'research.effect.Emissions': '{amount} emissions',
+  'research.effect.ProductionCost': '{amount} production cost',
+  'research.effect.RepairCost': '{amount} repair cost',
+  'research.duration': '{days} days',
 
   // model lineup screen (spec sheet)
   'modelLineup.noModels': 'No models designed yet.',
@@ -273,8 +284,10 @@ export const en = {
   'salesStats.launchMarketing': 'LAUNCH MARKETING',
 
   // body selection screen
-  'bodySelection.equipmentCost': 'Production equipment cost: {cost}',
-  'bodySelection.owned': 'Owned',
+  'bodySelection.equipmentCostLabel': 'Production equipment cost',
+  'bodySelection.alreadyTooled': 'Already tooled - no cost',
+  'bodySelection.bodyCapacity': 'Body capacity',
+  'bodySelection.unlocksIn': 'Unlocks in {year}',
   'bodySelection.engineBay': '{value} L.',
   'bodySelection.notEnoughCash': "Not enough cash for this body's tooling.",
 
@@ -310,13 +323,13 @@ export const en = {
   'bankruptcy.startNewGame': '+ START NEW GAME',
 
   // tutorial card
-  'tutorial.tapHighlighted': '👉 Tap the highlighted button',
+  'tutorial.tapHighlighted': 'Tap the highlighted button',
   'tutorial.gotIt': 'Got it',
 
   // component slot card (design wizard option cyclers)
   'component.previousLabel': 'Previous {label}',
   'component.nextLabel': 'Next {label}',
-  'component.unlocksIn': '🔒 {label} unlocks {year}',
+  'component.unlocksIn': '{label} unlocks {year}',
 
   // classification tags (Class/Type picker) - label+description per tag. Note 'medium' here is a
   // DIFFERENT key/word than data.loanTier.medium.name or data.promoTier.medium.name even though
@@ -344,7 +357,7 @@ export const en = {
 
   // car design wizard
   'carDesign.noDesignInProgress': 'No design in progress - go back and pick a body first.',
-  'carDesign.backToOffice': '‹ BACK TO OFFICE',
+  'carDesign.backToOffice': 'Back to office',
   'carDesign.costPrice': 'Cost Price',
   'carDesign.safetyRatingTitle': 'SAFETY RATING',
   'carDesign.engineerAdvisor': 'Engineer',
@@ -356,8 +369,9 @@ export const en = {
   'carDesign.meterPercent': '{value}%',
   'carDesign.modelName': 'Model name',
   'carDesign.comingSoon':
-    '🚧 Sales Regions and Production Runs are coming in a future update - for now, this car goes straight on sale everywhere.',
+    'Sales Regions and Production Runs are coming in a future update - for now, this car goes straight on sale everywhere.',
   'carDesign.finish': '✓ FINISH',
+  'carDesign.stepOf': 'Step {step} of {total}',
   // generateDefaultName's suggestion pattern - see the trap this exists to avoid, documented on
   // CarDesignScreen.tsx's generateDefaultName and core/vehicles.ts's CarModel.name field.
   'carDesign.defaultNameFallback': 'Model',
@@ -582,7 +596,7 @@ export const en = {
 
   // tutorial script (PR 4) - explicit titleKey/messageKey fields on TutorialStep (small table, 13
   // entries, no test fixtures construct this type - see data/tutorialSteps.ts). Messages that
-  // reference a highlighted button's own text (e.g. "+ CREATE CAR") bake in that button's
+  // reference a highlighted button's own text (e.g. "CREATE CAR") bake in that button's
   // translated wording directly, same maintenance relationship the English original already had
   // between this file and the screens - not solved by this migration, not made worse by it either.
   'tutorial.officeWelcome.title': 'Welcome to Pistons',
@@ -590,15 +604,15 @@ export const en = {
     "I'll show you around, then help you design your first car. The Office is home base - you'll return here between every decision.",
   'tutorial.officeSales.title': 'Sales panel',
   'tutorial.officeSales.message':
-    "This tracks your top-selling models and recent sales trends. It's empty for now - that changes once you've got a car on the lot.",
+    "The SALES panel on the right tracks your top-selling models and how many sold today. It's empty for now - that changes once you've got a car on the lot.",
   'tutorial.officeNav.title': 'Getting around',
   'tutorial.officeNav.message':
-    'R&D unlocks new parts, Promo runs ad campaigns, Models reviews everything you sell, Racing is a later-game team, and Staff manages your workforce and their wages.',
+    'The icon buttons along the bottom, from left: Research (flask) unlocks new parts, Promotion (megaphone) runs ad campaigns, Models (car) reviews everything you sell, Racing (flag) is a later-game team, Staff (person) manages your workforce, Company (building) shows your HQ, and News (newspaper) has the latest headlines.',
   'tutorial.officeHud.title': 'The top bar',
   'tutorial.officeHud.message':
-    'Reputation, population served, cash balance, and the date - always visible. ▶/⏸/⏩ control time itself: sales and bills only happen while unpaused.',
+    'Reputation, people who know your company, the date, cash and research points - always visible. The small pause/play/fast buttons under the year control time itself: sales and bills only happen while it runs. The gold cart opens Finance.',
   'tutorial.officeCreateCar.title': 'Time to build',
-  'tutorial.officeCreateCar.message': 'Tap the highlighted + CREATE CAR button to start designing your first vehicle.',
+  'tutorial.officeCreateCar.message': 'Tap the highlighted CREATE CAR button to start designing your first vehicle.',
   'tutorial.bodySelection.title': 'Choose a body',
   'tutorial.bodySelection.message':
     'Swipe through the available bodies with the arrows. Each has its own class, engine bay size, and a one-time production tooling cost the first time you use it.',
@@ -622,7 +636,7 @@ export const en = {
     'Price above your Cost Price to turn a profit. The suggested price balances margin against what buyers in your segment expect - then tap the highlighted ✓ FINISH button to put it into production.',
   'tutorial.lineupFinale.title': "You're on the lot",
   'tutorial.lineupFinale.message':
-    '🎉 Your first car is in production and will start selling back at the Office. From here you can review its specs, adjust the price, or start a restyle any time. Good luck out there.',
+    'Your first car is in production and will start selling back at the Office. From here you can review its specs, adjust the price, or start a restyle any time. Good luck out there.',
 
   // screen.<id>.title - the persistent top bar's title (see TopHud.tsx); a Record<ScreenId,
   // MessageKey> in useUiStore.ts maps every screen id to one of these.
@@ -643,6 +657,13 @@ export const en = {
   'screen.bank.title': 'Finance',
 
   'hud.inDebt': 'IN DEBT',
+  'hud.reputation': 'Reputation',
+  'hud.reach': 'People who know your company',
+  'hud.day': 'Day',
+  'hud.month': 'Month',
+  'hud.year': 'Year',
+  'hud.cash': 'Cash',
+  'hud.researchPoints': 'Research points',
 
 
   // stats.* - pluralized, _one/_other sibling pairs (see plural() in ./t.ts). Seeded here ahead of

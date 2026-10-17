@@ -1,44 +1,99 @@
 .button {
   position: relative;
-  overflow: hidden;
-  border: none;
-  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
   padding: var(--space-3) var(--space-4);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  background: var(--color-panel-dark);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-primary);
   text-align: left;
   cursor: pointer;
-  transition: filter 0.1s ease;
+  transition: background var(--transition-fast);
 }
 
 .button:hover {
-  filter: brightness(1.15);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.icon {
+  display: flex;
+  flex: none;
+  color: var(--color-text-primary);
+}
+
+.text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.track {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: #0b1026;
+  overflow: hidden;
 }
 
 .fill {
   position: absolute;
   inset: 0;
-  background: var(--color-accent);
-  opacity: 0.35;
+  background: #f3f6ff;
   transform-origin: left;
   transition: transform 0.3s ease;
 }
 
-.label {
-  position: relative;
-  z-index: 1;
+/* The selected category: a white card with an arrow-shaped right edge, dark text. */
+.active {
+  background: #f3f6ff;
+  color: #13204a;
+  border-bottom-color: transparent;
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 50%, calc(100% - 22px) 100%, 0 100%);
+  padding-right: 30px;
 }
 
-/* The selected category: brighter fill (fully lit, not dimmed) and a bordered outline so it reads
-   as "current" independent of how much progress it has. */
-.active {
-  color: var(--color-text-primary);
-  outline: 2px solid var(--color-accent);
-  outline-offset: -2px;
+.active:hover {
+  background: #ffffff;
+}
+
+.active .icon {
+  color: #13204a;
 }
 
 .active .fill {
-  opacity: 0.7;
+  background: #13204a;
+}
+
+.active .track {
+  background: #c9d2ea;
+}
+
+@media (max-height: 560px) {
+  .button {
+    padding: 6px var(--space-2);
+    gap: var(--space-2);
+  }
+
+  .label {
+    font-size: 0.8rem;
+  }
+
+  .track {
+    height: 5px;
+  }
+
+  .icon svg {
+    width: 18px;
+    height: 18px;
+  }
 }

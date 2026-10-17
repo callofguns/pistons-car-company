@@ -6,7 +6,7 @@ import { computeAmortizedPayment } from '../core/economy'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
 import { StatRow } from '../components/StatRow'
-import { Button, Heading } from '../components/Primitives'
+import { Button } from '../components/Primitives'
 import styles from './screen.module.css'
 import bankStyles from './BankScreen.module.css'
 
@@ -42,61 +42,66 @@ export function BankScreen() {
 
   return (
     <div className={styles.screen}>
-      <Heading>{t('screen.bank.title')}</Heading>
-
-      <StatRow label={t('bank.cashBalance')} value={plainCurrency(bank.balance)} />
-      {bank.balance < 0 && <span style={{ color: 'var(--color-danger)' }}>{t('bank.overdraftWarning')}</span>}
-
-      {bank.loans.length > 0 && (
-        <>
-          <Heading style={{ fontSize: '1.1rem' }}>{t('bank.activeLoans')}</Heading>
-          {bank.loans.map((loan) => (
-            <StatRow
-              key={loan.id}
-              label={t('bank.loanLabel', { principal: plainCurrency(loan.principal), rate: fmt.percent(loan.annualInterestRate * 100, 0) })}
-              value={t('bank.loanValue', { remaining: plainCurrency(loan.remainingBalance), payment: plainCurrency(loan.monthlyPayment) })}
-            />
-          ))}
-        </>
-      )}
-
-      <Heading style={{ fontSize: '1.1rem' }}>{t('bank.thisMonth')}</Heading>
-      <StatRow label={t('bank.income')} value={fmt.money(income)} />
-      {incomeCategories.map(([category, amount]) => (
-        <StatRow key={category} label={`  ${t(CATEGORY_LABEL_KEY[category])}`} value={fmt.money(amount)} />
-      ))}
-      <StatRow label={t('bank.expenses')} value={fmt.money(expense)} />
-      {expenseCategories.map(([category, amount]) => (
-        <StatRow key={category} label={`  ${t(CATEGORY_LABEL_KEY[category])}`} value={fmt.money(amount)} />
-      ))}
-      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
-        <span style={{ color: 'var(--color-text-secondary)' }}>{t('bank.netProfit')}</span>
-        <span style={{ fontWeight: 700, color: netProfit >= 0 ? 'var(--color-green)' : 'var(--color-danger)' }}>
-          {netProfit >= 0 ? '+' : ''}
-          {fmt.money(netProfit)}
-        </span>
+      <div className={bankStyles.balance}>
+        <span className={styles.sectionTitle}>{t('bank.cashBalance')}</span>
+        <span className={`${bankStyles.balanceValue} ${bank.balance < 0 ? bankStyles.negative : ''}`}>{plainCurrency(bank.balance)}</span>
+        {bank.balance < 0 && <span style={{ color: 'var(--color-danger)' }}>{t('bank.overdraftWarning')}</span>}
       </div>
 
-      <Heading style={{ fontSize: '1.1rem' }}>{t('bank.takeALoan')}</Heading>
-      <div className={styles.grid}>
-        {LOAN_TIERS.map((tier) => {
-          const payment = computeAmortizedPayment(tier.principal, tier.annualInterestRate, tier.termMonths)
-          return (
-            <div key={tier.id} className={bankStyles.loanCard}>
-              <strong>{t(tier.displayNameKey)}</strong>
-              <span>{plainCurrency(tier.principal)}</span>
-              <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
-                {t('bank.rateAndTerm', { rate: fmt.percent(tier.annualInterestRate * 100, 0), months: tier.termMonths })}
-              </span>
-              <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
-                {t('bank.perMonth', { amount: plainCurrency(payment) })}
-              </span>
-              <Button variant="gold" onClick={() => takeLoan(tier.id)}>
-                {t('bank.takeLoan')}
-              </Button>
-            </div>
-          )
-        })}
+      <div className={bankStyles.columns}>
+        <div className={styles.card}>
+          <h3 className={styles.sectionTitle}>{t('bank.thisMonth')}</h3>
+          <StatRow label={t('bank.income')} value={fmt.money(income)} />
+          {incomeCategories.map(([category, amount]) => (
+            <StatRow key={category} label={`  ${t(CATEGORY_LABEL_KEY[category])}`} value={fmt.money(amount)} />
+          ))}
+          <StatRow label={t('bank.expenses')} value={fmt.money(expense)} />
+          {expenseCategories.map(([category, amount]) => (
+            <StatRow key={category} label={`  ${t(CATEGORY_LABEL_KEY[category])}`} value={fmt.money(amount)} />
+          ))}
+          <div className={bankStyles.netRow}>
+            <span style={{ color: 'var(--color-text-secondary)' }}>{t('bank.netProfit')}</span>
+            <span style={{ fontWeight: 600, color: netProfit >= 0 ? 'var(--color-green)' : 'var(--color-danger)' }}>
+              {netProfit >= 0 ? '+' : ''}
+              {fmt.money(netProfit)}
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.card}>
+          {bank.loans.length > 0 && (
+            <>
+              <h3 className={styles.sectionTitle}>{t('bank.activeLoans')}</h3>
+              {bank.loans.map((loan) => (
+                <StatRow
+                  key={loan.id}
+                  label={t('bank.loanLabel', { principal: plainCurrency(loan.principal), rate: fmt.percent(loan.annualInterestRate * 100, 0) })}
+                  value={t('bank.loanValue', { remaining: plainCurrency(loan.remainingBalance), payment: plainCurrency(loan.monthlyPayment) })}
+                />
+              ))}
+            </>
+          )}
+
+          <h3 className={styles.sectionTitle}>{t('bank.takeALoan')}</h3>
+          <div className={bankStyles.loans}>
+            {LOAN_TIERS.map((tier) => {
+              const payment = computeAmortizedPayment(tier.principal, tier.annualInterestRate, tier.termMonths)
+              return (
+                <div key={tier.id} className={bankStyles.loanCard}>
+                  <span className={styles.sectionTitle}>{t(tier.displayNameKey)}</span>
+                  <span className={bankStyles.loanAmount}>{plainCurrency(tier.principal)}</span>
+                  <span className={bankStyles.loanDetail}>
+                    {t('bank.rateAndTerm', { rate: fmt.percent(tier.annualInterestRate * 100, 0), months: tier.termMonths })}
+                  </span>
+                  <span className={bankStyles.loanDetail}>{t('bank.perMonth', { amount: plainCurrency(payment) })}</span>
+                  <Button variant="gold" onClick={() => takeLoan(tier.id)}>
+                    {t('bank.takeLoan')}
+                  </Button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </div>
     </div>
   )

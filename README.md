@@ -8,7 +8,8 @@ Ported from an earlier Unity prototype; the simulation logic in `src/core/` is a
 
 - **React 18 + TypeScript + Vite**
 - **Zustand** for state (the store is the same "mutate + notify" pattern the Unity version used, just framework-native)
-- **CSS Modules** — flat, minimal styling by design; no art yet, the current focus is correct layout and working buttons
+- **CSS Modules** for styling, **Lucide** for icons, **Rubik** as the one typeface (self-hosted)
+- **Hand-written SVG art** in `src/art/` — the isometric offices (one per HQ level), the car side views and the factory backdrop are all drawn in code, no image files
 - **Vitest** for unit tests
 - **Browser `localStorage`** for saves — no backend, deployable as a static site
 
@@ -32,16 +33,18 @@ src/
 │                 tiers, rumor templates) as plain TS literals
 ├── store/      # Zustand store wrapping core/, plus the screen router and simulation loop
 ├── components/ # reusable widgets (StatRow, CarCarousel, ResearchNodeCard, TopHud, ...)
-├── screens/    # the 13 game screens
+├── art/        # vector drawings: isometric offices, car side views, factory backdrop
+├── screens/    # the game screens
 └── styles/     # shared CSS tokens (palette, spacing)
 ```
 
 ## Notes on this pass
 
-- **HUD:** the top bar shows reputation/population/day/date, matching the reference layout — cash and research-point pills are intentionally left out for now (see the project's web-pivot plan). Both values are fully simulated in `src/core/economy.ts` and `src/core/research.ts`, just not surfaced in the persistent bar yet.
-- **Visuals** are flat placeholders on purpose — the priority right now is correct layout and working navigation, not art.
+- **HUD:** the top bar matches the reference layout — reputation, reach, day, a big year medallion (with the pause/play/fast controls under it), month, cash and research points, plus the gold shop (Finance) and garage (main menu) buttons. Every sub-screen gets a back arrow.
+- **Look:** a navy "boardroom blueprint" theme (tokens in `src/styles/tokens.css`), designed for a landscape phone first.
+- **Language:** English only.
 - **"Game Bank"** is reinterpreted as an in-fiction investor cash advance rather than the reference's real-money IAP storefront.
-- **Saves** are a single autosave slot in `localStorage`, written on month rollover and on tab close/hide.
+- **Saves** live in three `localStorage` slots, written on month rollover and on tab close/hide.
 
 ## Deployment
 

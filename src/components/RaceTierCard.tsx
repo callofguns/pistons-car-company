@@ -1,3 +1,4 @@
+import { Lock } from 'lucide-react'
 import type { RaceTierDefinition } from '../core/racing'
 import { findClassificationTag } from '../data/classifications'
 import { useT } from '../i18n/useT'
@@ -36,7 +37,7 @@ export function RaceTierCard({ tier, unlocked, onSelect }: RaceTierCardProps) {
       </Button>
       {!unlocked && (
         <div className={styles.overlay}>
-          <span>🔒</span>
+          <Lock size={22} />
           <span>{t('promotion.unlocksInYears', { year: tier.unlockYear })}</span>
         </div>
       )}

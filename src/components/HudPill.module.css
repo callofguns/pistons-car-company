@@ -1,16 +1,38 @@
 .pill {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  background: var(--color-panel-light);
-  border: 1px solid var(--color-panel-lighter);
+  gap: 6px;
+  height: 36px;
+  min-width: 64px;
+  padding: 0 10px;
+  background: var(--color-panel-glass);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 6px 10px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   white-space: nowrap;
+}
+
+.icon {
+  display: flex;
+  flex: none;
 }
 
 .value {
   font-weight: 500;
   font-variant-numeric: tabular-nums;
+}
+
+.danger {
+  border-color: var(--color-danger);
+  background: rgba(239, 83, 80, 0.22);
+}
+
+@media (max-height: 560px) {
+  .pill {
+    height: 28px;
+    min-width: 0;
+    padding: 0 7px;
+    gap: 4px;
+    font-size: 0.8rem;
+  }
 }

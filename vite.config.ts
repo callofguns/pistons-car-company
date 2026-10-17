@@ -23,7 +23,7 @@ export default defineConfig({
       includeAssets: ['apple-touch-icon.png'],
       workbox: {
         // vite-plugin-pwa's default glob doesn't include font files, which would otherwise leave
-        // the self-hosted Fraunces/Work Sans faces (tokens.css) uncached - offline would silently
+        // the self-hosted Rubik font files (tokens.css) uncached - offline would silently
         // fall back to system fonts instead of actually failing, easy to miss without this.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
       },
@@ -38,8 +38,8 @@ export default defineConfig({
         // natively by Chrome. iOS has no orientation-lock API in any context, PWA or not, so the
         // in-app forced-landscape CSS (tokens.css) remains the permanent fallback there regardless.
         orientation: 'landscape',
-        background_color: '#1c1a17', // --color-background
-        theme_color: '#262320', // --color-panel-dark
+        background_color: '#111c44', // --color-background
+        theme_color: '#15224f', // --color-panel-dark
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },

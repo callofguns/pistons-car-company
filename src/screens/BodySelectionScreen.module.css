@@ -1,0 +1,342 @@
+/* Layered like the reference: the factory backdrop fills the screen, the car sits centered on the
+   conveyor line, and every control is pinned to an edge around it. */
+.screen {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.tutorial {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-4);
+  width: min(360px, 40%);
+  z-index: 3;
+}
+
+.cost {
+  position: absolute;
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-shadow: 0 2px 6px rgba(3, 8, 28, 0.8);
+}
+
+.costLabel {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.costValue {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.costValue svg {
+  color: var(--color-green);
+}
+
+/* The car sits on the conveyor line (~80% down the backdrop's floor band). */
+.stage {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 22%;
+  bottom: 34%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.watermark {
+  position: absolute;
+  top: 6%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: clamp(2rem, 7vw, 5.5rem);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.16);
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.car {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 10px 14px rgba(3, 8, 28, 0.6));
+}
+
+.carLocked {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+.lockBadge {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 999px;
+  background: rgba(10, 18, 48, 0.85);
+  border: 1px solid var(--color-trim);
+  color: var(--color-trim);
+  font-weight: 600;
+}
+
+.sideArrow {
+  position: absolute;
+  top: 44%;
+  transform: translateY(-50%);
+  width: 72px;
+  height: 52px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sideArrow:active:not(:disabled) {
+  transform: translateY(calc(-50% + 2px));
+}
+
+.sideArrowLeft {
+  left: var(--space-5);
+}
+
+.sideArrowRight {
+  right: var(--space-5);
+}
+
+.info {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.counter {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: var(--radius);
+  background: rgba(10, 18, 48, 0.75);
+}
+
+.classRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.smallArrow {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.className {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 180px;
+  text-shadow: 0 2px 6px rgba(3, 8, 28, 0.8);
+}
+
+.bodyName {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.carClass {
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dots {
+  display: flex;
+  gap: 4px;
+}
+
+.dot {
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.dotActive {
+  background: var(--color-accent-hover);
+}
+
+.footer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: var(--space-4);
+  width: min(380px, 40%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.continue {
+  width: 100%;
+  height: 60px;
+  font-size: 1.05rem;
+}
+
+.error {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: rgba(10, 18, 48, 0.85);
+  padding: 2px 8px;
+  border-radius: var(--radius);
+}
+
+.capacity {
+  position: absolute;
+  right: var(--space-5);
+  bottom: var(--space-5);
+  width: min(280px, 24%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.capacityLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.capacityRow {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.capacityValue {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+@media (max-height: 560px) {
+  .cost {
+    top: 2px;
+  }
+
+  .costLabel {
+    font-size: 0.75rem;
+  }
+
+  .costValue {
+    font-size: 1.25rem;
+  }
+
+  .stage {
+    top: 16%;
+    bottom: 40%;
+  }
+
+  .sideArrow {
+    width: 52px;
+    height: 40px;
+    left: auto;
+  }
+
+  .sideArrowLeft {
+    left: var(--space-3);
+  }
+
+  .sideArrowRight {
+    right: var(--space-3);
+  }
+
+  .info {
+    bottom: 58px;
+    gap: 2px;
+  }
+
+  .classRow {
+    gap: var(--space-2);
+  }
+
+  .smallArrow {
+    width: 32px;
+    height: 32px;
+  }
+
+  .className {
+    min-width: 130px;
+  }
+
+  .bodyName {
+    font-size: 0.7rem;
+  }
+
+  .carClass {
+    font-size: 1.05rem;
+  }
+
+  .footer {
+    bottom: var(--space-2);
+    width: min(260px, 34%);
+  }
+
+  .continue {
+    height: 44px;
+    font-size: 0.9rem;
+  }
+
+  .capacity {
+    right: var(--space-3);
+    bottom: var(--space-3);
+    width: 24%;
+    gap: 2px;
+  }
+
+  .capacityLabel {
+    font-size: 0.7rem;
+  }
+
+  .tutorial {
+    left: var(--space-2);
+    width: min(300px, 36%);
+  }
+}

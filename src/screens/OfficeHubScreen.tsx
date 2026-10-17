@@ -1,23 +1,44 @@
+import type { ComponentType } from 'react'
+import { Building2, Car, Flag, FlaskConical, Megaphone, Newspaper, UserPlus, type LucideProps } from 'lucide-react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { useActiveTutorialStep } from '../store/useTutorialStore'
 import { unreadNewsCount } from '../core/news'
+import type { ScreenId } from '../store/screenId'
 import { useT } from '../i18n/useT'
+import type { MessageKey } from '../i18n/keys'
+import { OfficeArt } from '../art/OfficeArt'
 import { ModelSalesRow } from '../components/ModelSalesRow'
-import { SalesGraph } from '../components/SalesGraph'
-import { Button, Heading } from '../components/Primitives'
+import { Button } from '../components/Primitives'
 import styles from './OfficeHubScreen.module.css'
 
-/** The true home screen. Also the only screen where game time advances - see useSimulationLoop.
- * Corner-anchored layout: current models being sold + their sales graph top-left, every
- * secondary navigation button laid out flat in a single row bottom-left, and Create Car set apart
- * bottom-right as its own elongated primary-action button. Finance is still one tap away via the
- * persistent top HUD's "$" button - it isn't duplicated here anymore. */
+interface NavItem {
+  screen: ScreenId
+  labelKey: MessageKey
+  Icon: ComponentType<LucideProps>
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { screen: 'Research', labelKey: 'nav.research', Icon: FlaskConical },
+  { screen: 'Promotion', labelKey: 'nav.promotion', Icon: Megaphone },
+  { screen: 'ModelLineup', labelKey: 'nav.models', Icon: Car },
+  { screen: 'TeamCreation', labelKey: 'nav.racing', Icon: Flag },
+  { screen: 'Employees', labelKey: 'nav.staff', Icon: UserPlus },
+  { screen: 'Company', labelKey: 'nav.company', Icon: Building2 },
+  { screen: 'News', labelKey: 'nav.news', Icon: Newspaper },
+]
+
+/** The true home screen, laid out like the reference: the company's isometric office (which
+ * changes with each HQ level) in the middle, the SALES panel on the right, icon-only navigation
+ * along the bottom-left, and CREATE CAR set apart bottom-right as the primary action. Also the
+ * only screen where game time advances - see useSimulationLoop. Finance is one tap away via the
+ * top bar's gold shop button. */
 export function OfficeHubScreen() {
   const show = useUiStore((s) => s.show)
   useGameStore((s) => s.revision)
   const models = useGameStore((s) => s.world.vehicles.models)
   const news = useGameStore((s) => s.world.news)
+  const hqLevel = useGameStore((s) => s.world.company.hqLevel)
   const beginNewDesign = useGameStore((s) => s.beginNewDesign)
   const tutorialStep = useActiveTutorialStep()
   const { t } = useT()
@@ -27,29 +48,28 @@ export function OfficeHubScreen() {
 
   return (
     <div className={styles.hub}>
-      <div className={styles.topLeft}>
-        <Heading style={{ fontSize: '1.1rem' }}>{t('officeHub.sales')}</Heading>
-        <div className={styles.modelsList}>
+      <div className={styles.artArea}>
+        <OfficeArt level={hqLevel} className={styles.art} title={t('screen.officeHub.title')} />
+      </div>
+
+      <section className={styles.salesPanel} aria-label={t('officeHub.sales')}>
+        <h2 className={styles.salesTitle}>{t('officeHub.sales')}</h2>
+        <div className={styles.salesFrame}>
           {topModels.length === 0 && <span className={styles.empty}>{t('officeHub.noModels')}</span>}
           {topModels.map((model) => (
             <ModelSalesRow key={model.id} model={model} onClick={() => show('SalesStatistics', model.id)} />
           ))}
         </div>
-        {topModels.length > 0 && <SalesGraph models={topModels} />}
-      </div>
+      </section>
 
-      <div className={styles.bottomLeft}>
-        <Button onClick={() => show('Research')}>{t('nav.research')}</Button>
-        <Button onClick={() => show('Promotion')}>{t('nav.promotion')}</Button>
-        <Button onClick={() => show('ModelLineup')}>{t('nav.models')}</Button>
-        <Button onClick={() => show('TeamCreation')}>{t('nav.racing')}</Button>
-        <Button onClick={() => show('Employees')}>{t('nav.staff')}</Button>
-        <Button onClick={() => show('Company')}>{t('nav.company')}</Button>
-        <Button className={styles.navButton} onClick={() => show('News')}>
-          {t('nav.news')}
-          {unread > 0 && <span className={styles.badge}>{unread > 9 ? '9+' : unread}</span>}
-        </Button>
-      </div>
+      <nav className={styles.nav}>
+        {NAV_ITEMS.map(({ screen, labelKey, Icon }) => (
+          <Button key={screen} className={styles.navButton} onClick={() => show(screen)} aria-label={t(labelKey)} title={t(labelKey)}>
+            <Icon size={26} strokeWidth={2.1} />
+            {screen === 'News' && unread > 0 && <span className={styles.badge}>{unread > 9 ? '9+' : unread}</span>}
+          </Button>
+        ))}
+      </nav>
 
       <Button
         variant="primary"

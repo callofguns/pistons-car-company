@@ -1,3 +1,4 @@
+import { Check, Lock, Minus } from 'lucide-react'
 import { PROMOTION_CHANNELS, type PromotionTierDefinition } from '../core/marketing'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
@@ -28,7 +29,7 @@ export function PromotionTierCard({ tier, unlocked, onSelect }: PromotionTierCar
       <div className={styles.title}>{t(tier.displayNameKey)}</div>
       {PROMOTION_CHANNELS.map((channel, i) => (
         <div key={channel} className={`${styles.channel} ${i >= tier.unlockedChannelCount ? styles.channelDim : ''}`}>
-          <span>•</span>
+          {i < tier.unlockedChannelCount ? <Check size={14} strokeWidth={3} /> : <Minus size={14} />}
           <span>{t(CHANNEL_LABEL_KEY[channel])}</span>
         </div>
       ))}
@@ -38,7 +39,7 @@ export function PromotionTierCard({ tier, unlocked, onSelect }: PromotionTierCar
       </Button>
       {!unlocked && (
         <div className={styles.overlay}>
-          <span>🔒</span>
+          <Lock size={22} />
           <span>{t('promotion.unlocksInYears', { year: tier.unlockYear })}</span>
         </div>
       )}

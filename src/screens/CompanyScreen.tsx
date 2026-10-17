@@ -6,6 +6,8 @@ import { StatRow } from '../components/StatRow'
 import { RumorRow } from '../components/RumorRow'
 import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
+import companyStyles from './CompanyScreen.module.css'
+import { OfficeArt } from '../art/OfficeArt'
 
 /** Company overview: name/city, headline stats, the HQ panel, and the Rumors feed. */
 export function CompanyScreen() {
@@ -23,8 +25,8 @@ export function CompanyScreen() {
 
   return (
     <div className={styles.columnsPage}>
-      <div className={`${styles.column} ${styles.columnMedium}`}>
-        <div style={{ fontSize: '4rem', textAlign: 'center' }}>🐎</div>
+      <div className={`${styles.column} ${styles.columnMedium} ${styles.card}`}>
+        <OfficeArt level={company.hqLevel} className={companyStyles.office} title={t(level.displayNameKey)} />
         <Heading style={{ textAlign: 'center' }}>{company.companyName}</Heading>
         <span style={{ textAlign: 'center', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
           {company.homeCity}
@@ -35,7 +37,9 @@ export function CompanyScreen() {
         <StatRow label={t('company.marketShare')} value={fmt.percent(company.marketSharePercent, 0)} />
         <StatRow label={t('company.earned')} value={fmt.money(company.lifetimeEarnings)} />
 
-        <Heading style={{ fontSize: '1.1rem', marginTop: 'var(--space-3)' }}>{t('company.hqTitle')}</Heading>
+        <h3 className={styles.sectionTitle} style={{ marginTop: 'var(--space-3)' }}>
+          {t('company.hqTitle')}
+        </h3>
         <StatRow label={t('company.hqLevel')} value={t(level.displayNameKey)} />
         <StatRow label={t('company.hqSlots')} value={String(level.slots)} />
         <StatRow label={t('company.hqOverhead')} value={t('employees.perMonth', { amount: fmt.money(level.monthlyOverhead) })} />
@@ -60,8 +64,8 @@ export function CompanyScreen() {
         )}
       </div>
 
-      <div className={styles.column}>
-        <Heading style={{ fontSize: '1.1rem' }}>{t('company.rumors')}</Heading>
+      <div className={`${styles.column} ${styles.card}`}>
+        <h3 className={styles.sectionTitle}>{t('company.rumors')}</h3>
         <div style={{ overflowY: 'auto' }}>
           {rumors.recent.length === 0 && <span className={styles.empty}>{t('company.noRumors')}</span>}
           {rumors.recent.slice(0, 8).map((text, i) => (

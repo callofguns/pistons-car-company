@@ -1,9 +1,5 @@
 .nameInput {
   width: 100%;
-  padding: var(--space-3);
-  border-radius: var(--radius);
-  border: none;
-  background: var(--color-panel-dark);
-  color: var(--color-text-primary);
-  font-size: 1rem;
+  font-size: 1.15rem;
+  text-align: center;
 }

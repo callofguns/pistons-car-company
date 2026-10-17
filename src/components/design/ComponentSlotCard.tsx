@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight, Lock } from 'lucide-react'
 import type { ComponentSlot } from '../../data/designSteps'
 import { plainCurrency } from '../../core/numberFormat'
 import { useT } from '../../i18n/useT'
@@ -36,7 +37,7 @@ export function ComponentSlotCard({ slot, selectedOptionId, currentYear, onSelec
           disabled={index <= 0}
           aria-label={t('component.previousLabel', { label: slot.label })}
         >
-          ‹
+          <ChevronLeft size={20} />
         </Button>
         <div className={styles.optionInfo}>
           <span className={styles.optionName}>{option.label}</span>
@@ -50,7 +51,7 @@ export function ComponentSlotCard({ slot, selectedOptionId, currentYear, onSelec
           disabled={index >= unlocked.length - 1}
           aria-label={t('component.nextLabel', { label: slot.label })}
         >
-          ›
+          <ChevronRight size={20} />
         </Button>
       </div>
       {option.description && <span className={styles.description}>{option.description}</span>}
@@ -61,7 +62,10 @@ export function ComponentSlotCard({ slot, selectedOptionId, currentYear, onSelec
         </span>
       )}
       {nextLocked && (
-        <span className={styles.lockedHint}>{t('component.unlocksIn', { label: nextLocked.label, year: nextLocked.unlockYear })}</span>
+        <span className={styles.lockedHint}>
+          <Lock size={12} />
+          {t('component.unlocksIn', { label: nextLocked.label, year: nextLocked.unlockYear })}
+        </span>
       )}
     </div>
   )

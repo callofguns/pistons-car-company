@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { useActiveTutorialStep, useTutorialStore } from '../store/useTutorialStore'
 import { CATALOG } from '../data/catalog'
+import { CarArt } from '../art/CarArt'
 import { findDesignStep, type ComponentSlot } from '../data/designSteps'
 import { ENGINE_PRESETS } from '../data/enginePresets'
 import { findClassificationTag } from '../data/classifications'
@@ -202,11 +204,17 @@ export function CarDesignScreen() {
     <div className={styles.screen}>
       <div className={wizardStyles.header}>
         <Button className={wizardStyles.backButton} onClick={handleBack} aria-label={t('common.back')}>
-          ‹
+          <ArrowLeft size={22} strokeWidth={2.5} />
         </Button>
-        <div>
+        <div className={wizardStyles.titleBlock}>
           <span className={wizardStyles.breadcrumb}>{meta.breadcrumb}</span>
           <Heading className={wizardStyles.title}>{meta.title}</Heading>
+        </div>
+        <CarArt bodyId={body.id} variant="bare" className={wizardStyles.headerCar} />
+        <div className={wizardStyles.stepDots} aria-label={t('carDesign.stepOf', { step: stepIndex + 1, total: WIZARD_STEPS.length })}>
+          {WIZARD_STEPS.map((id, i) => (
+            <span key={id} className={`${wizardStyles.stepDot} ${i < stepIndex ? wizardStyles.stepDotDone : ''} ${i === stepIndex ? wizardStyles.stepDotActive : ''}`} />
+          ))}
         </div>
         {stats && !HIDES_COST_PRICE.has(stepId) && (
           <div className={wizardStyles.costPrice}>

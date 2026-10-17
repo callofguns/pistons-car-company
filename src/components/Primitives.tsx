@@ -9,7 +9,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'gold' | 'ghost'
 }
 
-/** The one button component every screen uses - keeps every button in the app visually and behaviorally consistent while the game is still in its flat/placeholder visual phase. */
+/** The one button component every screen uses - keeps every button in the app visually and behaviorally consistent. */
 export function Button({ variant = 'secondary', className, children, ...rest }: ButtonProps) {
   const variantClass = variant === 'secondary' ? undefined : styles[variant]
   return (

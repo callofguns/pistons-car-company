@@ -1,36 +1,41 @@
 /* Self-hosted (not CDN-linked) so the PWA's offline precache still covers every asset - see
-   vite-plugin-pwa's config. Only the weights actually used, latin subset only - covers English,
-   Spanish, and French (the app's shipped locales, see src/i18n/locale.ts) in full, including
-   accented characters (é è ê ç ñ í ó ú ü ¿ ¡). A future non-Latin locale (e.g. anything CJK) would
-   need a different subset and likely a different display face entirely. */
-@import '@fontsource/fraunces/latin-600.css';
-@import '@fontsource/fraunces/latin-700.css';
-@import '@fontsource/work-sans/latin-400.css';
-@import '@fontsource/work-sans/latin-500.css';
-@import '@fontsource/work-sans/latin-700.css';
+   vite-plugin-pwa's config. Only the weights actually used, latin subset only (the game ships in
+   English only). */
+@import '@fontsource/rubik/latin-400.css';
+@import '@fontsource/rubik/latin-500.css';
+@import '@fontsource/rubik/latin-600.css';
+@import '@fontsource/rubik/latin-700.css';
 
-/* Mid-century dealership brochure palette: asphalt showroom floor, enamel-red badge accent, brass
-   trim. Chosen over the previous flat SaaS-dashboard dark theme to read as a specific product
-   ("running a car company") rather than a generic app shell - see the design-direction options
-   this was picked from. Named for what each token IS in that world (trim, danger) rather than its
-   literal hue, since the hue is exactly what a future re-theme would change. */
+/* Navy "boardroom blueprint" palette, matching the reference screenshots: a deep blue gradient
+   backdrop, translucent navy panels with a faint cool-blue edge, one bright blue for primary
+   actions and gold reserved for money/the shop. Named for what each token IS (accent, trim,
+   danger), not its hue, so a future re-theme only touches this block. */
 :root {
-  --color-background: #1c1a17;
-  --color-panel-dark: #262320;
-  --color-panel-light: #322e29;
-  --color-panel-lighter: #3d3830;
+  --color-background: #111c44;
+  --background-gradient: radial-gradient(ellipse 80% 90% at 50% 45%, #2b4c9e 0%, #1b326f 45%, #0e1838 100%);
+  --color-panel-dark: #15224f;
+  --color-panel-light: #1d2e66;
+  --color-panel-lighter: #273b7c;
+  --color-panel-glass: rgba(12, 22, 58, 0.62);
+  --color-border: rgba(150, 180, 255, 0.16);
+  --color-border-strong: rgba(150, 180, 255, 0.32);
 
-  --color-accent: #c8102e; /* enamel racing red - primary actions, brand */
-  --color-accent-hover: #e0263f;
-  --color-trim: #c9a227; /* brass/chrome trim - currency, secondary accent, the heading bevel */
-  --color-danger: #d9730d; /* burnt-orange warning - deliberately not red, so it never reads as "primary action" */
-  --color-green: #7a9d5c;
+  --color-accent: #2f6ee6; /* bright blue - primary actions, active states, meter fills */
+  --color-accent-hover: #4682f2;
+  --color-accent-soft: rgba(47, 110, 230, 0.22);
+  --color-trim: #f2b53c; /* gold - money, the shop button, highlights */
+  --color-danger: #ef5350; /* red - warnings, breakthroughs, debt */
+  --color-green: #4fd18b;
+  --color-blueprint-line: rgba(160, 190, 255, 0.07);
 
-  --color-text-primary: #f2ede4;
-  --color-text-secondary: #b3a99a;
-  --color-text-disabled: #6f665a;
+  --color-text-primary: #f3f6ff;
+  --color-text-secondary: #a8b5dc;
+  --color-text-disabled: #5d6a98;
 
-  --radius: 3px;
+  --radius: 6px;
+  --radius-large: 10px;
+  --shadow-panel: 0 4px 14px rgba(3, 8, 28, 0.45);
+  --shadow-button: 0 3px 0 rgba(3, 8, 28, 0.55), 0 6px 14px rgba(3, 8, 28, 0.35);
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -38,11 +43,10 @@
   --space-5: 24px;
   --space-6: 32px;
 
-  /* Bold serif badge lettering for every screen title (Heading) - used with restraint, nowhere
-     else. Work Sans carries everything else, including numbers (tabular figures where it matters:
-     HudPill, StatRow) rather than switching to a separate monospace face. */
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-sans: 'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* One face everywhere, like the reference. --font-display stays as its own token so titles can
+     diverge again later without touching every component. */
+  --font-display: 'Rubik', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Rubik', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   --transition-fast: 0.12s ease;
   --transition-medium: 0.2s ease;
@@ -87,7 +91,7 @@ html, body, #root {
 }
 
 body {
-  background: var(--color-background);
+  background: var(--color-background) var(--background-gradient) fixed;
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   /* Landscape notches eat the left/right edges, not top/bottom - viewport-fit=cover in index.html
@@ -108,11 +112,27 @@ button:disabled {
 
 input {
   font-family: inherit;
+  font-size: 1rem;
+  padding: var(--space-3);
+  color: var(--color-text-primary);
+  background: rgba(8, 14, 40, 0.7);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+}
+
+input::placeholder {
+  color: var(--color-text-disabled);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--color-accent-hover);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
 
 /* No focus outline existed anywhere before this - a real functional gap for keyboard/switch
-   navigation, not just visual polish. One rule, everywhere, in the trim color so it reads as
-   "selected" rather than an error state. */
+   navigation, not just visual polish. One rule, everywhere, in the gold trim color so it stands
+   out against the blue buttons and reads as "selected" rather than an error state. */
 :focus-visible {
   outline: 2px solid var(--color-trim);
   outline-offset: 2px;
@@ -138,13 +158,13 @@ input {
 
 @keyframes tutorial-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(201, 162, 39, 0.7);
+    box-shadow: 0 0 0 0 rgba(242, 181, 60, 0.75);
   }
   70% {
-    box-shadow: 0 0 0 14px rgba(201, 162, 39, 0);
+    box-shadow: 0 0 0 14px rgba(242, 181, 60, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(201, 162, 39, 0);
+    box-shadow: 0 0 0 0 rgba(242, 181, 60, 0);
   }
 }
 

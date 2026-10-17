@@ -1,64 +1,116 @@
+/* Corner-anchored like the reference: art centered, SALES top-right, nav bottom-left, CREATE CAR
+   bottom-right. Absolute positioning keeps the drawing as large as the space allows without the
+   side panels pushing it around. */
 .hub {
   flex: 1;
   position: relative;
   min-height: 0;
 }
 
-.topLeft {
+.artArea {
   position: absolute;
-  top: var(--space-5);
-  left: var(--space-5);
+  inset: 0 26% 76px 26%;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  max-width: 260px;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
-.modelsList {
+.art {
+  width: 100%;
+  height: 100%;
+  max-width: 640px;
+  filter: drop-shadow(0 18px 24px rgba(3, 8, 28, 0.45));
+}
+
+.salesPanel {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-5);
+  width: min(320px, 24%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.salesTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* The reference's thin corner brackets around the sales list. */
+.salesFrame {
+  position: relative;
+  width: 100%;
+  min-height: 72px;
+  padding: var(--space-3) var(--space-2);
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.empty {
-  color: var(--color-text-secondary);
-  font-style: italic;
-  font-size: 0.9rem;
+.salesFrame::before,
+.salesFrame::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 36px;
+  height: 36px;
+  border-top: 2px solid var(--color-border-strong);
 }
 
-/* Grid, not flex-nowrap: this went from 5 buttons to 7 (Company + News added alongside R&D/Promo/
-   Models/Racing/Staff), and flex-nowrap would have pushed the overflow off-screen with no
-   scrollbar - especially at the max-height:560px breakpoint below, and especially once translated
-   ES/FR labels (PR 2) run longer than their English originals. max-content columns keep each
-   button its own natural width (matching the old flex row's look) while wrapping onto a second
-   row after 4 - the row grows upward from this box's bottom-anchored position, into space that
-   was already empty above it, so it costs nothing layout-wise. */
-.bottomLeft {
+.salesFrame::before {
+  left: 0;
+  border-left: 2px solid var(--color-border-strong);
+}
+
+.salesFrame::after {
+  right: 0;
+  border-right: 2px solid var(--color-border-strong);
+}
+
+.empty {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0 var(--space-2);
+}
+
+.nav {
   position: absolute;
-  bottom: var(--space-5);
+  bottom: var(--space-4);
   left: var(--space-5);
-  display: grid;
-  grid-template-columns: repeat(4, max-content);
-  gap: var(--space-2);
+  display: flex;
+  gap: var(--space-3);
 }
 
 .navButton {
   position: relative;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom, #1f2c5c, #17224a);
 }
 
-/* Office Hub's own unread-News indicator - see NewsScreen for the persisted read/unread state
-   this counts. */
+/* Office Hub's unread-News indicator - see NewsScreen for the persisted read/unread state this
+   counts. */
 .badge {
   position: absolute;
   top: -6px;
   right: -6px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
   border-radius: 999px;
-  background: var(--color-accent);
+  background: var(--color-danger);
   color: var(--color-text-primary);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
   line-height: 1;
   display: flex;
@@ -66,35 +118,55 @@
   justify-content: center;
 }
 
-/* Deliberately elongated rectangle, not a full-width bar, set apart from the rest of the nav
-   cluster in the opposite corner as the primary call to action. min-width instead of a fixed
-   width - "+ CREATE CAR" (12 chars) vs "+ CRÉER UNE VOITURE" (19 chars) needs room to grow, and
-   since this is anchored by `right`, growing wider extends leftward into space that's already
-   empty, same free-growth reasoning as .bottomLeft's grid above. */
 .createCarButton {
   position: absolute;
-  bottom: var(--space-5);
+  bottom: var(--space-4);
   right: var(--space-5);
-  min-width: 200px;
-  width: auto;
-  padding: 0 var(--space-4);
+  width: min(340px, 26%);
+  min-width: 170px;
   height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
   font-size: 1.05rem;
   white-space: nowrap;
 }
 
+/* Landscape phone: the nav buttons shrink and the art squeezes between the two side columns. */
 @media (max-height: 560px) {
-  .topLeft {
-    max-width: 200px;
+  .artArea {
+    inset: 0 22% 54px 22%;
+  }
+
+  .salesPanel {
+    top: var(--space-2);
+    right: var(--space-3);
+    width: 22%;
+    min-width: 170px;
+  }
+
+  .salesTitle {
+    font-size: 0.85rem;
+  }
+
+  .nav {
+    bottom: var(--space-3);
+    left: var(--space-3);
+    gap: 6px;
+  }
+
+  .navButton {
+    width: 44px;
+    height: 44px;
+  }
+
+  .navButton svg {
+    width: 22px;
+    height: 22px;
   }
 
   .createCarButton {
-    min-width: 160px;
-    height: 48px;
+    bottom: var(--space-3);
+    right: var(--space-3);
+    height: 44px;
+    min-width: 150px;
     font-size: 0.9rem;
   }
 }

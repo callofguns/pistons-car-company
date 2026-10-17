@@ -1,0 +1,11 @@
+.office {
+  flex: none;
+  width: 100%;
+  height: 170px;
+}
+
+@media (max-height: 560px) {
+  .office {
+    height: 110px;
+  }
+}

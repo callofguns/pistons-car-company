@@ -1,5 +1,5 @@
-// Generates flat, placeholder PWA icons - a simple steering-wheel mark in --color-accent on
-// --color-panel-dark, matching the app's mid-century dealership-brochure palette (see
+// Generates flat, placeholder PWA icons - a simple steering-wheel mark in gold (--color-trim) on
+// navy --color-panel-dark, matching the app's palette (see
 // src/styles/tokens.css). Pure Node (zlib for the PNG's DEFLATE stream, no image library), so
 // it's cheap to re-run once real branding art exists. Run with:
 //   node scripts/generate-pwa-icons.mjs
@@ -12,8 +12,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const outDir = path.resolve(__dirname, '../public')
 mkdirSync(outDir, { recursive: true })
 
-const BACKGROUND = hex('#262320') // --color-panel-dark
-const MARK = hex('#c8102e') // --color-accent
+const BACKGROUND = hex('#15224f') // --color-panel-dark
+const MARK = hex('#f2b53c') // --color-trim
 
 function hex(s) {
   const n = parseInt(s.slice(1), 16)

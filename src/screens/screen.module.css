@@ -47,6 +47,12 @@
   flex: 1 0 auto;
 }
 
+/* A .screen that is itself two columns side by side (Sales Statistics). */
+.screen.columns {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
 /* Modifier for screens that use .columns as their outermost element (Research, Company) instead
    of nesting it inside .screen (Model Lineup) - carries the padding/scroll .screen would normally
    provide, so those screens don't need to inline it themselves. */
@@ -54,6 +60,9 @@
   composes: columns;
   padding: var(--space-5);
   overflow-y: auto;
+  /* Each column (often a .card) is as tall as its content and the page scrolls - stretching them
+     to the page height instead clipped the bottom of a tall card (Company's Upgrade button). */
+  align-items: flex-start;
 }
 
 .column {
@@ -93,4 +102,33 @@
 .empty {
   color: var(--color-text-secondary);
   font-style: italic;
+}
+
+/* A glass panel grouping one section of a screen (Finance's "This month", Company's HQ, ...). */
+.card {
+  background: var(--color-panel-glass);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-panel);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Small uppercase section label inside a card. */
+.sectionTitle {
+  margin: 0 0 var(--space-1);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+@media (max-height: 560px) {
+  .card {
+    padding: var(--space-3);
+  }
 }

@@ -5,6 +5,7 @@ import { APP_VERSION } from '../version'
 import { useT } from '../i18n/useT'
 import { Button, Heading } from '../components/Primitives'
 import { listSlots } from '../core/save'
+import { CarArt } from '../art/CarArt'
 import styles from './screen.module.css'
 import menuStyles from './MainMenuScreen.module.css'
 
@@ -42,6 +43,7 @@ export function MainMenuScreen() {
   return (
     <div className={`${styles.screen} ${menuStyles.menu}`}>
       <div className={menuStyles.plate}>
+        <CarArt bodyId="gt-coupe" color="#2f6ee6" className={menuStyles.heroCar} />
         <span className={menuStyles.eyebrow}>{t('menu.est', { year: DEFAULT_GAME_CONFIG.startYear })}</span>
         {/* The app's own brand name - a proper noun, like company.companyName or an advisor name,
             never translated. */}

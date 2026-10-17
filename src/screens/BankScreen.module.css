@@ -1,9 +1,64 @@
-.loanCard {
-  background: var(--color-panel-dark);
-  border-radius: var(--radius);
-  padding: var(--space-4);
-  width: min(240px, 100%);
+.balance {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  align-items: center;
+  gap: 2px;
+}
+
+.balanceValue {
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--color-green);
+  font-variant-numeric: tabular-nums;
+}
+
+.negative {
+  color: var(--color-danger);
+}
+
+/* This month's books on the left, loans on the right; stacks on narrow screens. */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.loans {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+}
+
+.loanCard {
+  background: rgba(8, 14, 40, 0.5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.netRow {
+  display: flex;
+  justify-content: space-between;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-strong);
+}
+
+.loanDetail {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.loanAmount {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+@media (max-height: 560px) {
+  .balanceValue {
+    font-size: 1.6rem;
+  }
 }

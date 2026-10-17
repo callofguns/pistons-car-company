@@ -7,7 +7,7 @@ import { CarCarousel } from '../components/CarCarousel'
 import { AdvisorPanel } from '../components/AdvisorPanel'
 import { StatRow } from '../components/StatRow'
 import { MeterBar } from '../components/MeterBar'
-import { Button } from '../components/Primitives'
+import { Button, Heading } from '../components/Primitives'
 import styles from './screen.module.css'
 
 /** Per-model sell-through dashboard: advisor panel, stat list, daily-sales radial, withdraw/marketing actions. */
@@ -43,57 +43,62 @@ export function SalesStatisticsScreen() {
   const leftToSell = Math.max(0, model.plannedProductionRun - model.totalSold)
 
   return (
-    <div className={styles.screen}>
-      {/* Ben Gross is a proper noun, not translated - see EmployeesScreen for the same rule. */}
-      <AdvisorPanel name="Ben Gross" message={t('salesStats.advisorMessage')} />
-      <CarCarousel
-        indexOneBased={index + 1}
-        total={models.length}
-        onPrevious={() => setIndex((i) => Math.max(0, i - 1))}
-        onNext={() => setIndex((i) => Math.min(models.length - 1, i + 1))}
-      />
-
-      <StatRow
-        label={t('salesStats.labelTotalSold')}
-        value={t('salesStats.totalSold', { sold: grouped(model.totalSold), planned: grouped(model.plannedProductionRun) })}
-      />
-      <StatRow label={t('salesStats.labelLeftToSell')} value={grouped(leftToSell)} />
-      <StatRow label={t('salesStats.labelSalesIncome')} value={fmt.money(model.lastDayRevenue)} />
-      <StatRow label={t('salesStats.labelEarnings')} value={fmt.money(model.lifetimeEarnings)} />
-      <StatRow
-        label={t('salesStats.labelMarketingDuration')}
-        value={model.marketingActive ? tp('stats.marketingDaysRemaining', model.marketingDaysRemaining) : t('salesStats.marketingInactive')}
-      />
-      <StatRow
-        label={t('salesStats.labelMarketingEfficiency')}
-        value={
-          model.marketingActive
-            ? t('salesStats.efficiencyMultiplier', { value: model.marketingEfficiencyMultiplier.toFixed(1) })
-            : t('salesStats.efficiencyDefault')
-        }
-      />
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <MeterBar
-          radial
-          value01={model.currentDailySalesRatePercent / 100}
-          displayValue={t('salesStats.dailySalesRate', { value: Math.round(model.currentDailySalesRatePercent) })}
+    <div className={`${styles.screen} ${styles.columns}`}>
+      <div className={styles.column}>
+        {/* Ben Gross is a proper noun, not translated - see EmployeesScreen for the same rule. */}
+        <AdvisorPanel name="Ben Gross" message={t('salesStats.advisorMessage')} />
+        <CarCarousel
+          model={model}
+          indexOneBased={index + 1}
+          total={models.length}
+          onPrevious={() => setIndex((i) => Math.max(0, i - 1))}
+          onNext={() => setIndex((i) => Math.min(models.length - 1, i + 1))}
         />
-        <span>{tp('stats.unitsSoldToday', model.lastDayUnitsSold)}</span>
+        <Heading style={{ textAlign: 'center' }}>{model.name}</Heading>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+          <MeterBar
+            radial
+            value01={model.currentDailySalesRatePercent / 100}
+            displayValue={t('salesStats.dailySalesRate', { value: Math.round(model.currentDailySalesRatePercent) })}
+          />
+          <span>{tp('stats.unitsSoldToday', model.lastDayUnitsSold)}</span>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 12 }}>
-        <Button style={{ flex: 1 }} onClick={() => setOnSale(model.id, !model.isOnSale)}>
-          {model.isOnSale ? t('salesStats.withdraw') : t('salesStats.resume')}
-        </Button>
-        <Button
-          variant="primary"
-          style={{ flex: 1 }}
-          disabled={model.marketingActive}
-          onClick={() => show('Promotion', model.id)}
-        >
-          {t('salesStats.launchMarketing')}
-        </Button>
+      <div className={`${styles.column} ${styles.card}`}>
+        <StatRow
+          label={t('salesStats.labelTotalSold')}
+          value={t('salesStats.totalSold', { sold: grouped(model.totalSold), planned: grouped(model.plannedProductionRun) })}
+        />
+        <StatRow label={t('salesStats.labelLeftToSell')} value={grouped(leftToSell)} />
+        <StatRow label={t('salesStats.labelSalesIncome')} value={fmt.money(model.lastDayRevenue)} />
+        <StatRow label={t('salesStats.labelEarnings')} value={fmt.money(model.lifetimeEarnings)} />
+        <StatRow
+          label={t('salesStats.labelMarketingDuration')}
+          value={model.marketingActive ? tp('stats.marketingDaysRemaining', model.marketingDaysRemaining) : t('salesStats.marketingInactive')}
+        />
+        <StatRow
+          label={t('salesStats.labelMarketingEfficiency')}
+          value={
+            model.marketingActive
+              ? t('salesStats.efficiencyMultiplier', { value: model.marketingEfficiencyMultiplier.toFixed(1) })
+              : t('salesStats.efficiencyDefault')
+          }
+        />
+
+        <div style={{ display: 'flex', gap: 12, marginTop: 'auto', paddingTop: 'var(--space-2)' }}>
+          <Button style={{ flex: 1 }} onClick={() => setOnSale(model.id, !model.isOnSale)}>
+            {model.isOnSale ? t('salesStats.withdraw') : t('salesStats.resume')}
+          </Button>
+          <Button
+            variant="primary"
+            style={{ flex: 1 }}
+            disabled={model.marketingActive}
+            onClick={() => show('Promotion', model.id)}
+          >
+            {t('salesStats.launchMarketing')}
+          </Button>
+        </div>
       </div>
     </div>
   )

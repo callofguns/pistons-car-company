@@ -1,8 +1,9 @@
+import { useState, type ReactNode } from 'react'
+import { FlaskConical, Info, TriangleAlert } from 'lucide-react'
 import type { ResearchNodeDefinition, ResearchNodeState } from '../core/research'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
 import { Button } from './Primitives'
-import { MeterBar } from './MeterBar'
 import styles from './ResearchNodeCard.module.css'
 
 interface ResearchNodeCardProps {
@@ -10,6 +11,7 @@ interface ResearchNodeCardProps {
   state: ResearchNodeState
   progress01: number
   moneyCost: number
+  icon: ReactNode
   onAction: () => void
 }
 
@@ -21,25 +23,71 @@ const STATE_LABEL_KEY: Record<ResearchNodeState, MessageKey> = {
   Researched: 'research.state.Researched',
 }
 
-/** One tech-tree card. Action button label/color follow ResearchNodeState. Direct port of ResearchNodeCardView.cs. */
-export function ResearchNodeCard({ node, state, progress01, moneyCost, onAction }: ResearchNodeCardProps) {
+/** One blueprint card in the tech tree, laid out like the reference: part icon, due year and
+ * progress %, name, research-point + money cost, and an action button whose label/color follow
+ * ResearchNodeState. The (i) button flips the card to show what the research actually does.
+ * Direct port of ResearchNodeCardView.cs. */
+export function ResearchNodeCard({ node, state, progress01, moneyCost, icon, onAction }: ResearchNodeCardProps) {
   const { t, fmt } = useT()
+  const [showInfo, setShowInfo] = useState(false)
   const interactable = state === 'AvailableNormal' || state === 'AvailableBreakthrough'
-  const variant = state === 'AvailableBreakthrough' ? 'danger' : state === 'Researched' ? 'primary' : 'ghost'
+  const variant = state === 'AvailableBreakthrough' ? 'danger' : state === 'AvailableNormal' ? 'primary' : 'secondary'
+  const name = t(`data.research.${node.id}.name` as MessageKey)
+  const early = state === 'AvailableBreakthrough'
+  const dim = state === 'Locked'
 
   return (
-    <div className={styles.card}>
-      <div className={styles.header}>
-        <span>{node.availableYear}</span>
-        {(state === 'AvailableBreakthrough' || state === 'InProgress') && <span className={styles.warning}>⚠</span>}
+    <div className={`${styles.card} ${dim ? styles.dim : ''} ${state === 'Researched' ? styles.done : ''}`}>
+      <button className={styles.infoButton} onClick={() => setShowInfo((v) => !v)} aria-label={t('research.info', { name })} aria-pressed={showInfo}>
+        <Info size={14} strokeWidth={2.5} />
+      </button>
+
+      <div className={styles.top}>
+        <div className={styles.icon} aria-hidden="true">
+          {icon}
+        </div>
+        <div className={styles.titleBlock}>
+          <div className={styles.badges}>
+            <span className={styles.year}>{node.availableYear}</span>
+            <span className={styles.percent}>{Math.round(progress01 * 100)}%</span>
+            {early && (
+              <span className={styles.warning} title={t('research.earlyWarning', { year: node.availableYear })}>
+                <TriangleAlert size={14} />
+              </span>
+            )}
+          </div>
+          <div className={styles.name}>{name}</div>
+        </div>
       </div>
-      {state === 'InProgress' && <MeterBar value01={progress01} />}
-      <div className={styles.name}>{t(`data.research.${node.id}.name` as MessageKey)}</div>
-      <div className={styles.costRow}>
-        <span className={styles.science}>🧪 {node.scienceCost}</span>
-        <span className={styles.money}>{fmt.money(moneyCost)}</span>
-      </div>
-      <Button variant={variant} disabled={!interactable} onClick={onAction}>
+
+      {showInfo ? (
+        <ul className={styles.effects}>
+          {node.effects.map((effect) => (
+            <li key={effect.target}>
+              {t(`research.effect.${effect.target}` as MessageKey, {
+                amount: `${effect.amount > 0 ? '+' : ''}${Math.round(effect.amount * 100)}%`,
+              })}
+            </li>
+          ))}
+          <li className={styles.duration}>{t('research.duration', { days: node.durationDays })}</li>
+        </ul>
+      ) : (
+        <div className={styles.costRow}>
+          <span className={styles.science}>
+            <FlaskConical size={15} />
+            {node.scienceCost}
+          </span>
+          <span className={styles.money}>{fmt.money(moneyCost)}</span>
+        </div>
+      )}
+
+      {state === 'InProgress' && (
+        <div className={styles.progressTrack}>
+          <div className={styles.progressFill} style={{ transform: `scaleX(${progress01})` }} />
+        </div>
+      )}
+
+      <Button variant={variant} className={styles.action} disabled={!interactable} onClick={onAction}>
         {t(STATE_LABEL_KEY[state])}
       </Button>
     </div>

@@ -1,11 +1,29 @@
 import { useEffect } from 'react'
+import type { ComponentType } from 'react'
+import {
+  Banknote,
+  Building2,
+  Car,
+  ChartColumn,
+  Flag,
+  FlaskConical,
+  Landmark,
+  Megaphone,
+  Newspaper,
+  PackageCheck,
+  TriangleAlert,
+  Trophy,
+  type LucideProps,
+} from 'lucide-react'
 import { useUiStore } from '../store/useUiStore'
+import type { NewsEventType } from '../core/news'
 import { useGameStore } from '../store/useGameStore'
 import { useT } from '../i18n/useT'
 import { renderNewsHeadline } from '../i18n/news'
 import { tryLoadFromStorage } from '../core/save'
 import type { NewsEntry } from '../core/news'
-import { Button, Heading } from '../components/Primitives'
+import { Heading } from '../components/Primitives'
+import { BackButton } from '../components/BackButton'
 import styles from './screen.module.css'
 import newsStyles from './NewsScreen.module.css'
 
@@ -30,7 +48,6 @@ function asMenuPayload(payload: unknown): MenuPayload | null {
  *    game would be more machinery than this is worth.
  */
 export function NewsScreen() {
-  const back = useUiStore((s) => s.back)
   const payload = useUiStore((s) => s.payload)
   useGameStore((s) => s.revision)
   const liveNews = useGameStore((s) => s.world.news)
@@ -52,13 +69,7 @@ export function NewsScreen() {
 
   return (
     <div className={`${styles.screen} ${styles.centered} ${styles.narrow}`} style={{ position: 'relative' }}>
-      <Button
-        style={{ position: 'absolute', top: 'var(--space-4)', left: 'var(--space-4)', width: 44, height: 44, padding: 0 }}
-        onClick={back}
-        aria-label={t('common.back')}
-      >
-        ‹
-      </Button>
+      <BackButton />
 
       <Heading>{t('news.screenTitle')}</Heading>
 
@@ -66,9 +77,7 @@ export function NewsScreen() {
         {entries.length === 0 && <span className={styles.empty}>{t('news.empty')}</span>}
         {entries.map((entry) => (
           <div key={entry.id} className={`${newsStyles.row} ${!entry.read ? newsStyles.unread : ''}`}>
-            <span className={newsStyles.icon} aria-hidden="true">
-              📰
-            </span>
+            <NewsIcon type={entry.type} />
             <div className={newsStyles.body}>
               <span className={newsStyles.date}>{fmt.date(entry.date)}</span>
               <span className={newsStyles.headline}>{renderNewsHeadline(entry, t, fmt)}</span>
@@ -77,5 +86,30 @@ export function NewsScreen() {
         ))}
       </div>
     </div>
+  )
+}
+
+const NEWS_ICONS: Partial<Record<NewsEventType, { Icon: ComponentType<LucideProps>; color: string }>> = {
+  ModelReleased: { Icon: Car, color: 'var(--color-accent-hover)' },
+  ModelSoldOut: { Icon: PackageCheck, color: 'var(--color-green)' },
+  ResearchCompleted: { Icon: FlaskConical, color: '#8fb4ff' },
+  LoanTaken: { Icon: Landmark, color: 'var(--color-trim)' },
+  LoanPaidOff: { Icon: Banknote, color: 'var(--color-green)' },
+  MarketingCampaignStarted: { Icon: Megaphone, color: 'var(--color-accent-hover)' },
+  MarketingCampaignEnded: { Icon: Megaphone, color: 'var(--color-text-secondary)' },
+  MonthlyReport: { Icon: ChartColumn, color: 'var(--color-text-secondary)' },
+  BankruptcyWarning: { Icon: TriangleAlert, color: 'var(--color-danger)' },
+  RacingTeamRegistered: { Icon: Flag, color: 'var(--color-trim)' },
+  RaceCompleted: { Icon: Trophy, color: 'var(--color-trim)' },
+  HQUpgraded: { Icon: Building2, color: 'var(--color-accent-hover)' },
+}
+
+/** A colored icon per kind of headline, so the feed scans at a glance. */
+function NewsIcon({ type }: { type: NewsEventType }) {
+  const { Icon, color } = NEWS_ICONS[type] ?? { Icon: Newspaper, color: 'var(--color-text-secondary)' }
+  return (
+    <span className={newsStyles.icon} aria-hidden="true" style={{ color }}>
+      <Icon size={18} />
+    </span>
   )
 }

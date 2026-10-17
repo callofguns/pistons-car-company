@@ -79,6 +79,9 @@ export function selectBody(
   today: GameDate,
 ): boolean {
   if (!vehicles.currentSession) beginNewDesign(vehicles)
+  // Bodies have always carried an unlockYear, but nothing enforced it - every body was selectable
+  // from day one.
+  if (body.unlockYear > currentYear) return false
 
   if (!isBodyTooled(vehicles, body.id)) {
     // Was a bare tryWithdraw() - tooling spend never touched the ledger, even though 'Production'

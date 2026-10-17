@@ -49,6 +49,7 @@ export function ModelLineupScreen() {
     <div className={styles.screen}>
       {tutorialStep && <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />}
       <CarCarousel
+        model={model}
         indexOneBased={index + 1}
         total={models.length}
         onPrevious={() => setIndex((i) => Math.max(0, i - 1))}
@@ -58,7 +59,7 @@ export function ModelLineupScreen() {
       <span style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>{formatCategoryTag(model, locale)}</span>
 
       <div className={styles.columns}>
-        <div className={styles.column}>
+        <div className={`${styles.column} ${styles.card}`}>
           <StatRow label={t('modelLineup.labelPower')} value={t('modelLineup.power', { value: Math.round(s.powerHp) })} />
           <StatRow
             label={t('modelLineup.labelTorque')}
@@ -85,7 +86,7 @@ export function ModelLineupScreen() {
             value={t('modelLineup.zeroToHundred', { value: s.zeroToHundredSec.toFixed(1) })}
           />
         </div>
-        <div className={styles.column}>
+        <div className={`${styles.column} ${styles.card}`}>
           <StatRow label={t('modelLineup.labelRating')} value={String(s.rating)} />
           <StatRow label={t('modelLineup.labelCarsSold')} value={grouped(model.totalSold)} />
           <StatRow label={t('modelLineup.labelEarnings')} value={fmt.money(model.lifetimeEarnings)} />

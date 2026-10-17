@@ -1,3 +1,4 @@
+import { Check, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
@@ -5,6 +6,7 @@ import { clearStorage, listSlots, type SaveGameData } from '../core/save'
 import { makeDate } from '../core/gameDate'
 import { useT } from '../i18n/useT'
 import { Button, Heading } from '../components/Primitives'
+import { BackButton } from '../components/BackButton'
 import styles from './screen.module.css'
 import slotStyles from './SaveSlotsScreen.module.css'
 
@@ -29,7 +31,6 @@ function asNewGamePayload(payload: unknown): NewGamePayload | null {
  * flow already has its own "are you sure" via the second tap on the slot itself.
  */
 export function SaveSlotsScreen() {
-  const back = useUiStore((s) => s.back)
   const show = useUiStore((s) => s.show)
   const goHome = useUiStore((s) => s.goHome)
   const payload = useUiStore((s) => s.payload)
@@ -69,13 +70,7 @@ export function SaveSlotsScreen() {
 
   return (
     <div className={`${styles.screen} ${styles.centered} ${styles.narrow}`} style={{ position: 'relative' }}>
-      <Button
-        style={{ position: 'absolute', top: 'var(--space-4)', left: 'var(--space-4)', width: 44, height: 44, padding: 0 }}
-        onClick={back}
-        aria-label={t('common.back')}
-      >
-        ‹
-      </Button>
+      <BackButton />
 
       <Heading>{newGame ? t('saveSlots.overwriteHeading') : t('menu.saves')}</Heading>
       {newGame && (
@@ -114,7 +109,7 @@ export function SaveSlotsScreen() {
                   onClick={() => handleDeleteClick(index)}
                   aria-label={t(deletingIndex === index ? 'saveSlots.confirmDelete' : 'saveSlots.delete', { name: data.companyName })}
                 >
-                  {deletingIndex === index ? '✓' : '🗑'}
+                  {deletingIndex === index ? <Check size={18} strokeWidth={3} /> : <Trash2 size={18} />}
                 </button>
               )}
             </div>

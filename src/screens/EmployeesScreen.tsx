@@ -12,7 +12,6 @@ import { signedPercent, grouped } from '../core/numberFormat'
 import { useT } from '../i18n/useT'
 import { EmployeeRow } from '../components/EmployeeRow'
 import { StatRow } from '../components/StatRow'
-import { Heading } from '../components/Primitives'
 import styles from './screen.module.css'
 
 /** The roster/hiring screen: your current employees (left) each doing one of five jobs that feeds
@@ -34,10 +33,10 @@ export function EmployeesScreen() {
 
   return (
     <div className={styles.columnsPage}>
-      <div className={`${styles.column} ${styles.columnMedium}`}>
-        <Heading style={{ fontSize: '1.1rem' }}>{t('employees.roster', { count: staff.employees.length, cap: slotCap })}</Heading>
+      <div className={`${styles.column} ${styles.columnMedium} ${styles.card}`}>
+        <h3 className={styles.sectionTitle}>{t('employees.roster', { count: staff.employees.length, cap: slotCap })}</h3>
 
-        <div className={styles.grid}>
+        <div>
           <StatRow label={t('employees.wageBill')} value={t('employees.perMonth', { amount: fmt.money(monthlyWageBill(staff)) })} />
           <StatRow label={t('employees.prodSpeed')} value={signedPercent(productionSpeedBonusPercent(staff, perks))} />
           <StatRow label={t('employees.researchBonus')} value={`+${grouped(Math.round(researchPointsBonus(staff, perks)))}`} />
@@ -60,8 +59,8 @@ export function EmployeesScreen() {
         </div>
       </div>
 
-      <div className={styles.column}>
-        <Heading style={{ fontSize: '1.1rem' }}>{t('employees.applicants')}</Heading>
+      <div className={`${styles.column} ${styles.card}`}>
+        <h3 className={styles.sectionTitle}>{t('employees.applicants')}</h3>
         {atCap && <span className={styles.empty}>{t('employees.atCap')}</span>}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', overflowY: 'auto' }}>

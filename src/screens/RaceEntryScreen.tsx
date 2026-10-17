@@ -52,6 +52,7 @@ export function RaceEntryScreen() {
     <div className={`${styles.screen} ${styles.centered} ${styles.narrow}`}>
       <Heading>{t('race.selectTier')}</Heading>
       <CarCarousel
+        model={model}
         indexOneBased={index + 1}
         total={models.length}
         onPrevious={() => setCarIndex((i) => Math.max(0, i - 1))}

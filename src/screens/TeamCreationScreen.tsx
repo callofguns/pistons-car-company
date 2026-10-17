@@ -1,3 +1,4 @@
+import { Dices, Flag } from 'lucide-react'
 import { useState } from 'react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
@@ -41,6 +42,7 @@ export function TeamCreationScreen() {
 
   return (
     <div className={`${styles.screen} ${styles.centered} ${styles.narrow}`}>
+      <Flag size={40} color="var(--color-trim)" />
       <Heading>{t('team.registration')}</Heading>
       <span style={{ color: 'var(--color-text-secondary)' }}>{t('team.registerBlurb')}</span>
 
@@ -50,14 +52,19 @@ export function TeamCreationScreen() {
           onChange={(e) => setName(e.target.value)}
           placeholder={t('team.namePlaceholder')}
           disabled={racing.isRegistered}
-          style={{ flex: 1, padding: 10 }}
+          style={{ flex: 1 }}
         />
-        <Button onClick={() => setName(t(NAME_POOL_KEYS[Math.floor(Math.random() * NAME_POOL_KEYS.length)]))} disabled={racing.isRegistered}>
-          🎲
+        <Button
+          onClick={() => setName(t(NAME_POOL_KEYS[Math.floor(Math.random() * NAME_POOL_KEYS.length)]))}
+          disabled={racing.isRegistered}
+          aria-label={t('team.randomName')}
+          style={{ display: 'flex', alignItems: 'center' }}
+        >
+          <Dices size={20} />
         </Button>
       </div>
 
-      <span style={{ color: 'var(--color-green)' }}>{fmt.money(RACING_REGISTRATION_COST)}</span>
+      <span style={{ color: 'var(--color-green)', fontSize: '1.3rem', fontWeight: 600 }}>{fmt.money(RACING_REGISTRATION_COST)}</span>
 
       {!racing.isRegistered && !unlocked && <span style={{ color: 'var(--color-text-secondary)' }}>{t('team.locked')}</span>}
 
@@ -71,7 +78,7 @@ export function TeamCreationScreen() {
       </Button>
 
       {racing.isRegistered && (
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+        <div className={styles.card} style={{ width: '100%' }}>
           {racing.pendingEntry ? (
             <span style={{ color: 'var(--color-text-secondary)' }}>
               {t('team.pendingEntry', { tier: raceTierName(racing.pendingEntry.tierId, t), model: racing.pendingEntry.modelName })}
@@ -82,7 +89,7 @@ export function TeamCreationScreen() {
             </Button>
           )}
 
-          <Heading style={{ fontSize: '1.1rem' }}>{t('team.recentResults')}</Heading>
+          <h3 className={styles.sectionTitle}>{t('team.recentResults')}</h3>
           {racing.history.length === 0 && <span className={styles.empty}>{t('team.noResultsYet')}</span>}
           {racing.history.slice(0, 5).map((result) => (
             <div key={result.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>

@@ -1,0 +1,61 @@
+.page {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  padding: var(--space-3) 0 0;
+}
+
+.sidebar {
+  width: 260px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-3) 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--color-border);
+}
+
+/* Blueprint paper: two grid sizes of faint lines over the navy backdrop. */
+.blueprint {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  background-image:
+    linear-gradient(var(--color-blueprint-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-blueprint-line) 1px, transparent 1px),
+    linear-gradient(rgba(160, 190, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(160, 190, 255, 0.035) 1px, transparent 1px);
+  background-size:
+    80px 80px,
+    80px 80px,
+    16px 16px,
+    16px 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--space-4);
+  max-width: 1200px;
+}
+
+@media (max-height: 560px) {
+  .page {
+    padding-top: var(--space-1);
+  }
+
+  .sidebar {
+    width: 170px;
+    padding: var(--space-1) 0;
+  }
+
+  .blueprint {
+    padding: var(--space-2) var(--space-3) var(--space-3);
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: var(--space-2);
+  }
+}
