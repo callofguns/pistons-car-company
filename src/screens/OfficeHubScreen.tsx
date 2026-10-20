@@ -1,10 +1,12 @@
 import type { ComponentType } from 'react'
-import { Building2, Car, Factory, Flag, FlaskConical, Megaphone, Newspaper, Swords, UserPlus, type LucideProps } from 'lucide-react'
+import { Trophy, Building2, Car, Factory, Flag, FlaskConical, Megaphone, Newspaper, Swords, UserPlus, type LucideProps } from 'lucide-react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { useActiveTutorialStep } from '../store/useTutorialStore'
 import { unreadNewsCount } from '../core/news'
 import { carsOnOrder } from '../core/factory'
+import { nextGoals } from '../core/achievements'
+import { achievementName } from '../i18n/achievements'
 import type { ScreenId } from '../store/screenId'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
@@ -49,6 +51,8 @@ export function OfficeHubScreen() {
 
   const topModels = [...models].sort((a, b) => b.lifetimeEarnings - a.lifetimeEarnings).slice(0, 4)
   const unread = unreadNewsCount(news)
+  const world = useGameStore((s) => s.world)
+  const goal = nextGoals(world, 1)[0]
 
   return (
     <div className={styles.hub}>
@@ -69,6 +73,17 @@ export function OfficeHubScreen() {
             />
           ))}
         </div>
+        <button className={styles.goal} onClick={() => show('Goals')}>
+          <Trophy size={16} />
+          <span className={styles.goalText}>
+            <span className={styles.goalName}>{goal ? `${t('goals.nextGoal')}: ${achievementName(goal.def.id, t)}` : t('goals.allDone')}</span>
+            {goal && (
+              <span className={styles.goalTrack}>
+                <span className={styles.goalBar} style={{ transform: `scaleX(${goal.progress})` }} />
+              </span>
+            )}
+          </span>
+        </button>
       </section>
 
       <nav className={styles.nav}>

@@ -9,6 +9,7 @@ const NEWS_SOUNDS: Partial<Record<NewsEventType, Parameters<typeof playSfx>[0]>>
   ModelReleased: 'fanfare',
   ResearchCompleted: 'chime',
   HQUpgraded: 'fanfare',
+  AchievementUnlocked: 'fanfare',
   LoanTaken: 'cash',
   BankruptcyWarning: 'warning',
   HistoryEventStarted: 'warning',

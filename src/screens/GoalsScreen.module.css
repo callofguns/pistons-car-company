@@ -1,0 +1,129 @@
+.page {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  padding: var(--space-3) 0 0;
+}
+
+.sidebar {
+  width: 240px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--color-border);
+}
+
+.total {
+  padding: 0 var(--space-4) var(--space-3);
+  font-size: 0.8rem;
+  color: var(--color-trim);
+}
+
+.grid {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-5);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  grid-auto-rows: min-content;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-3);
+  background: var(--color-panel-glass);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-panel);
+}
+
+.done {
+  border-color: var(--color-trim);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.badge {
+  width: 40px;
+  height: 28px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.done .badge {
+  background: var(--color-trim);
+  color: #2a1d05;
+}
+
+.name {
+  font-weight: 700;
+}
+
+.desc {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(8, 14, 40, 0.6);
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  background: var(--color-accent);
+}
+
+.done .bar {
+  background: var(--color-trim);
+}
+
+.reward {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.done .reward {
+  color: var(--color-trim);
+}
+
+@media (max-height: 560px) {
+  .page {
+    padding-top: var(--space-1);
+  }
+
+  .sidebar {
+    width: 170px;
+  }
+
+  .grid {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .card {
+    padding: var(--space-2);
+    gap: 4px;
+  }
+}

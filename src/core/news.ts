@@ -30,6 +30,7 @@ export type NewsEventType =
   | 'HistoryEventStarted'
   | 'HistoryEventEnded'
   | 'RivalLaunch'
+  | 'AchievementUnlocked'
 
 export interface NewsEntry {
   id: string

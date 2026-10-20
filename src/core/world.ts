@@ -8,6 +8,7 @@ import { makeDate, type GameDate } from './gameDate'
 import { createLedgerState, monthTotalExpense, monthTotalIncome, onLedgerMonthTick, type LedgerState } from './ledger'
 import { onMarketDayTick, createCompetitorState, growReach, totalMarketCarsPerDay, type CompetitorState, type MarketConditions } from './market'
 import { onMarketingDayTick } from './marketing'
+import { checkAchievements, createAchievementsState, type AchievementsState } from './achievements'
 import { createRivalsState, onRivalsDayTick, rivalStrength, type RivalsState } from './rivals'
 import { createNewsState, postNews, type NewsState } from './news'
 import { isInDevelopment, onDevelopmentDayTick } from './development'
@@ -48,6 +49,7 @@ export interface World {
   vehicles: VehicleState
   competitors: CompetitorState
   rivals: RivalsState
+  achievements: AchievementsState
   racing: RacingState
   factory: FactoryState
 }
@@ -67,6 +69,7 @@ export function createNewWorld(config: GameConfig, catalog: Catalog, companyName
     vehicles: createVehicleState(),
     competitors: createCompetitorState(),
     rivals: createRivalsState(config.startYear),
+    achievements: createAchievementsState(),
     racing: createRacingState(),
     factory: createFactoryState(),
   }
@@ -159,6 +162,8 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
       }
     }
   })
+
+  checkAchievements(world, today)
 
   if (today.day === 1) {
     const loanIdsBefore = world.bank.loans.map((l) => ({ id: l.id, principal: l.principal }))

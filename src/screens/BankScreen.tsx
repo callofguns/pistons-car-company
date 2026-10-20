@@ -21,6 +21,7 @@ const CATEGORY_LABEL_KEY: Record<TransactionCategory, MessageKey> = {
   Research: 'data.transactionCategory.Research',
   Marketing: 'data.transactionCategory.Marketing',
   Racing: 'data.transactionCategory.Racing',
+  Reward: 'data.transactionCategory.Reward',
   LoanPrincipal: 'data.transactionCategory.LoanPrincipal',
   LoanInterest: 'data.transactionCategory.LoanInterest',
   OverdraftInterest: 'data.transactionCategory.OverdraftInterest',

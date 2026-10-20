@@ -18,3 +18,4 @@ export type ScreenId =
   | 'News'
   | 'Factory'
   | 'Rivals'
+  | 'Goals'

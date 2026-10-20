@@ -5,6 +5,7 @@ import { useSimulationLoop } from './store/useSimulationLoop'
 import { TopHud } from './components/TopHud'
 import { BankruptcyOverlay } from './components/BankruptcyOverlay'
 import { TutorialOverlay } from './components/TutorialOverlay'
+import { AchievementToast } from './components/AchievementToast'
 import { SCREENS } from './screens'
 import { useAudioController } from './audio/useAudioController'
 
@@ -36,6 +37,7 @@ export function App() {
           <TopHud />
           <ScreenComponent />
           <TutorialOverlay />
+          <AchievementToast />
         </div>
       )}
     </>

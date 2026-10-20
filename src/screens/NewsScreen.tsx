@@ -113,6 +113,7 @@ const NEWS_ICONS: Partial<Record<NewsEventType, { Icon: ComponentType<LucideProp
   RaceCompleted: { Icon: Trophy, color: 'var(--color-trim)' },
   HQUpgraded: { Icon: Building2, color: 'var(--color-accent-hover)' },
   HistoryEventStarted: { Icon: Globe, color: 'var(--color-trim)' },
+  AchievementUnlocked: { Icon: Trophy, color: 'var(--color-trim)' },
   RivalLaunch: { Icon: Car, color: 'var(--color-danger)' },
   HistoryEventEnded: { Icon: Globe, color: 'var(--color-text-secondary)' },
 }

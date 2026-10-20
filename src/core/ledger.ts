@@ -15,6 +15,7 @@ export type TransactionCategory =
   | 'Research'
   | 'Marketing'
   | 'Racing'
+  | 'Reward'
   | 'LoanPrincipal'
   | 'LoanInterest'
   | 'OverdraftInterest'

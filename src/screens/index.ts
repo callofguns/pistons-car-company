@@ -18,6 +18,7 @@ import { BankScreen } from './BankScreen'
 import { NewsScreen } from './NewsScreen'
 import { FactoryScreen } from './FactoryScreen'
 import { RivalsScreen } from './RivalsScreen'
+import { GoalsScreen } from './GoalsScreen'
 
 export const SCREENS: Record<ScreenId, ComponentType> = {
   MainMenu: MainMenuScreen,
@@ -38,4 +39,5 @@ export const SCREENS: Record<ScreenId, ComponentType> = {
   News: NewsScreen,
   Factory: FactoryScreen,
   Rivals: RivalsScreen,
+  Goals: GoalsScreen,
 }
