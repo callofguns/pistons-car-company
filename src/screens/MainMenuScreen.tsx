@@ -1,4 +1,6 @@
+import { Volume2, VolumeX } from 'lucide-react'
 import { useUiStore } from '../store/useUiStore'
+import { useAudioStore } from '../store/useAudioStore'
 import { useGameStore } from '../store/useGameStore'
 import { DEFAULT_GAME_CONFIG } from '../core/gameConfig'
 import { APP_VERSION } from '../version'
@@ -37,6 +39,9 @@ export function MainMenuScreen() {
 
   const mostRecent = findMostRecentSlot()
 
+  const soundOn = useAudioStore((s) => s.musicOn || s.sfxOn)
+  const toggleSound = useAudioStore((s) => s.toggleAll)
+
   const handlePlay = () => {
     if (mostRecent && loadSlot(mostRecent.index)) goHome('OfficeHub')
   }
@@ -66,6 +71,10 @@ export function MainMenuScreen() {
           {t('menu.news')}
         </Button>
       </div>
+
+      <Button className={menuStyles.sound} onClick={toggleSound} aria-label={soundOn ? t('common.soundOff') : t('common.soundOn')} aria-pressed={soundOn}>
+        {soundOn ? <Volume2 size={22} strokeWidth={2.25} /> : <VolumeX size={22} strokeWidth={2.25} />}
+      </Button>
 
       <span className={menuStyles.version}>{APP_VERSION}</span>
     </div>

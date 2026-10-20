@@ -71,3 +71,15 @@
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
 }
+
+.sound {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

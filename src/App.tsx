@@ -6,9 +6,11 @@ import { TopHud } from './components/TopHud'
 import { BankruptcyOverlay } from './components/BankruptcyOverlay'
 import { TutorialOverlay } from './components/TutorialOverlay'
 import { SCREENS } from './screens'
+import { useAudioController } from './audio/useAudioController'
 
 export function App() {
   useSimulationLoop()
+  useAudioController()
   const currentScreen = useUiStore((s) => s.currentScreen)
   const ScreenComponent = SCREENS[currentScreen]
 

@@ -1,5 +1,6 @@
-import { ArrowLeft, Banknote, Crown, FastForward, FlaskConical, Pause, Play, ShoppingCart, TriangleAlert, Users, Warehouse } from 'lucide-react'
+import { ArrowLeft, Banknote, Crown, FastForward, FlaskConical, Pause, Play, ShoppingCart, TriangleAlert, Users, Volume2, VolumeX, Warehouse } from 'lucide-react'
 import { useGameStore } from '../store/useGameStore'
+import { useAudioStore } from '../store/useAudioStore'
 import { screenWantsTopHud, SCREEN_TITLE_KEYS, useUiStore } from '../store/useUiStore'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
@@ -32,6 +33,8 @@ export function TopHud() {
   const world = useGameStore((s) => s.world)
   const setPlaybackSpeed = useGameStore((s) => s.setPlaybackSpeed)
   const saveNow = useGameStore((s) => s.saveNow)
+  const soundOn = useAudioStore((s) => s.musicOn || s.sfxOn)
+  const toggleSound = useAudioStore((s) => s.toggleAll)
   const { t, fmt } = useT()
 
   if (!screenWantsTopHud(currentScreen)) return null
@@ -136,6 +139,9 @@ export function TopHud() {
       </div>
 
       <div className={styles.right}>
+        <Button className={styles.squareButton} onClick={toggleSound} aria-label={soundOn ? t('common.soundOff') : t('common.soundOn')} aria-pressed={soundOn}>
+          {soundOn ? <Volume2 size={22} strokeWidth={2.25} /> : <VolumeX size={22} strokeWidth={2.25} />}
+        </Button>
         <Button variant="gold" className={styles.squareButton} onClick={() => show('Bank')} aria-label={t('common.shop')}>
           <ShoppingCart size={22} strokeWidth={2.25} />
         </Button>

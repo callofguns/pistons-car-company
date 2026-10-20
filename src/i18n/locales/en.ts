@@ -23,6 +23,8 @@ export const en = {
   'common.skipTutorial': 'Skip tutorial',
   'common.mainMenu': 'Main Menu',
   'common.menu': 'Menu',
+  'common.soundOn': 'Turn sound on',
+  'common.soundOff': 'Turn sound off',
   'common.shop': 'Shop',
   'common.pause': 'Pause',
   'common.play': 'Play',
