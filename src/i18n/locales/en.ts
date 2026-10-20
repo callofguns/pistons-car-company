@@ -685,7 +685,19 @@ export const en = {
     'Price above your Cost Price to turn a profit. The suggested price balances margin against what buyers in your segment expect - then tap the highlighted ✓ FINISH button to put it into production.',
   'tutorial.lineupFinale.title': "You're on the lot",
   'tutorial.lineupFinale.message':
-    'Your first car is now in development. While it develops you earn research points - spend them in Research. When it is ready, open the Factory (the building icon at the bottom of the Office) and order cars on a production line - they go on sale as they are built. Good luck out there.',
+    'Your first car is now in development. While it develops you earn research points - spend them in Research. Head back to the Office to let time run.',
+  'tutorial.officeWait.title': 'Your car is being developed',
+  'tutorial.officeWait.message':
+    'Press play (or fast forward) under the year to let time run. Development takes a few weeks, and you earn research points while you wait. A news item will tell you when the car is ready.',
+  'tutorial.officeFactory.title': 'Your car is ready',
+  'tutorial.officeFactory.message':
+    'Nothing sells until you build cars. Tap the highlighted Factory button to order your first batch.',
+  'tutorial.factoryOrder.title': 'Order cars',
+  'tutorial.factoryOrder.message':
+    'Your production line builds the cars you order, a few every day. Tap the highlighted +500 button to order 500 cars. Unsold cars cost storage money, so do not order too many.',
+  'tutorial.factoryDone.title': 'Now sell them',
+  'tutorial.factoryDone.message':
+    'Go back to the Office and press play. Cars appear in stock as they are built, then sell, and the money shows in the Sales panel. If cars run out, order more. If sales are slow, lower the price or launch marketing.',
 
   // screen.<id>.title - the persistent top bar's title (see TopHud.tsx); a Record<ScreenId,
   // MessageKey> in useUiStore.ts maps every screen id to one of these.

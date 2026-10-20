@@ -151,6 +151,45 @@
   color: var(--color-text-primary);
 }
 
+/* A moving floor stripe under a line that is building cars, with the car bobbing along. */
+.building {
+  background-image: repeating-linear-gradient(90deg, rgba(255, 200, 80, 0.55) 0 14px, transparent 14px 28px);
+  background-size: 100% 4px;
+  background-repeat: no-repeat;
+  background-position: 0 calc(100% - 2px);
+  padding-bottom: 6px;
+  animation: belt 0.8s linear infinite;
+}
+
+.carBuilding {
+  animation: bob 0.8s ease-in-out infinite;
+}
+
+@keyframes belt {
+  to {
+    background-position: 28px calc(100% - 2px);
+  }
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .building,
+  .carBuilding {
+    animation: none;
+  }
+}
+
+.tutorial {
+  flex: none;
+  display: flex;
+  justify-content: center;
+}
+
 @media (max-height: 560px) {
   .card {
     padding: var(--space-2);

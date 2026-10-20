@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Plus, Warehouse } from 'lucide-react'
 import { useGameStore } from '../store/useGameStore'
+import { useActiveTutorialStep } from '../store/useTutorialStore'
+import { TutorialCard } from '../components/TutorialCard'
 import { lineLevel, LINE_LEVELS, maxLines, monthlyFactoryCosts, NEW_LINE_COST, type ProductionLine } from '../core/factory'
 import { isInDevelopment } from '../core/development'
 import { difficultySettings } from '../core/difficulty'
@@ -22,6 +24,7 @@ export function FactoryScreen() {
   const buildLine = useGameStore((s) => s.buildLine)
   const { t, fmt } = useT()
   const [error, setError] = useState(false)
+  const tutorialStep = useActiveTutorialStep()
 
   const { factory, vehicles, company } = world
   const max = maxLines(company.hqLevel)
@@ -36,9 +39,15 @@ export function FactoryScreen() {
         <span>{t('factory.monthlyCosts', { upkeep: fmt.money(costs.upkeep), storage: fmt.money(costs.storage) })}</span>
       </div>
 
+      {tutorialStep && (
+        <div className={factoryStyles.tutorial}>
+          <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />
+        </div>
+      )}
+
       <div className={`${styles.fill} ${factoryStyles.grid}`}>
         {factory.lines.map((line, i) => (
-          <LineCard key={line.id} line={line} number={i + 1} models={vehicles.models} />
+          <LineCard key={line.id} line={line} number={i + 1} models={vehicles.models} highlightOrder={i === 0 && tutorialStep?.step.targetId === 'factory-order'} />
         ))}
 
         <div className={`${factoryStyles.card} ${factoryStyles.newLine}`}>
@@ -60,7 +69,7 @@ export function FactoryScreen() {
   )
 }
 
-function LineCard({ line, number, models }: { line: ProductionLine; number: number; models: CarModel[] }) {
+function LineCard({ line, number, models, highlightOrder }: { line: ProductionLine; number: number; models: CarModel[]; highlightOrder: boolean }) {
   const assignLineModel = useGameStore((s) => s.assignLineModel)
   const addLineOrder = useGameStore((s) => s.addLineOrder)
   const clearLineOrder = useGameStore((s) => s.clearLineOrder)
@@ -74,6 +83,8 @@ function LineCard({ line, number, models }: { line: ProductionLine; number: numb
   const model = models.find((m) => m.id === line.modelId)
   const level = lineLevel(line.level)
   const next = line.level < LINE_LEVELS.length ? lineLevel(line.level + 1) : null
+  // Running right now: a released model with cars still on order.
+  const building = model !== undefined && !isInDevelopment(model) && line.orderRemaining > 0
   const step = (delta: number) => assignLineModel(line.id, choices[(index + delta + choices.length) % choices.length])
 
   return (
@@ -87,10 +98,10 @@ function LineCard({ line, number, models }: { line: ProductionLine; number: numb
         <button className={factoryStyles.arrow} onClick={() => step(-1)} aria-label={t('factory.previousModel')}>
           <ChevronLeft size={18} />
         </button>
-        <div className={factoryStyles.modelBox}>
+        <div className={`${factoryStyles.modelBox} ${building ? factoryStyles.building : ''}`}>
           {model ? (
             <>
-              <CarArt bodyId={model.bodyStyleId} color={modelPaint(model.id)} className={factoryStyles.car} />
+              <CarArt bodyId={model.bodyStyleId} color={modelPaint(model.id)} className={`${factoryStyles.car} ${building ? factoryStyles.carBuilding : ''}`} />
               <span className={factoryStyles.modelName}>{model.name}</span>
             </>
           ) : (
@@ -114,7 +125,11 @@ function LineCard({ line, number, models }: { line: ProductionLine; number: numb
 
       <div className={factoryStyles.orders}>
         {ORDER_STEPS.map((cars) => (
-          <Button key={cars} className={factoryStyles.orderButton} disabled={!model} onClick={() => addLineOrder(line.id, cars)} aria-label={t('factory.addCars', { count: cars })}>
+          <Button
+            key={cars}
+            data-tutorial-target={cars === 500 ? 'factory-order' : undefined}
+            className={`${factoryStyles.orderButton} ${highlightOrder && cars === 500 ? 'tutorial-target-highlight' : ''}`}
+            disabled={!model} onClick={() => addLineOrder(line.id, cars)} aria-label={t('factory.addCars', { count: cars })}>
             <Plus size={12} strokeWidth={3} />
             {grouped(cars)}
           </Button>

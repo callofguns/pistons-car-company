@@ -72,7 +72,11 @@ export function OfficeHubScreen() {
 
       <nav className={styles.nav}>
         {NAV_ITEMS.map(({ screen, labelKey, Icon }) => (
-          <Button key={screen} className={styles.navButton} onClick={() => show(screen)} aria-label={t(labelKey)} title={t(labelKey)}>
+          <Button
+            key={screen}
+            data-tutorial-target={screen === 'Factory' ? 'office-factory' : undefined}
+            className={`${styles.navButton} ${screen === 'Factory' && tutorialStep?.step.targetId === 'office-factory' ? 'tutorial-target-highlight' : ''}`}
+            onClick={() => show(screen)} aria-label={t(labelKey)} title={t(labelKey)}>
             <Icon size={26} strokeWidth={2.1} />
             {screen === 'News' && unread > 0 && <span className={styles.badge}>{unread > 9 ? '9+' : unread}</span>}
           </Button>
