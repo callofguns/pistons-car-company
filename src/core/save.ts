@@ -8,6 +8,7 @@ import type { NewsEntry } from './news'
 import type { RaceResultRecord, RacingState } from './racing'
 import type { Employee } from './staff'
 import type { FactoryState } from './factory'
+import { createRivalsState, type RivalsState } from './rivals'
 import type { Difficulty } from './difficulty'
 
 /** One research node's saved progress. Effects aren't serialized - on load they're re-applied to a fresh TechModifiers from the catalog definition, same as ResearchService.RestoreState did in the C# port. */
@@ -81,6 +82,8 @@ export interface SaveGameData {
   // Schema 4 (the Stage 3 economy): required.
   difficulty: Difficulty
   factory: FactoryState
+  /** Missing in saves made before rivals existed - loaded as a fresh set. */
+  rivals?: RivalsState
 }
 
 // 4: the Stage 3 economy - $45M money scale, difficulty, the factory (production lines replace the
@@ -143,6 +146,7 @@ export function buildSaveData(world: World): SaveGameData {
 
     difficulty: world.company.difficulty,
     factory: world.factory,
+    rivals: world.rivals,
   }
 }
 
@@ -150,6 +154,7 @@ export function buildSaveData(world: World): SaveGameData {
 export function loadWorld(config: GameConfig, catalog: Catalog, data: SaveGameData): World {
   const world = createNewWorld(config, catalog, data.companyName, data.difficulty)
   world.factory = data.factory
+  world.rivals = data.rivals ?? createRivalsState(data.year)
 
   world.time.currentDate = makeDate(data.year, data.month, data.day)
   world.bank.balance = data.cashBalance

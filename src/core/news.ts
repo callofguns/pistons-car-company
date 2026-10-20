@@ -29,6 +29,7 @@ export type NewsEventType =
   | 'HQUpgraded'
   | 'HistoryEventStarted'
   | 'HistoryEventEnded'
+  | 'RivalLaunch'
 
 export interface NewsEntry {
   id: string

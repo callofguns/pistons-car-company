@@ -6,8 +6,9 @@ import { applyOverdraftInterest, checkBankruptcy, createBank, onLoanMonthTick, p
 import type { GameConfig } from './gameConfig'
 import { makeDate, type GameDate } from './gameDate'
 import { createLedgerState, monthTotalExpense, monthTotalIncome, onLedgerMonthTick, type LedgerState } from './ledger'
-import { onMarketDayTick, createCompetitorState, growReach, type CompetitorState, type MarketConditions } from './market'
+import { onMarketDayTick, createCompetitorState, growReach, totalMarketCarsPerDay, type CompetitorState, type MarketConditions } from './market'
 import { onMarketingDayTick } from './marketing'
+import { createRivalsState, onRivalsDayTick, rivalStrength, type RivalsState } from './rivals'
 import { createNewsState, postNews, type NewsState } from './news'
 import { isInDevelopment, onDevelopmentDayTick } from './development'
 import { autoAssignReleasedModel, carsOnOrder, createFactoryState, onFactoryDayTick, onFactoryMonthTick, type FactoryState } from './factory'
@@ -46,6 +47,7 @@ export interface World {
   staff: StaffState
   vehicles: VehicleState
   competitors: CompetitorState
+  rivals: RivalsState
   racing: RacingState
   factory: FactoryState
 }
@@ -64,6 +66,7 @@ export function createNewWorld(config: GameConfig, catalog: Catalog, companyName
     staff: createStaffState(catalog.employeeNames, catalog.employeePerks),
     vehicles: createVehicleState(),
     competitors: createCompetitorState(),
+    rivals: createRivalsState(config.startYear),
     racing: createRacingState(),
     factory: createFactoryState(),
   }
@@ -81,6 +84,7 @@ export function marketConditionsFor(world: World, events: EventEffects): MarketC
     fuelEconomyWeightMultiplier: events.fuelEconomyWeightMultiplier,
     powerWeightMultiplier: events.powerWeightMultiplier,
     classDemandMultiplier: events.classDemandMultiplier,
+    rivalStrength: rivalStrength(world.rivals, world.time.currentDate.year),
     // Laws in force x how fresh the design still is.
     modelMultiplier: (model) => events.modelMultiplier(model) * freshness(model, world.time.currentDate),
   }
@@ -137,6 +141,13 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
     world.competitors,
     marketConditionsFor(world, events),
   )
+
+  // The rival makers sell whatever the player didn't, and now and then launch a new model.
+  const playerSoldToday = world.vehicles.models.reduce((sum, m) => sum + m.lastDayUnitsSold, 0)
+  const marketToday = totalMarketCarsPerDay(catalog.marketSegments, today.year)
+  for (const launch of onRivalsDayTick(world.rivals, today.year, Math.max(marketToday, playerSoldToday), playerSoldToday)) {
+    postNews(world.news, 'RivalLaunch', today, { rivalName: launch.rival.name, modelName: launch.modelName })
+  }
 
   world.vehicles.models.forEach((model, i) => {
     if (model.totalSold > soldBefore[i]) {

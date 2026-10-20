@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { Building2, Car, Factory, Flag, FlaskConical, Megaphone, Newspaper, UserPlus, type LucideProps } from 'lucide-react'
+import { Building2, Car, Factory, Flag, FlaskConical, Megaphone, Newspaper, Swords, UserPlus, type LucideProps } from 'lucide-react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { useActiveTutorialStep } from '../store/useTutorialStore'
@@ -26,6 +26,7 @@ const NAV_ITEMS: NavItem[] = [
   { screen: 'Factory', labelKey: 'nav.factory', Icon: Factory },
   { screen: 'TeamCreation', labelKey: 'nav.racing', Icon: Flag },
   { screen: 'Employees', labelKey: 'nav.staff', Icon: UserPlus },
+  { screen: 'Rivals', labelKey: 'nav.rivals', Icon: Swords },
   { screen: 'Company', labelKey: 'nav.company', Icon: Building2 },
   { screen: 'News', labelKey: 'nav.news', Icon: Newspaper },
 ]

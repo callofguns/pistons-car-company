@@ -128,7 +128,7 @@ describe('onMarketDayTick', () => {
   it('a difficulty demand multiplier scales sales', () => {
     const easy = buildModel(100_000)
     const hard = buildModel(100_000)
-    const conditions = (m: number) => ({ demandMultiplier: m, fuelEconomyWeightMultiplier: 1, powerWeightMultiplier: 1, classDemandMultiplier: {}, modelMultiplier: () => 1 })
+    const conditions = (m: number) => ({ demandMultiplier: m, fuelEconomyWeightMultiplier: 1, powerWeightMultiplier: 1, classDemandMultiplier: {}, rivalStrength: 1.08, modelMultiplier: () => 1 })
     const companyA = createCompanyState('A', 'X', 200_000)
     const companyB = createCompanyState('B', 'X', 200_000)
     onMarketDayTick(easy.vehicles.models, [tinyReachSegment], (m) => resolveBody([body], m), easy.bank, createLedgerState(), TODAY, companyA, createCompetitorState(), conditions(1.3))

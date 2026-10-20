@@ -1,0 +1,147 @@
+.heading {
+  margin: 0 0 var(--space-2);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rankRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+}
+
+.you {
+  background: rgba(79, 140, 255, 0.14);
+  border-color: var(--color-accent);
+}
+
+.rank {
+  width: 22px;
+  flex: none;
+  font-weight: 700;
+  color: var(--color-trim);
+  text-align: center;
+}
+
+.rankBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rankTop {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+}
+
+.rankName {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(8, 14, 40, 0.6);
+  overflow: hidden;
+}
+
+.fill,
+.fillRival {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  border-radius: 999px;
+  background: var(--color-accent);
+  transition: transform 0.3s;
+}
+
+.fillRival {
+  background: var(--color-trim);
+}
+
+.note {
+  margin-top: auto;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.cards {
+  overflow-y: auto;
+}
+
+.rival {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.car {
+  width: 110px;
+  flex: none;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rivalName {
+  font-weight: 700;
+}
+
+.chip {
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  font-size: 0.7rem;
+  color: var(--color-trim);
+}
+
+.sub {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.strengthRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.hot {
+  color: var(--color-danger);
+  white-space: nowrap;
+}
+
+@media (max-height: 560px) {
+  .car {
+    width: 84px;
+  }
+
+  .rankRow {
+    padding: 4px var(--space-2);
+  }
+}

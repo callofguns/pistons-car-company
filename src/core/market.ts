@@ -24,6 +24,8 @@ const MARKET_BASE_YEAR = 1970
  * as appealing as a rival wins 1 in (RIVAL_COUNT + 1) of them. See captureShare. */
 const RIVAL_APPEAL = 0.6
 const RIVAL_COUNT = 3
+/** Rivals' combined pull (the sum of their appeal squared) when none are simulated. */
+const DEFAULT_RIVAL_STRENGTH = RIVAL_COUNT * RIVAL_APPEAL * RIVAL_APPEAL
 
 /** A buyer segment (Economy, Family, Luxury, Sports, Utility). Every on-sale model is scored
  * against each segment's preferences to decide daily demand. */
@@ -56,6 +58,8 @@ export interface MarketConditions {
   powerWeightMultiplier: number
   /** Extra demand for particular body classes (e.g. the SUV boom). */
   classDemandMultiplier: Partial<Record<CarClass, number>>
+  /** How strongly the rival makers pull buyers away - see rivals.ts's rivalStrength. */
+  rivalStrength: number
   /** Per-model multiplier - age (freshness), regulation bans. 1 = no effect, 0 = can't sell. */
   modelMultiplier: (model: CarModel) => number
 }
@@ -65,6 +69,7 @@ export const NEUTRAL_MARKET_CONDITIONS: MarketConditions = {
   fuelEconomyWeightMultiplier: 1,
   powerWeightMultiplier: 1,
   classDemandMultiplier: {},
+  rivalStrength: DEFAULT_RIVAL_STRENGTH,
   modelMultiplier: () => 1,
 }
 
@@ -88,6 +93,11 @@ export function marketGrowth(year: number): number {
   return 1 + Math.max(0, year - MARKET_BASE_YEAR) * MARKET_GROWTH_PER_YEAR
 }
 
+/** How many new cars every maker together sells per day in a year, before price and appeal. */
+export function totalMarketCarsPerDay(segments: MarketSegmentDefinition[], year: number): number {
+  return segments.reduce((sum, s) => sum + s.marketCarsPerDay, 0) * marketGrowth(year)
+}
+
 /** 0-1 share of the people in the market who have heard of the company. */
 export function awareness(populationServed: number): number {
   return populationServed / (populationServed + HALF_AWARENESS_REACH)
@@ -95,9 +105,9 @@ export function awareness(populationServed: number): number {
 
 /** Of the aware buyers in a segment, the fraction who pick this car over the rivals' - rising
  * steeply for a better-matched car. */
-function captureShare(appeal: number): number {
+function captureShare(appeal: number, rivalStrength: number): number {
   const a = appeal * appeal
-  return a / (a + RIVAL_COUNT * RIVAL_APPEAL * RIVAL_APPEAL)
+  return a / (a + rivalStrength)
 }
 
 /** How many of a segment's buyers can and will pay this price: a small bonus for undercutting
@@ -123,7 +133,7 @@ export function dailyDemand(
   for (const segment of segments) {
     const appeal = scoreAppeal(model, body, segment, conditions)
     const classBoost = body ? (conditions.classDemandMultiplier[body.carClass] ?? 1) : 1
-    demand += segment.marketCarsPerDay * growth * classBoost * aware * captureShare(appeal) * affordability(model.salePrice, segment.expectedPrice)
+    demand += segment.marketCarsPerDay * growth * classBoost * aware * captureShare(appeal, conditions.rivalStrength) * affordability(model.salePrice, segment.expectedPrice)
   }
   const reputationFactor = 0.5 + company.reputationPercent / 100
   return demand * reputationFactor * model.marketingEfficiencyMultiplier * conditions.demandMultiplier * conditions.modelMultiplier(model)
@@ -183,7 +193,7 @@ export function onMarketDayTick(
   }
 
   // Market share: our cars against everything every maker sold today.
-  const totalMarket = segments.reduce((sum, s) => sum + s.marketCarsPerDay, 0) * marketGrowth(today.year) * nextWobble(competitors)
+  const totalMarket = totalMarketCarsPerDay(segments, today.year) * nextWobble(competitors)
   const targetShare = totalMarket <= 0 ? 0 : (soldToday / (totalMarket + soldToday)) * 100
   company.marketSharePercent = lerp(company.marketSharePercent, targetShare, 0.05)
 

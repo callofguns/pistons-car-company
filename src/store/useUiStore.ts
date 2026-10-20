@@ -44,6 +44,7 @@ export const SCREEN_TITLE_KEYS: Record<ScreenId, MessageKey> = {
   // Record<ScreenId, MessageKey>, so every screen needs an entry regardless.
   News: 'news.screenTitle',
   Factory: 'screen.factory.title',
+  Rivals: 'screen.rivals.title',
 }
 
 /** Lets a screen with its own internal steps (the design wizard) take over the top bar's title

@@ -74,6 +74,8 @@ export function renderNewsHeadline(entry: NewsEntry, t: ReturnType<typeof useT>[
         name: t(`data.historyEvent.${entry.params.eventId}.name` as MessageKey),
         description: t(`data.historyEvent.${entry.params.eventId}.description` as MessageKey),
       })
+    case 'RivalLaunch':
+      return t('news.rivalLaunch', { rival: String(entry.params.rivalName), model: String(entry.params.modelName) })
     case 'HistoryEventEnded':
       return t('news.historyEventEnded', { name: t(`data.historyEvent.${entry.params.eventId}.name` as MessageKey) })
     default: {
