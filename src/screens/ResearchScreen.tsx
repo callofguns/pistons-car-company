@@ -7,6 +7,7 @@ import { CATALOG } from '../data/catalog'
 import { nodesInCategory } from '../core/catalog'
 import { canStartResearch, getNodeState, getProgress01, currentMoneyCost, currentScienceCost, isResearched, type ResearchCategory } from '../core/research'
 import { useT } from '../i18n/useT'
+import { researchNodeName } from '../i18n/research'
 import type { MessageKey } from '../i18n/keys'
 import { ResearchNodeCard } from '../components/ResearchNodeCard'
 import { ProgressButton } from '../components/ProgressButton'
@@ -38,6 +39,10 @@ export function ResearchScreen() {
   const [selected, setSelected] = useState<ResearchCategory>('Engine')
   const nodes = nodesInCategory(CATALOG, selected)
   const SelectedIcon = CATEGORIES.find((c) => c.id === selected)!.Icon
+  const nameOf = (id: string | null | undefined) => {
+    const other = id ? catalog.researchNodes.find((n) => n.id === id) : undefined
+    return other ? researchNodeName(other, t) : undefined
+  }
   const developingCount = models.filter(isInDevelopment).length
   // Same rate world.ts's advanceOneDay grants on a development day.
   const pointsPerDay = Math.round(config.researchPointsPerDay + researchPointsBonus(staff, catalog.employeePerks))
@@ -82,6 +87,8 @@ export function ResearchScreen() {
                 progress01={getProgress01(research, node.id)}
                 moneyCost={currentMoneyCost(node, costYear)}
                 scienceCost={currentScienceCost(node, costYear)}
+                requiresName={nameOf(node.prerequisiteId)}
+                excludesNames={node.excludes?.map((id) => nameOf(id) ?? id)}
                 affordable={canStartResearch(research, node, bank, currentYear)}
                 onAction={() => startResearch(node.id)}
               />

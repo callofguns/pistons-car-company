@@ -13,6 +13,9 @@ interface ResearchNodeCardProps {
   progress01: number
   moneyCost: number
   scienceCost: number
+  /** Names of the card that must be researched first, and of the cards this one is a choice against. */
+  requiresName?: string
+  excludesNames?: string[]
   /** False when the company is short on research points or cash for this node right now. */
   affordable: boolean
   icon: ReactNode
@@ -22,6 +25,7 @@ interface ResearchNodeCardProps {
 const STATE_LABEL_KEY: Record<ResearchNodeState, MessageKey> = {
   Locked: 'research.state.Locked',
   TooEarly: 'research.state.TooEarly',
+  Skipped: 'research.state.Skipped',
   AvailableNormal: 'research.state.AvailableNormal',
   AvailableBreakthrough: 'research.state.AvailableBreakthrough',
   InProgress: 'research.state.InProgress',
@@ -32,7 +36,7 @@ const STATE_LABEL_KEY: Record<ResearchNodeState, MessageKey> = {
  * progress %, name, research-point + money cost, and an action button whose label/color follow
  * ResearchNodeState. The (i) button flips the card to show what the research actually does.
  * Direct port of ResearchNodeCardView.cs. */
-export function ResearchNodeCard({ node, state, progress01, moneyCost, scienceCost, affordable, icon, onAction }: ResearchNodeCardProps) {
+export function ResearchNodeCard({ node, state, progress01, moneyCost, scienceCost, requiresName, excludesNames, affordable, icon, onAction }: ResearchNodeCardProps) {
   const { t, fmt } = useT()
   const [showInfo, setShowInfo] = useState(false)
   // Was enabled even when unaffordable, so a tap silently did nothing.
@@ -40,7 +44,7 @@ export function ResearchNodeCard({ node, state, progress01, moneyCost, scienceCo
   const variant = state === 'AvailableBreakthrough' ? 'danger' : state === 'AvailableNormal' ? 'primary' : 'secondary'
   const name = researchNodeName(node, t)
   const early = state === 'AvailableBreakthrough'
-  const dim = state === 'Locked' || state === 'TooEarly'
+  const dim = state === 'Locked' || state === 'TooEarly' || state === 'Skipped'
 
   return (
     <div className={`${styles.card} ${dim ? styles.dim : ''} ${state === 'Researched' ? styles.done : ''}`}>
@@ -69,7 +73,8 @@ export function ResearchNodeCard({ node, state, progress01, moneyCost, scienceCo
       {showInfo ? (
         <ul className={styles.effects}>
           {node.unlocks && <li>{t(`research.unlocks.${node.unlocks.kind}` as MessageKey)}</li>}
-          {node.prerequisiteId && state === 'Locked' && <li>{t('research.needsPrevious')}</li>}
+          {requiresName && state === 'Locked' && <li>{t('research.requires', { name: requiresName })}</li>}
+          {excludesNames && excludesNames.length > 0 && <li>{t('research.choice', { names: excludesNames.join(', ') })}</li>}
           {node.effects.map((effect) => (
             <li key={effect.target}>
               {t(`research.effect.${effect.target}` as MessageKey, {
@@ -96,7 +101,9 @@ export function ResearchNodeCard({ node, state, progress01, moneyCost, scienceCo
       )}
 
       <Button variant={variant} className={styles.action} disabled={!interactable} onClick={onAction}>
-        {t(STATE_LABEL_KEY[state], { year: node.availableYear - BREAKTHROUGH_MAX_YEARS_EARLY })}
+        {state === 'Locked' && requiresName
+          ? t('research.needs', { name: requiresName })
+          : t(STATE_LABEL_KEY[state], { year: node.availableYear - BREAKTHROUGH_MAX_YEARS_EARLY })}
       </Button>
     </div>
   )

@@ -84,22 +84,26 @@ describe('id-derived i18n keys exist for every data table entry', () => {
   it('researchNodes.ts ids stay exactly this list (persisted in saves - never rename)', () => {
     const expectedIds: MessageKey[] = [
       'data.research.engine-engine-material.name',
-      'data.research.engine-cylinder-head-material.name',
-      'data.research.engine-pistons.name',
-      'data.research.engine-crankshaft.name',
       'data.research.engine-fuel-system.name',
+      'data.research.engine-pistons.name',
+      'data.research.engine-cylinder-head-material.name',
+      'data.research.engine-crankshaft.name',
+      'data.research.engine-performance-tuning.name',
+      'data.research.engine-efficiency-tuning.name',
+      'data.research.engine-exhaust-gas-recirculation.name',
+      'data.research.engine-direct-injection.name',
       'data.research.bodies-aerodynamic-shell.name',
       'data.research.bodies-lightweight-chassis.name',
       'data.research.bodies-reinforced-frame.name',
+      'data.research.bodies-mass-production-tooling.name',
+      'data.research.bodies-premium-craftsmanship.name',
       'data.research.bodies-modular-platform.name',
       'data.research.undercarriage-suspension-tuning.name',
-      'data.research.undercarriage-independent-rear-suspension.name',
       'data.research.undercarriage-anti-roll-bars.name',
+      'data.research.undercarriage-independent-rear-suspension.name',
       'data.research.safety-seatbelt-pretensioners.name',
       'data.research.safety-abs-braking.name',
       'data.research.safety-stability-control.name',
-      'data.research.engine-exhaust-gas-recirculation.name',
-      'data.research.engine-direct-injection.name',
     ]
     const actualIds = RESEARCH_NODES.filter((n) => !n.unlocks).map((n) => `data.research.${n.id}.name`)
     expect(actualIds).toEqual(expectedIds)

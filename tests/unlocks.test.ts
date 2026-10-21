@@ -53,3 +53,40 @@ describe('research unlocks parts', () => {
     expect(currentMoneyCost(dualFront, 1981)).toBeGreaterThan(currentMoneyCost(dualFront, 1985))
   })
 })
+
+describe('branching research', () => {
+  it('a choice closes the other branch once it is started', () => {
+    const research = createResearchState(1000)
+    const bank = createBank(1e9)
+    const ledger = createLedgerState()
+    const material = node('engine-engine-material')
+    const fuel = node('engine-fuel-system')
+    const perf = node('engine-performance-tuning')
+    const eff = node('engine-efficiency-tuning')
+    const year = 1982
+
+    // Needs its own prerequisite first.
+    expect(getNodeState(research, perf, year)).toBe('Locked')
+    for (const n of [material, fuel]) {
+      expect(startResearch(research, n, bank, ledger, year, makeDate(year, 1, 1))).toBe(true)
+      for (let d = 0; d < n.durationDays; d++) onResearchDayTick(research, RESEARCH_NODES, 0)
+    }
+    expect(getNodeState(research, perf, year)).toBe('AvailableNormal')
+    expect(getNodeState(research, eff, year)).toBe('AvailableNormal')
+
+    startResearch(research, perf, bank, ledger, year, makeDate(year, 1, 1))
+    expect(getNodeState(research, eff, year)).toBe('Skipped')
+    expect(startResearch(research, eff, bank, ledger, year, makeDate(year, 1, 1))).toBe(false)
+  })
+
+  it('every prerequisite and exclusion points at a real card in the same tab', () => {
+    for (const n of RESEARCH_NODES) {
+      for (const id of [n.prerequisiteId, ...(n.excludes ?? [])]) {
+        if (!id) continue
+        const other = RESEARCH_NODES.find((x) => x.id === id)
+        expect(other, `${n.id} -> ${id}`).toBeDefined()
+        expect(other!.category).toBe(n.category)
+      }
+    }
+  })
+})

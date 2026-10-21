@@ -7,41 +7,48 @@ import { BODIES } from './bodies'
 
 interface NodeSpec {
   name: string
-  effect: TechEffect
+  category: ResearchCategory
+  /** The year this becomes normal (cheaper) research; up to 8 years earlier it is a breakthrough. */
+  year: number
+  effects: TechEffect[]
+  /** Name of the card (same tab) that must be researched first. */
+  requires?: string
+  /** Names of cards (same tab) that are a different choice: researching one closes the other. */
+  excludes?: string[]
 }
 
-/** Stat upgrades - each makes every car designed afterwards a little better or cheaper. (The
- * Appearance and Interior tabs hold only part unlocks.) */
-const BY_CATEGORY: Partial<Record<ResearchCategory, NodeSpec[]>> = {
-  Engine: [
-    { name: 'Engine Material', effect: { target: 'Power', amount: 0.04 } },
-    { name: 'Cylinder Head Material', effect: { target: 'Power', amount: 0.03 } },
-    { name: 'Pistons', effect: { target: 'Reliability', amount: 0.02 } },
-    { name: 'Crankshaft', effect: { target: 'Reliability', amount: 0.02 } },
-    { name: 'Fuel System', effect: { target: 'FuelEconomy', amount: 0.06 } },
-  ],
-  Bodies: [
-    { name: 'Aerodynamic Shell', effect: { target: 'FuelEconomy', amount: 0.04 } },
-    { name: 'Lightweight Chassis', effect: { target: 'ProductionCost', amount: -0.03 } },
-    { name: 'Reinforced Frame', effect: { target: 'Reliability', amount: 0.02 } },
-    { name: 'Modular Platform', effect: { target: 'ProductionCost', amount: -0.05 } },
-  ],
-  Undercarriage: [
-    { name: 'Suspension Tuning', effect: { target: 'Reliability', amount: 0.02 } },
-    { name: 'Independent Rear Suspension', effect: { target: 'Reliability', amount: 0.03 } },
-    { name: 'Anti-Roll Bars', effect: { target: 'Reliability', amount: 0.02 } },
-  ],
-  Safety: [
-    { name: 'Seatbelt Pretensioners', effect: { target: 'RepairCost', amount: -0.02 } },
-    { name: 'ABS Braking', effect: { target: 'Reliability', amount: 0.02 } },
-    { name: 'Stability Control', effect: { target: 'Reliability', amount: 0.03 } },
-  ],
-}
+const P = (target: TechEffect['target'], amount: number): TechEffect => ({ target, amount })
 
-/** Emission-cutting research, timed for the emission laws in data/historyEvents.ts. Not chained. */
-const EMISSIONS_NODES: (NodeSpec & { year: number })[] = [
-  { name: 'Exhaust Gas Recirculation', effect: { target: 'Emissions', amount: -0.15 }, year: 1990 },
-  { name: 'Direct Injection', effect: { target: 'Emissions', amount: -0.15 }, year: 2006 },
+/** Stat upgrades, as a tree: each card can need one earlier card, so the tabs branch, and a few
+ * pairs are a choice - researching one closes the other for good. Every card makes every car
+ * designed afterwards a little better or cheaper. (Appearance and Interior hold only part
+ * unlocks.) Ids are slug(tab)-slug(name) and are saved - never rename. */
+const STAT_NODES: NodeSpec[] = [
+  // Engine
+  { name: 'Engine Material', category: 'Engine', year: 1970, effects: [P('Power', 0.04)] },
+  { name: 'Fuel System', category: 'Engine', year: 1970, effects: [P('FuelEconomy', 0.06)] },
+  { name: 'Pistons', category: 'Engine', year: 1972, effects: [P('Reliability', 0.02)], requires: 'Engine Material' },
+  { name: 'Cylinder Head Material', category: 'Engine', year: 1976, effects: [P('Power', 0.03)], requires: 'Engine Material' },
+  { name: 'Crankshaft', category: 'Engine', year: 1978, effects: [P('Reliability', 0.02)], requires: 'Pistons' },
+  { name: 'Performance Tuning', category: 'Engine', year: 1980, effects: [P('Power', 0.06), P('Reliability', -0.01)], requires: 'Engine Material', excludes: ['Efficiency Tuning'] },
+  { name: 'Efficiency Tuning', category: 'Engine', year: 1980, effects: [P('FuelEconomy', 0.08), P('Emissions', -0.05)], requires: 'Fuel System', excludes: ['Performance Tuning'] },
+  { name: 'Exhaust Gas Recirculation', category: 'Engine', year: 1990, effects: [P('Emissions', -0.15)], requires: 'Fuel System' },
+  { name: 'Direct Injection', category: 'Engine', year: 2006, effects: [P('Emissions', -0.15)], requires: 'Fuel System' },
+  // Bodies
+  { name: 'Aerodynamic Shell', category: 'Bodies', year: 1972, effects: [P('FuelEconomy', 0.04)] },
+  { name: 'Lightweight Chassis', category: 'Bodies', year: 1975, effects: [P('ProductionCost', -0.03)] },
+  { name: 'Reinforced Frame', category: 'Bodies', year: 1978, effects: [P('Reliability', 0.02)] },
+  { name: 'Mass Production Tooling', category: 'Bodies', year: 1985, effects: [P('ProductionCost', -0.06)], requires: 'Lightweight Chassis', excludes: ['Premium Craftsmanship'] },
+  { name: 'Premium Craftsmanship', category: 'Bodies', year: 1985, effects: [P('Reliability', 0.04), P('ProductionCost', 0.03)], requires: 'Reinforced Frame', excludes: ['Mass Production Tooling'] },
+  { name: 'Modular Platform', category: 'Bodies', year: 1990, effects: [P('ProductionCost', -0.05)], requires: 'Lightweight Chassis' },
+  // Undercarriage
+  { name: 'Suspension Tuning', category: 'Undercarriage', year: 1972, effects: [P('Reliability', 0.02)] },
+  { name: 'Anti-Roll Bars', category: 'Undercarriage', year: 1978, effects: [P('Reliability', 0.02)], requires: 'Suspension Tuning' },
+  { name: 'Independent Rear Suspension', category: 'Undercarriage', year: 1982, effects: [P('Reliability', 0.03)], requires: 'Suspension Tuning' },
+  // Safety
+  { name: 'Seatbelt Pretensioners', category: 'Safety', year: 1974, effects: [P('RepairCost', -0.02)] },
+  { name: 'ABS Braking', category: 'Safety', year: 1994, effects: [P('Reliability', 0.02)], requires: 'Seatbelt Pretensioners' },
+  { name: 'Stability Control', category: 'Safety', year: 1996, effects: [P('Reliability', 0.03)], requires: 'ABS Braking' },
 ]
 
 /** Which research tab each design step's part unlocks live in. */
@@ -161,50 +168,25 @@ function slug(name: string): string {
 }
 
 function buildResearchNodes(): ResearchNodeDefinition[] {
-  const nodes: ResearchNodeDefinition[] = []
-  let year = 1968
-  let index = 0
+  const idOf = (spec: Pick<NodeSpec, 'category' | 'name'>) => `${slug(spec.category)}-${slug(spec.name)}`
+  const idByName = (category: ResearchCategory, name: string) => idOf({ category, name })
 
-  for (const [category, specs] of Object.entries(BY_CATEGORY) as [ResearchCategory, NodeSpec[]][]) {
-    let previousId: string | null = null
-
-    for (const spec of specs) {
-      const id = `${slug(category)}-${slug(spec.name)}`
-      nodes.push({
-        id,
-        displayName: spec.name,
-        category,
-        availableYear: year,
-        prerequisiteId: previousId,
-        scienceCost: 30 + (index % 5) * 10,
-        moneyCost: 1_500_000 + (index % 6) * 600_000,
-        durationDays: 8 + (index % 4) * 2,
-        effects: [spec.effect],
-      })
-
-      previousId = id
-      year += 2
-      index += 1
-    }
-  }
-
-  for (const spec of EMISSIONS_NODES) {
-    nodes.push({
-      id: `engine-${slug(spec.name)}`,
+  return STAT_NODES.map((spec) => {
+    const yearsIn = Math.max(0, spec.year - FREE_UNTIL_YEAR)
+    return {
+      id: idOf(spec),
       displayName: spec.name,
-      category: 'Engine',
+      category: spec.category,
       availableYear: spec.year,
-      prerequisiteId: null,
-      scienceCost: 40 + Math.round((spec.year - 1970) * 1.5),
-      moneyCost: 2_000_000 + (spec.year - 1970) * 50_000,
-      durationDays: 15,
-      effects: [spec.effect],
-    })
-  }
-
-  return nodes
+      prerequisiteId: spec.requires ? idByName(spec.category, spec.requires) : null,
+      excludes: spec.excludes?.map((name) => idByName(spec.category, name)),
+      scienceCost: 30 + Math.round(yearsIn * 1.5),
+      moneyCost: roundTo100K(1_500_000 + yearsIn * 100_000),
+      durationDays: 8 + Math.round(yearsIn / 4),
+      effects: spec.effects,
+    }
+  })
 }
 
-/** Stat upgrades (chained within each tab, spread 1968 onward) plus one unlock card per post-1970
- * part, engine and body. */
+/** Stat upgrade tree plus one unlock card per post-1970 part, engine and body. */
 export const RESEARCH_NODES: ResearchNodeDefinition[] = [...buildResearchNodes(), ...buildUnlockNodes()]

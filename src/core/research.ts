@@ -22,6 +22,8 @@ export interface ResearchNodeDefinition {
   category: ResearchCategory
   availableYear: number
   prerequisiteId: string | null
+  /** Other cards that are a different choice: once one of them is started or finished, this one is closed for good. */
+  excludes?: string[]
   /** Research points (the flask currency) required. */
   scienceCost: number
   moneyCost: number
@@ -35,7 +37,7 @@ export interface ResearchNodeDefinition {
 /** The three button states the reference shows on a research card, plus the states before/after
  * that window. Locked = needs the previous research first; TooEarly = more than
  * BREAKTHROUGH_MAX_YEARS_EARLY years before its due year. */
-export type ResearchNodeState = 'Locked' | 'TooEarly' | 'AvailableNormal' | 'AvailableBreakthrough' | 'InProgress' | 'Researched'
+export type ResearchNodeState = 'Locked' | 'Skipped' | 'TooEarly' | 'AvailableNormal' | 'AvailableBreakthrough' | 'InProgress' | 'Researched'
 
 interface NodeRuntime {
   started: boolean
@@ -79,6 +81,7 @@ export function getNodeState(
   const r = runtimeOf(research, node.id)
   if (r.researched) return 'Researched'
   if (r.started) return 'InProgress'
+  if (node.excludes?.some((id) => runtimeOf(research, id).started || runtimeOf(research, id).researched)) return 'Skipped'
   if (node.prerequisiteId && !isResearched(research, node.prerequisiteId)) return 'Locked'
   if (currentYear >= node.availableYear) return 'AvailableNormal'
   return node.availableYear - currentYear > BREAKTHROUGH_MAX_YEARS_EARLY ? 'TooEarly' : 'AvailableBreakthrough'
