@@ -1,5 +1,6 @@
 import type { Catalog } from './catalog'
 import { freshness } from './aging'
+import { averageScore, reviewDemandMultiplier, reviewModel, reviewReputationChange } from './reviews'
 import { activeEvents, combineEvents, eventChangesToday, type EventEffects } from './events'
 import { createCompanyState, createRumorState, postResearchRumor, postSaleRumor, type CompanyState, type RumorState } from './company'
 import { applyOverdraftInterest, checkBankruptcy, createBank, onLoanMonthTick, payMandatory, type BankState } from './economy'
@@ -89,7 +90,7 @@ export function marketConditionsFor(world: World, events: EventEffects): MarketC
     classDemandMultiplier: events.classDemandMultiplier,
     rivalStrength: rivalStrength(world.rivals, world.time.currentDate.year),
     // Laws in force x how fresh the design still is.
-    modelMultiplier: (model) => events.modelMultiplier(model) * freshness(model, world.time.currentDate),
+    modelMultiplier: (model) => events.modelMultiplier(model) * freshness(model, world.time.currentDate) * reviewDemandMultiplier(model),
   }
 }
 
@@ -116,6 +117,18 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
     // how many to build.
     autoAssignReleasedModel(world.factory, model.id)
     postNews(world.news, 'ModelReleased', today, { modelName: model.name, price: model.salePrice })
+
+    // The motoring press tests every new car. Good reviews help sales and the company's name.
+    model.reviews = reviewModel(model, today.year)
+    world.company.reputationPercent = Math.min(100, Math.max(0, world.company.reputationPercent + reviewReputationChange(model.reviews)))
+    const verdict = [...model.reviews].sort((a, b) => Math.abs(b.score - 5.5) - Math.abs(a.score - 5.5))[0]
+    postNews(world.news, 'ModelReviewed', today, {
+      modelName: model.name,
+      score: averageScore(model.reviews),
+      critic: verdict.critic,
+      aspect: verdict.aspect,
+      tone: verdict.tone,
+    })
   }
 
   onStaffDayTick(world.staff, catalog.employeePerks)

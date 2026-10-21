@@ -1,5 +1,6 @@
 import type { GameDate } from './gameDate'
 import type { DesignStats } from './designStats'
+import type { CriticReview } from './reviews'
 
 /** The five body classes the player can design in, per the game brief. */
 export type CarClass = 'Sedan' | 'SUV' | 'Sports' | 'Coupe' | 'Truck'
@@ -112,6 +113,8 @@ export interface CarModel {
    * core/development.ts). 0 or missing = released. Research points only come in while at least
    * one model is in development. */
   developmentDaysRemaining?: number
+  /** What the motoring critics said when the car was released (missing on cars from older saves). */
+  reviews?: CriticReview[]
   /** The full development length this model started with, for progress bars. */
   developmentDaysTotal?: number
 }

@@ -5,6 +5,7 @@ import { grouped } from '../core/numberFormat'
 import { carsOnOrder } from '../core/factory'
 import { freshness, modelAgeYears } from '../core/aging'
 import { isInDevelopment } from '../core/development'
+import { CRITICS, averageScore } from '../core/reviews'
 import { useT } from '../i18n/useT'
 import { CarCarousel } from '../components/CarCarousel'
 import { AdvisorPanel } from '../components/AdvisorPanel'
@@ -74,6 +75,12 @@ export function SalesStatisticsScreen() {
 
       <div className={`${styles.column} ${styles.card}`}>
         <StatRow label={t('salesStats.labelTotalSold')} value={grouped(model.totalSold)} />
+        {model.reviews && model.reviews.length > 0 && (
+          <StatRow
+            label={t('review.critics')}
+            value={`${averageScore(model.reviews).toFixed(1)} (${CRITICS.map((c) => model.reviews!.find((r) => r.critic === c.id)?.score.toFixed(1) ?? '-').join(' / ')})`}
+          />
+        )}
         <StatRow label={t('salesStats.labelFreshness')} value={t('salesStats.freshnessValue', { percent: Math.round(fresh * 100), years: ageYears.toFixed(1) })} />
         <StatRow label={t('salesStats.labelInStock')} value={grouped(model.inventory)} />
         <StatRow label={t('salesStats.labelOnOrder')} value={grouped(onOrder)} />

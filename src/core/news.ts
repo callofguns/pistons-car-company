@@ -31,6 +31,7 @@ export type NewsEventType =
   | 'HistoryEventEnded'
   | 'RivalLaunch'
   | 'AchievementUnlocked'
+  | 'ModelReviewed'
 
 export interface NewsEntry {
   id: string

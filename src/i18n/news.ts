@@ -3,6 +3,7 @@ import type { useT } from './useT'
 import type { MessageKey } from './keys'
 import type { Formatters } from './format'
 import { researchNodeNameById } from './research'
+import { CRITICS } from '../core/reviews'
 
 function researchNodeName(nodeId: string, t: ReturnType<typeof useT>['t']): string {
   return researchNodeNameById(nodeId, t)
@@ -76,6 +77,15 @@ export function renderNewsHeadline(entry: NewsEntry, t: ReturnType<typeof useT>[
       })
     case 'RivalLaunch':
       return t('news.rivalLaunch', { rival: String(entry.params.rivalName), model: String(entry.params.modelName) })
+    case 'ModelReviewed': {
+      const critic = CRITICS.find((c) => c.id === entry.params.critic)
+      return t('news.modelReviewed', {
+        critic: critic?.name ?? String(entry.params.critic),
+        model: String(entry.params.modelName),
+        score: Number(entry.params.score).toFixed(1),
+        quote: t(`review.quote.${entry.params.aspect}.${entry.params.tone}` as MessageKey),
+      })
+    }
     case 'AchievementUnlocked':
       return t('news.achievementUnlocked', {
         name: t(`data.achievement.${entry.params.achievementId}.name` as MessageKey),
