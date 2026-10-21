@@ -16,6 +16,7 @@ import { createNewsState, postNews, type NewsState } from './news'
 import { isInDevelopment, onDevelopmentDayTick } from './development'
 import { autoAssignReleasedModel, carsOnOrder, createFactoryState, onFactoryDayTick, onFactoryMonthTick, type FactoryState } from './factory'
 import { difficultySettings } from './difficulty'
+import type { CarClass } from './vehicles'
 import { createRacingState, onRacingMonthTick, type RacingState } from './racing'
 import { onResearchDayTick, createResearchState, type ResearchState } from './research'
 import {
@@ -29,6 +30,14 @@ import {
 } from './staff'
 import { hqMonthlyOverhead } from './hq'
 import type { Difficulty } from './difficulty'
+import {
+  hqCity,
+  hqClassDemand,
+  hqCostMultiplier,
+  startingCapitalFor,
+  startingResearchPointsFor,
+  type FounderProfile,
+} from './foundation'
 import { createTimeState, tickTime, type TimeState } from './time'
 import { resolveBody, createVehicleState, type VehicleState } from './vehicleService'
 
@@ -57,17 +66,29 @@ export interface World {
   factory: FactoryState
 }
 
-export function createNewWorld(config: GameConfig, catalog: Catalog, companyName?: string, difficulty: Difficulty = 'normal'): World {
+export function createNewWorld(
+  config: GameConfig,
+  catalog: Catalog,
+  companyName?: string,
+  difficulty: Difficulty = 'normal',
+  founder?: FounderProfile,
+): World {
   const startDate = makeDate(config.startYear, config.startMonth, config.startDay)
 
   return {
     time: createTimeState(startDate, config.secondsPerDay),
-    bank: createBank(config.startingCapital),
+    bank: createBank(startingCapitalFor(config.startingCapital, founder)),
     ledger: createLedgerState(),
-    company: createCompanyState(companyName ?? config.defaultCompanyName, config.defaultHomeCity, config.startingPopulation, difficulty),
+    company: createCompanyState(
+      companyName ?? config.defaultCompanyName,
+      hqCity(founder) ?? config.defaultHomeCity,
+      config.startingPopulation,
+      difficulty,
+      founder,
+    ),
     rumors: createRumorState(),
     news: createNewsState(),
-    research: createResearchState(config.startingResearchPoints),
+    research: createResearchState(startingResearchPointsFor(config.startingResearchPoints, founder)),
     staff: createStaffState(catalog.employeeNames, catalog.employeePerks),
     vehicles: createVehicleState(),
     competitors: createCompetitorState(),
@@ -91,12 +112,21 @@ export function eventEffectsFor(world: World, catalog: Catalog): EventEffects {
   return effects
 }
 
+function mergeClassDemand(
+  a: Partial<Record<CarClass, number>>,
+  b: Partial<Record<CarClass, number>>,
+): Partial<Record<CarClass, number>> {
+  const merged = { ...a }
+  for (const [carClass, m] of Object.entries(b) as [CarClass, number][]) merged[carClass] = (merged[carClass] ?? 1) * m
+  return merged
+}
+
 export function marketConditionsFor(world: World, events: EventEffects): MarketConditions {
   return {
     demandMultiplier: difficultySettings(world.company.difficulty).demandMultiplier * events.demandMultiplier,
     fuelEconomyWeightMultiplier: events.fuelEconomyWeightMultiplier,
     powerWeightMultiplier: events.powerWeightMultiplier,
-    classDemandMultiplier: events.classDemandMultiplier,
+    classDemandMultiplier: mergeClassDemand(events.classDemandMultiplier, hqClassDemand(world.company.founder)),
     rivalStrength: rivalStrength(world.rivals, world.time.currentDate.year),
     // Laws in force x how fresh the design still is.
     modelMultiplier: (model) => events.modelMultiplier(model) * freshness(model, world.time.currentDate) * reviewDemandMultiplier(model),
@@ -143,6 +173,7 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
   onStaffDayTick(world.staff, catalog.employeePerks)
   const built = onFactoryDayTick(world.factory, world.vehicles.models, world.bank, world.ledger, today, {
     speedMultiplier: (1 + productionSpeedBonusPercent(world.staff, catalog.employeePerks) / 100) * events.productionSpeedMultiplier,
+    modelCostMultiplier: (model) => hqCostMultiplier(world.company.founder, { carClass: resolveBody(catalog.bodies, model)?.carClass, unitCost: model.unitCost, powerHp: model.stats.powerHp }),
     unitCostMultiplier: difficulty.costMultiplier * events.productionCostMultiplier * (1 - Math.min(90, unitCostReductionPercent(world.staff, catalog.employeePerks)) / 100),
   })
   for (const model of world.vehicles.models) if (built.has(model.id)) model.outOfStockNotified = false

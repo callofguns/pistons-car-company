@@ -4,6 +4,7 @@ import { createRng } from './prng'
 import type { LedgerState } from './ledger'
 import type { GameDate } from './gameDate'
 import type { CompanyState } from './company'
+import { fansFromSales } from './foundation'
 import type { BodyStyleDefinition, CarClass, CarModel } from './vehicles'
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
@@ -188,6 +189,7 @@ export function onMarketDayTick(
 
       depositRecorded(bank, ledger, revenue, 'Sales', today)
       company.totalCarsSoldAllModels += unitsSold
+      company.fans += fansFromSales(unitsSold, company.reputationPercent, company.founder)
       company.lifetimeEarnings += revenue
     }
   }

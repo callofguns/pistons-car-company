@@ -4,6 +4,8 @@ import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { clearStorage, listSlotInfo, type SlotInfo } from '../core/save'
 import type { Difficulty } from '../core/difficulty'
+import type { FounderProfile } from '../core/foundation'
+import { useTutorialStore } from '../store/useTutorialStore'
 import { makeDate } from '../core/gameDate'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
@@ -16,6 +18,8 @@ interface NewGamePayload {
   mode: 'new'
   pendingCompanyName: string
   difficulty: Difficulty
+  founder?: FounderProfile
+  tutorial?: boolean
 }
 
 function asNewGamePayload(payload: unknown): NewGamePayload | null {
@@ -39,6 +43,7 @@ export function SaveSlotsScreen() {
   const payload = useUiStore((s) => s.payload)
   const loadSlot = useGameStore((s) => s.loadSlot)
   const startNewGameInSlot = useGameStore((s) => s.startNewGameInSlot)
+  const startTutorial = useTutorialStore((s) => s.start)
   const { t, fmt } = useT()
 
   const newGame = asNewGamePayload(payload)
@@ -50,7 +55,8 @@ export function SaveSlotsScreen() {
   const handleSlotClick = (index: number, slot: SlotInfo) => {
     if (newGame) {
       if (slot.kind !== 'save' || confirmingIndex === index) {
-        startNewGameInSlot(index, newGame.pendingCompanyName, newGame.difficulty ?? 'normal')
+        startNewGameInSlot(index, newGame.pendingCompanyName, newGame.difficulty ?? 'normal', newGame.founder)
+        if (newGame.tutorial) startTutorial()
         goHome('OfficeHub')
         return
       }

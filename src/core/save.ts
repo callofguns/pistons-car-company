@@ -12,6 +12,7 @@ import { createRivalsState, type RivalsState } from './rivals'
 import { checkAchievements, type AchievementsState } from './achievements'
 import { type RandomEventsState } from './randomEvents'
 import type { Difficulty } from './difficulty'
+import type { FounderProfile } from './foundation'
 
 /** One research node's saved progress. Effects aren't serialized - on load they're re-applied to a fresh TechModifiers from the catalog definition, same as ResearchService.RestoreState did in the C# port. */
 export interface ResearchNodeSaveEntry {
@@ -89,6 +90,9 @@ export interface SaveGameData {
   /** Missing in saves made before achievements existed - everything already earned is credited quietly. */
   achievements?: AchievementsState
   randomEvents?: RandomEventsState
+  /** The setup choices (logo, HQ, goal, background) and fans - missing in older saves. */
+  founder?: FounderProfile
+  fans?: number
 }
 
 // 4: the Stage 3 economy - $45M money scale, difficulty, the factory (production lines replace the
@@ -154,12 +158,14 @@ export function buildSaveData(world: World): SaveGameData {
     rivals: world.rivals,
     achievements: world.achievements,
     randomEvents: world.randomEvents,
+    founder: world.company.founder,
+    fans: world.company.fans,
   }
 }
 
 /** Builds a fresh World and restores it to match `data`. */
 export function loadWorld(config: GameConfig, catalog: Catalog, data: SaveGameData): World {
-  const world = createNewWorld(config, catalog, data.companyName, data.difficulty)
+  const world = createNewWorld(config, catalog, data.companyName, data.difficulty, data.founder)
   world.factory = data.factory
   world.rivals = data.rivals ?? createRivalsState(data.year)
 
@@ -177,6 +183,7 @@ export function loadWorld(config: GameConfig, catalog: Catalog, data: SaveGameDa
   world.company.lifetimeEarnings = data.lifetimeEarnings
   world.company.daysInsolvent = data.daysInsolvent
   world.company.isBankrupt = data.isBankrupt
+  world.company.fans = data.fans ?? data.totalCarsSoldAllModels
 
   world.research.points = data.researchPoints
   for (const entry of data.researchNodes) {

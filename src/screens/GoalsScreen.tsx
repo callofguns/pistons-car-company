@@ -1,5 +1,6 @@
 import { useState, type ComponentType } from 'react'
-import { Building2, Check, Coins, FlaskConical, Globe, Hourglass, ShoppingCart, type LucideProps } from 'lucide-react'
+import { Building2, Check, Coins, FlaskConical, Globe, Hourglass, ShoppingCart, Star, type LucideProps } from 'lucide-react'
+import { GLOBAL_GOALS } from '../data/foundation'
 import { useGameStore } from '../store/useGameStore'
 import { ACHIEVEMENTS, ACHIEVEMENT_GROUPS, isUnlocked, progress01, type AchievementGroup } from '../core/achievements'
 import { achievementDescription, achievementName } from '../i18n/achievements'
@@ -15,6 +16,7 @@ const GROUP_ICONS: Record<AchievementGroup, ComponentType<LucideProps>> = {
   Company: Building2,
   Research: FlaskConical,
   Survival: Hourglass,
+  Founder: Star,
 }
 
 /** Every achievement, by group: the groups down the left (with how many are done), and a card
@@ -23,7 +25,8 @@ export function GoalsScreen() {
   useGameStore((s) => s.revision)
   const world = useGameStore((s) => s.world)
   const { t, fmt } = useT()
-  const [selected, setSelected] = useState<AchievementGroup>('Sales')
+  const yourGoal = GLOBAL_GOALS.find((x) => x.id === world.company.founder?.goalId)?.achievementId
+  const [selected, setSelected] = useState<AchievementGroup>(yourGoal ? 'Founder' : 'Sales')
 
   const totalDone = ACHIEVEMENTS.filter((a) => isUnlocked(world.achievements, a.id)).length
   const inGroup = ACHIEVEMENTS.filter((a) => a.group === selected)
@@ -61,6 +64,7 @@ export function GoalsScreen() {
                   {done ? <Check size={18} strokeWidth={3} /> : `${Math.floor(progress * 100)}%`}
                 </span>
                 <span className={goalStyles.name}>{achievementName(def.id, t)}</span>
+                {def.id === yourGoal && <span className={goalStyles.yours}>{t('goals.yourGoal')}</span>}
               </div>
               <span className={goalStyles.desc}>{achievementDescription(def, t, fmt)}</span>
               <div className={goalStyles.track}>

@@ -25,3 +25,10 @@
 .identity > button {
   width: 100%;
 }
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}

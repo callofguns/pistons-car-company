@@ -1,6 +1,7 @@
 import { createRng, randInt } from './prng'
 import type { CarModel } from './vehicles'
 import type { Difficulty } from './difficulty'
+import type { FounderProfile } from './foundation'
 
 /** Company-wide numbers that don't belong to any single model. Direct port of CompanyState.cs. */
 export interface CompanyState {
@@ -21,6 +22,10 @@ export interface CompanyState {
   hqLevel: number
   /** Picked on the new-game screen - see core/difficulty.ts for what it changes. */
   difficulty: Difficulty
+  /** Fans won by selling cars (a global-goal measure). */
+  fans: number
+  /** The setup choices: logo, HQ region, global goal and background. Missing in older saves. */
+  founder?: FounderProfile
 }
 
 export function createCompanyState(
@@ -28,6 +33,7 @@ export function createCompanyState(
   homeCity: string,
   populationServed: number,
   difficulty: Difficulty = 'normal',
+  founder?: FounderProfile,
 ): CompanyState {
   return {
     companyName,
@@ -42,6 +48,8 @@ export function createCompanyState(
     isBankrupt: false,
     hqLevel: 1,
     difficulty,
+    fans: 0,
+    founder,
   }
 }
 

@@ -118,6 +118,8 @@ export interface ProductionModifiers {
   speedMultiplier: number
   /** Multiplies the cash cost of each car built (difficulty, Logisticians). */
   unitCostMultiplier: number
+  /** Extra per-model cost factor (the company's HQ region); 1 when absent. */
+  modelCostMultiplier?: (model: CarModel) => number
 }
 
 /** Builds today's cars on every line that has a released model and an open order, paying each
@@ -138,7 +140,7 @@ export function onFactoryDayTick(
     if (!model || isInDevelopment(model)) continue
 
     const capacity = Math.max(1, Math.floor(lineLevel(line.level).carsPerDay * modifiers.speedMultiplier))
-    const unitCost = model.unitCost * modifiers.unitCostMultiplier
+    const unitCost = model.unitCost * modifiers.unitCostMultiplier * (modifiers.modelCostMultiplier?.(model) ?? 1)
     let units = Math.min(capacity, line.orderRemaining)
     if (!canAfford(bank, units * unitCost)) units = Math.max(0, Math.floor(bank.balance / unitCost))
     if (units <= 0) continue

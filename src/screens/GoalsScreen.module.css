@@ -127,3 +127,15 @@
     gap: 4px;
   }
 }
+
+.yours {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border: 1px solid var(--color-trim);
+  border-radius: 999px;
+  color: var(--color-trim);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}

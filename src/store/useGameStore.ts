@@ -21,6 +21,7 @@ import {
   marketingDiscountPercent,
   qualityBonusPercent,
 } from '../core/staff'
+import { marketingDiscountFromFounder, type FounderProfile } from '../core/foundation'
 import { startCampaign as coreStartCampaign } from '../core/marketing'
 import { markAllNewsRead as coreMarkAllNewsRead, postNews } from '../core/news'
 import { resolveRandomEvent } from '../core/randomEvents'
@@ -69,7 +70,7 @@ interface GameStore {
   saveNow: () => void
   /** Starts a brand-new company in the given slot (overwriting whatever was there) and makes it
    * the active game. Used by the Company Naming / Save Slots screens. */
-  startNewGameInSlot: (slotIndex: number, companyName: string, difficulty: Difficulty) => void
+  startNewGameInSlot: (slotIndex: number, companyName: string, difficulty: Difficulty, founder?: FounderProfile) => void
   /** Loads a slot's save into play. Returns false (and leaves the current game untouched) if that
    * slot turns out to be empty or incompatible - shouldn't happen from the Save Slots screen,
    * which only offers slots listSlots() already confirmed are loadable, but this stays safe either way. */
@@ -166,8 +167,8 @@ export const useGameStore = create<GameStore>((set, get) => {
       saveToStorage(buildSaveData(world), undefined, activeSlotIndex)
     },
 
-    startNewGameInSlot: (slotIndex, companyName, difficulty) => {
-      const world = createNewWorld(get().config, get().catalog, companyName, difficulty)
+    startNewGameInSlot: (slotIndex, companyName, difficulty, founder) => {
+      const world = createNewWorld(get().config, get().catalog, companyName, difficulty, founder)
       saveToStorage(buildSaveData(world), undefined, slotIndex)
       set((s) => ({ world, activeSlotIndex: slotIndex, revision: s.revision + 1 }))
     },
@@ -183,7 +184,7 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     restartAfterBankruptcy: () => {
       const { config, catalog, world, activeSlotIndex } = get()
-      const freshWorld = createNewWorld(config, catalog, world.company.companyName, world.company.difficulty)
+      const freshWorld = createNewWorld(config, catalog, world.company.companyName, world.company.difficulty, world.company.founder)
       const slot = activeSlotIndex ?? 0
       saveToStorage(buildSaveData(freshWorld), undefined, slot)
       set((s) => ({ world: freshWorld, activeSlotIndex: slot, revision: s.revision + 1 }))
@@ -356,7 +357,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         world.ledger,
         world.time.currentDate.year,
         world.time.currentDate,
-        marketingDiscountPercent(world.staff, catalog.employeePerks),
+        marketingDiscountPercent(world.staff, catalog.employeePerks) + marketingDiscountFromFounder(world.company.founder),
       )
       if (ok) postNews(world.news, 'MarketingCampaignStarted', world.time.currentDate, { modelName: model.name })
       bump()

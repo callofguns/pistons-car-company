@@ -7,6 +7,8 @@ import { useT } from '../i18n/useT'
 import { formatCategoryTag } from '../i18n/vehicles'
 import { Banknote, Calendar, Car, ChartColumn, Factory, Star, Tag, Wrench } from 'lucide-react'
 import { developmentProgress01, isInDevelopment } from '../core/development'
+import { hqCostMultiplier } from '../core/foundation'
+import { resolveBody } from '../core/vehicleService'
 import { MeterBar } from '../components/MeterBar'
 import { CarCarousel } from '../components/CarCarousel'
 import { SpecRow } from '../components/SpecRow'
@@ -26,6 +28,8 @@ export function ModelLineupScreen() {
   const payload = useUiStore((s) => s.payload)
   useGameStore((s) => s.revision)
   const models = useGameStore((s) => s.world.vehicles.models)
+  const founder = useGameStore((s) => s.world.company.founder)
+  const catalog = useGameStore((s) => s.catalog)
   const beginRestyling = useGameStore((s) => s.beginRestyling)
   const { t, fmt, locale } = useT()
 
@@ -115,7 +119,7 @@ export function ModelLineupScreen() {
           <SpecRow Icon={Car} label={t('modelLineup.labelCarsSold')} value={grouped(model.totalSold)} />
           <SpecRow Icon={Banknote} label={t('modelLineup.labelEarnings')} value={fmt.money(model.lifetimeEarnings)} />
           <SpecRow Icon={Calendar} label={t('modelLineup.labelYearOfIssue')} value={fmt.date(model.issueDate)} />
-          <SpecRow Icon={Factory} label={t('modelLineup.labelCostPrice')} value={plainCurrency(model.unitCost)} />
+          <SpecRow Icon={Factory} label={t('modelLineup.labelCostPrice')} value={plainCurrency(model.unitCost * hqCostMultiplier(founder, { carClass: resolveBody(catalog.bodies, model)?.carClass, unitCost: model.unitCost, powerHp: model.stats.powerHp }))} />
           <SpecRow Icon={Tag} label={t('modelLineup.labelPrice')} value={plainCurrency(model.salePrice)} />
           <Button className={lineupStyles.statsButton} onClick={() => show('SalesStatistics', model.id)}>
             <ChartColumn size={16} />

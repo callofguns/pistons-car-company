@@ -1,5 +1,6 @@
 import { useGameStore } from '../store/useGameStore'
 import { hqSlotCap } from '../core/hq'
+import { marketingDiscountFromFounder } from '../core/foundation'
 import {
   monthlyWageBill,
   productionSpeedBonusPercent,
@@ -22,6 +23,7 @@ export function EmployeesScreen() {
   useGameStore((s) => s.revision)
   const staff = useGameStore((s) => s.world.staff)
   const hqLevel = useGameStore((s) => s.world.company.hqLevel)
+  const founder = useGameStore((s) => s.world.company.founder)
   const catalog = useGameStore((s) => s.catalog)
   const hireEmployee = useGameStore((s) => s.hireEmployee)
   const fireEmployee = useGameStore((s) => s.fireEmployee)
@@ -41,7 +43,7 @@ export function EmployeesScreen() {
           <StatRow label={t('employees.prodSpeed')} value={signedPercent(productionSpeedBonusPercent(staff, perks))} />
           <StatRow label={t('employees.researchBonus')} value={`+${grouped(Math.round(researchPointsBonus(staff, perks)))}`} />
           <StatRow label={t('employees.prodQuality')} value={signedPercent(qualityBonusPercent(staff, perks))} />
-          <StatRow label={t('employees.marketingDiscount')} value={signedPercent(marketingDiscountPercent(staff, perks))} />
+          <StatRow label={t('employees.marketingDiscount')} value={signedPercent(marketingDiscountPercent(staff, perks) + marketingDiscountFromFounder(founder))} />
           <StatRow label={t('employees.unitCostReduction')} value={signedPercent(-unitCostReductionPercent(staff, perks))} />
         </div>
 

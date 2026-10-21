@@ -4,7 +4,7 @@ import { postNews } from './news'
 import type { GameDate } from './gameDate'
 import type { World } from './world'
 
-export type AchievementGroup = 'Sales' | 'Money' | 'Market' | 'Company' | 'Research' | 'Survival'
+export type AchievementGroup = 'Sales' | 'Money' | 'Market' | 'Company' | 'Research' | 'Survival' | 'Founder'
 
 /** What an achievement counts - decides the description text and how the target is shown. */
 export type AchievementKind =
@@ -21,6 +21,8 @@ export type AchievementKind =
   | 'staff'
   | 'year'
   | 'rank'
+  | 'fans'
+  | 'wins'
 
 export interface AchievementDefinition {
   id: string
@@ -78,9 +80,13 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: 'year-1980', group: 'Survival', kind: 'year', target: 1980, reward: 1 * M },
   { id: 'year-2000', group: 'Survival', kind: 'year', target: 2000, reward: 4 * M },
   { id: 'year-2020', group: 'Survival', kind: 'year', target: 2020, reward: 10 * M },
+  { id: 'goal-fans', group: 'Founder', kind: 'fans', target: 500_000, reward: 20 * M },
+  { id: 'goal-history', group: 'Founder', kind: 'models', target: 50, reward: 20 * M },
+  { id: 'goal-wealth', group: 'Founder', kind: 'cash', target: 5_000 * M, reward: 20 * M },
+  { id: 'goal-motorsport', group: 'Founder', kind: 'wins', target: 5, reward: 20 * M },
 ]
 
-export const ACHIEVEMENT_GROUPS: AchievementGroup[] = ['Sales', 'Money', 'Market', 'Company', 'Research', 'Survival']
+export const ACHIEVEMENT_GROUPS: AchievementGroup[] = ['Sales', 'Money', 'Market', 'Company', 'Research', 'Survival', 'Founder']
 
 /** The current value of what an achievement measures. */
 export function measure(kind: AchievementKind, world: World): number {
@@ -109,6 +115,10 @@ export function measure(kind: AchievementKind, world: World): number {
       return world.staff.employees.length
     case 'year':
       return world.time.currentDate.year
+    case 'fans':
+      return world.company.fans
+    case 'wins':
+      return world.racing.history.filter((r) => r.position === 1).length
     case 'rank': {
       const ours = world.company.marketSharePercent
       return world.company.totalCarsSoldAllModels > 0 && world.rivals.rivals.every((r) => ours > r.sharePercent) ? 1 : 0
