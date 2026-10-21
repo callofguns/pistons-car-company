@@ -98,7 +98,6 @@ describe('id-derived i18n keys exist for every data table entry', () => {
       'data.research.safety-seatbelt-pretensioners.name',
       'data.research.safety-abs-braking.name',
       'data.research.safety-stability-control.name',
-      'data.research.engine-catalytic-converter.name',
       'data.research.engine-exhaust-gas-recirculation.name',
       'data.research.engine-direct-injection.name',
     ]

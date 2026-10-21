@@ -29,7 +29,21 @@ export function calculateCarSpecs(
   tech: TechModifiers,
   designChoices: DesignChoices = NO_DESIGN_CHOICES,
 ): CarPerformanceStats {
-  const aspirationPowerMul = aspirationPowerMultiplier(engine.aspiration)
+  const { componentOptions, classificationTags } = designChoices
+  const tuning = componentOptions.reduce(
+    (sum, o) => ({
+      powerPct: sum.powerPct + (o.engine?.powerPct ?? 0),
+      torquePct: sum.torquePct + (o.engine?.torquePct ?? 0),
+      reliability: sum.reliability + (o.engine?.reliability ?? 0),
+      fuelPct: sum.fuelPct + (o.engine?.fuelPct ?? 0),
+      emissionsPct: sum.emissionsPct + (o.engine?.emissionsPct ?? 0),
+      maxRpm: sum.maxRpm + (o.engine?.maxRpm ?? 0),
+    }),
+    { powerPct: 0, torquePct: 0, reliability: 0, fuelPct: 0, emissionsPct: 0, maxRpm: 0 },
+  )
+  // A forced-induction option replaces the engine preset's own aspiration.
+  const aspiration = componentOptions.find((o) => o.engine?.aspiration)?.engine?.aspiration ?? engine.aspiration
+  const aspirationPowerMul = aspirationPowerMultiplier(aspiration)
   const powerMul = 1 + tech.get('Power')
   const reliabilityBonus = tech.get('Reliability')
   const fuelEconomyBonus = tech.get('FuelEconomy')
@@ -37,36 +51,35 @@ export function calculateCarSpecs(
   const costCut = tech.get('ProductionCost')
   const repairCut = tech.get('RepairCost')
 
-  const { componentOptions, classificationTags } = designChoices
   const componentWeightDeltaKg = componentOptions.reduce((sum, o) => sum + o.weightDeltaKg, 0)
   const componentCostDelta = componentOptions.reduce((sum, o) => sum + o.costDelta, 0)
 
-  const powerHp = engine.displacementLiters * 55 * cylinderEfficiency(engine.cylinders) * aspirationPowerMul * powerMul
-  const torqueNm = powerHp * 1.35 * (engine.fuelType === 'Diesel' ? 1.15 : 1)
+  const powerHp = engine.displacementLiters * 55 * cylinderEfficiency(engine.cylinders) * aspirationPowerMul * powerMul * (1 + tuning.powerPct)
+  const torqueNm = powerHp * 1.35 * (engine.fuelType === 'Diesel' ? 1.15 : 1) * (1 + tuning.torquePct)
   const torqueRpm = clamp(4800 - engine.cylinders * 120, 1800, 5200)
 
   const weightKg = Math.max(400, body.baseWeightKg + engine.cylinders * 22 + engine.displacementLiters * 45 + componentWeightDeltaKg)
 
   const fuelConsumption = Math.max(
     3,
-    (engine.fuelType === 'Electric' ? 0 : 4.2 + engine.displacementLiters * 1.35) * (1 - fuelEconomyBonus),
+    (engine.fuelType === 'Electric' ? 0 : 4.2 + engine.displacementLiters * 1.35) * (1 - fuelEconomyBonus) * (1 + tuning.fuelPct),
   )
 
   const reliability = clamp(
-    96 - engine.cylinders * 1.4 - (engine.aspiration !== 'NaturallyAspirated' ? 5 : 0) + reliabilityBonus * 100,
+    96 - engine.cylinders * 1.4 - (aspiration !== 'NaturallyAspirated' ? 5 : 0) + reliabilityBonus * 100 + tuning.reliability,
     25,
     99,
   )
 
   const emissions =
-    engine.fuelType === 'Electric' ? 0 : Math.max(40, (110 + engine.displacementLiters * 170) * (1 - emissionsCut))
+    engine.fuelType === 'Electric' ? 0 : Math.max(40, (110 + engine.displacementLiters * 170) * (1 - emissionsCut) * (1 + tuning.emissionsPct))
 
   const repairCost = Math.max(
     150,
-    (500 + powerHp * 3.1 + (engine.aspiration !== 'NaturallyAspirated' ? 300 : 0)) * (1 - repairCut),
+    (500 + powerHp * 3.1 + (aspiration !== 'NaturallyAspirated' ? 300 : 0)) * (1 - repairCut),
   )
 
-  const maxRpm = clamp(6400 - engine.cylinders * 160 + (engine.aspiration === 'Turbocharged' ? 300 : 0), 4500, 9000)
+  const maxRpm = clamp(6400 - engine.cylinders * 160 + (aspiration === 'Turbocharged' ? 300 : 0) + tuning.maxRpm, 4500, 9000)
 
   const powerToWeight = powerHp / Math.max(weightKg, 1)
   const zeroToHundred = clamp(17.5 - powerToWeight * 155, 3.2, 22)
@@ -74,7 +87,7 @@ export function calculateCarSpecs(
 
   const unitCost = Math.max(
     500,
-    (body.baseUnitCost + powerHp * 21 + (engine.aspiration !== 'NaturallyAspirated' ? 1200 : 0)) * (1 - costCut) +
+    (body.baseUnitCost + powerHp * 21 + (aspiration !== 'NaturallyAspirated' ? 1200 : 0)) * (1 - costCut) +
       componentCostDelta,
   )
 

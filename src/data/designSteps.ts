@@ -1,10 +1,27 @@
 import type { DesignStatKey } from '../core/designStats'
+import type { Aspiration } from '../core/vehicles'
 
 /**
  * One selectable option within a component slot (e.g. "Aluminum" under the "Body Material" slot
  * on the Safety step). Mirrors the reference's cycling option cards, including the locked-until-
  * a-future-year pattern already used by BodyStyleDefinition.unlockYear and ResearchNodeCard.
  */
+/** What an engine-tuning option does to the engine itself (the Engine Tuning step). Percentages are
+ * fractions (0.05 = +5%). Everything adds up across the chosen options. */
+export interface EngineEffects {
+  powerPct?: number
+  torquePct?: number
+  /** Points of reliability (percentage points) added or removed. */
+  reliability?: number
+  /** Change in fuel use: negative is thriftier. */
+  fuelPct?: number
+  emissionsPct?: number
+  /** Extra rev limit in RPM. */
+  maxRpm?: number
+  /** Replaces the engine preset's aspiration (turbo, supercharger). */
+  aspiration?: Aspiration
+}
+
 export interface ComponentOption {
   id: string
   label: string
@@ -13,6 +30,7 @@ export interface ComponentOption {
   costDelta: number
   weightDeltaKg: number
   effects: Partial<Record<DesignStatKey, number>>
+  engine?: EngineEffects
 }
 
 /** One cycling picker within a step, e.g. "Body Material" or "Tire Supplier". */
@@ -80,9 +98,65 @@ export const DESIGN_STEPS: DesignStepDefinition[] = [
     ],
   },
   {
+    id: 'EngineTuning',
+    title: 'Engine Tuning',
+    breadcrumb: 'Engine',
+    meters: [],
+    slots: [
+      {
+        id: 'bore-stroke',
+        label: 'Bore & Stroke',
+        options: [
+          { id: 'balanced', label: 'Balanced', description: 'Bore and stroke the same: a sensible all-rounder.', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'wide-bore', label: 'Wide Bore', description: 'Wider pistons rev higher and make more power, but wear faster.', unlockYear: 1950, costDelta: 300, weightDeltaKg: 0, effects: {}, engine: { powerPct: 0.05, maxRpm: 400, reliability: -2 } },
+          { id: 'long-stroke', label: 'Long Stroke', description: 'Longer piston travel gives more pull at low revs and better fuel use.', unlockYear: 1950, costDelta: 300, weightDeltaKg: 0, effects: {}, engine: { powerPct: -0.02, torquePct: 0.08, fuelPct: -0.04, maxRpm: -400 } },
+        ],
+      },
+      {
+        id: 'forced-induction',
+        label: 'Forced Induction',
+        options: [
+          { id: 'none', label: 'None', description: 'Uses whatever the engine has.', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'turbocharger', label: 'Turbocharger', description: 'Exhaust-driven boost: much more power for a little less reliability.', unlockYear: 1975, costDelta: 1200, weightDeltaKg: 12, effects: {}, engine: { aspiration: 'Turbocharged' } },
+          { id: 'supercharger', label: 'Supercharger', description: 'Belt-driven boost: instant response, but thirstier.', unlockYear: 1980, costDelta: 1000, weightDeltaKg: 15, effects: {}, engine: { aspiration: 'Supercharged', torquePct: 0.05, fuelPct: 0.05 } },
+          { id: 'twin-turbo', label: 'Twin Turbo', description: 'Two turbochargers: serious power, serious cost.', unlockYear: 1995, costDelta: 2600, weightDeltaKg: 22, effects: {}, engine: { aspiration: 'Turbocharged', powerPct: 0.12, reliability: -2, fuelPct: 0.04 } },
+        ],
+      },
+      {
+        id: 'camshaft',
+        label: 'Camshaft',
+        options: [
+          { id: 'standard', label: 'Standard', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'sport-cam', label: 'Sport Cam', description: 'More power at high revs; slightly thirstier.', unlockYear: 1975, costDelta: 450, weightDeltaKg: 0, effects: {}, engine: { powerPct: 0.04, reliability: -1, fuelPct: 0.03 } },
+          { id: 'racing-cam', label: 'Racing Cam', description: 'Big power and a high rev limit, with a rougher, less reliable engine.', unlockYear: 1990, costDelta: 1100, weightDeltaKg: 0, effects: {}, engine: { powerPct: 0.09, maxRpm: 500, reliability: -4, fuelPct: 0.08 } },
+          { id: 'variable-valve', label: 'Variable Valve Timing', description: 'Power when you want it and thrift when you do not.', unlockYear: 1995, costDelta: 1300, weightDeltaKg: 3, effects: {}, engine: { powerPct: 0.06, fuelPct: -0.06, reliability: -1 } },
+        ],
+      },
+      {
+        id: 'cooling',
+        label: 'Cooling',
+        options: [
+          { id: 'liquid', label: 'Liquid Cooled', description: 'The normal choice.', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'air-cooled', label: 'Air Cooled', description: 'Cheaper and lighter, but runs hot.', unlockYear: 1950, costDelta: -150, weightDeltaKg: -15, effects: {}, engine: { reliability: -3 } },
+          { id: 'performance-cooling', label: 'Performance Cooling', description: 'Keeps a hard-working engine healthy.', unlockYear: 1980, costDelta: 450, weightDeltaKg: 6, effects: {}, engine: { reliability: 3 } },
+        ],
+      },
+      {
+        id: 'exhaust',
+        label: 'Exhaust',
+        options: [
+          { id: 'stock', label: 'Stock', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'sport-exhaust', label: 'Sport Exhaust', description: 'A little more power and a lot more noise and emissions.', unlockYear: 1950, costDelta: 250, weightDeltaKg: -4, effects: {}, engine: { powerPct: 0.03, emissionsPct: 0.08 } },
+          { id: 'catalytic', label: 'Catalytic Converter', description: 'Cuts emissions sharply, costing a little power.', unlockYear: 1975, costDelta: 300, weightDeltaKg: 8, effects: {}, engine: { powerPct: -0.02, emissionsPct: -0.25 } },
+          { id: 'performance-headers', label: 'Performance Headers', description: 'Free-flowing exhaust: good power, dirty emissions.', unlockYear: 1985, costDelta: 600, weightDeltaKg: 2, effects: {}, engine: { powerPct: 0.05, emissionsPct: 0.12 } },
+        ],
+      },
+    ],
+  },
+  {
     id: 'Transmission',
     title: 'Transmission',
-    breadcrumb: 'Engine',
+    breadcrumb: 'Engine Tuning',
     meters: ['handling'],
     slots: [
       {

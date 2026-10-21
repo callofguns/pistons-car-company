@@ -40,7 +40,6 @@ const BY_CATEGORY: Partial<Record<ResearchCategory, NodeSpec[]>> = {
 
 /** Emission-cutting research, timed for the emission laws in data/historyEvents.ts. Not chained. */
 const EMISSIONS_NODES: (NodeSpec & { year: number })[] = [
-  { name: 'Catalytic Converter', effect: { target: 'Emissions', amount: -0.2 }, year: 1974 },
   { name: 'Exhaust Gas Recirculation', effect: { target: 'Emissions', amount: -0.15 }, year: 1990 },
   { name: 'Direct Injection', effect: { target: 'Emissions', amount: -0.15 }, year: 2006 },
 ]
@@ -48,6 +47,7 @@ const EMISSIONS_NODES: (NodeSpec & { year: number })[] = [
 /** Which research tab each design step's part unlocks live in. */
 const STEP_CATEGORY: Record<string, ResearchCategory> = {
   Safety: 'Safety',
+  EngineTuning: 'Engine',
   Transmission: 'Undercarriage',
   Undercarriage: 'Undercarriage',
   Tires: 'Undercarriage',
@@ -58,6 +58,15 @@ const STEP_CATEGORY: Record<string, ResearchCategory> = {
 
 /** Research card names for parts whose designer label alone would be unclear ("Sport"). */
 const PART_NAMES: Record<string, string> = {
+  'forced-induction.turbocharger': 'Turbocharger',
+  'forced-induction.supercharger': 'Supercharger',
+  'forced-induction.twin-turbo': 'Twin Turbo',
+  'camshaft.sport-cam': 'Sport Camshaft',
+  'camshaft.racing-cam': 'Racing Camshaft',
+  'camshaft.variable-valve': 'Variable Valve Timing',
+  'cooling.performance-cooling': 'Performance Cooling',
+  'exhaust.catalytic': 'Catalytic Converter',
+  'exhaust.performance-headers': 'Performance Headers',
   'suspension.sport': 'Sport Suspension',
   'suspension.adaptive': 'Adaptive Suspension',
   'brakes.disc-all-round': 'All-Round Disc Brakes',

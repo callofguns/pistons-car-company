@@ -34,6 +34,7 @@ type WizardStepId =
   | 'Safety'
   | 'SafetyRating'
   | 'Engine'
+  | 'EngineTuning'
   | 'Transmission'
   | 'Undercarriage'
   | 'Tires'
@@ -48,6 +49,7 @@ const WIZARD_STEPS: WizardStepId[] = [
   'Safety',
   'SafetyRating',
   'Engine',
+  'EngineTuning',
   'Transmission',
   'Undercarriage',
   'Tires',
