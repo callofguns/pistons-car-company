@@ -9,6 +9,7 @@ import { makeDate, type GameDate } from './gameDate'
 import { createLedgerState, monthTotalExpense, monthTotalIncome, onLedgerMonthTick, type LedgerState } from './ledger'
 import { onMarketDayTick, createCompetitorState, growReach, totalMarketCarsPerDay, type CompetitorState, type MarketConditions } from './market'
 import { onMarketingDayTick } from './marketing'
+import { activeRandomMultipliers, createRandomEventsState, onRandomEventsDayTick, type RandomEventsState } from './randomEvents'
 import { checkAchievements, createAchievementsState, type AchievementsState } from './achievements'
 import { createRivalsState, onRivalsDayTick, rivalStrength, type RivalsState } from './rivals'
 import { createNewsState, postNews, type NewsState } from './news'
@@ -51,6 +52,7 @@ export interface World {
   competitors: CompetitorState
   rivals: RivalsState
   achievements: AchievementsState
+  randomEvents: RandomEventsState
   racing: RacingState
   factory: FactoryState
 }
@@ -71,6 +73,7 @@ export function createNewWorld(config: GameConfig, catalog: Catalog, companyName
     competitors: createCompetitorState(),
     rivals: createRivalsState(config.startYear),
     achievements: createAchievementsState(),
+    randomEvents: createRandomEventsState(),
     racing: createRacingState(),
     factory: createFactoryState(),
   }
@@ -79,7 +82,13 @@ export function createNewWorld(config: GameConfig, catalog: Catalog, companyName
 /** Today's market conditions: difficulty plus (later) history events and per-model factors. */
 /** Today's history events, added up. */
 export function eventEffectsFor(world: World, catalog: Catalog): EventEffects {
-  return combineEvents(activeEvents(catalog.historyEvents, world.time.currentDate))
+  const effects = combineEvents(activeEvents(catalog.historyEvents, world.time.currentDate))
+  // Plus whatever the player's random-event decisions are still doing.
+  const random = activeRandomMultipliers(world.randomEvents)
+  effects.demandMultiplier *= random.demand
+  effects.productionSpeedMultiplier *= random.speed
+  effects.productionCostMultiplier *= random.cost
+  return effects
 }
 
 export function marketConditionsFor(world: World, events: EventEffects): MarketConditions {
@@ -176,6 +185,7 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
     }
   })
 
+  onRandomEventsDayTick(world, today)
   checkAchievements(world, today)
 
   if (today.day === 1) {

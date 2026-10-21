@@ -6,6 +6,7 @@ import { TopHud } from './components/TopHud'
 import { BankruptcyOverlay } from './components/BankruptcyOverlay'
 import { TutorialOverlay } from './components/TutorialOverlay'
 import { AchievementToast } from './components/AchievementToast'
+import { RandomEventDialog } from './components/RandomEventDialog'
 import { SCREENS } from './screens'
 import { useAudioController } from './audio/useAudioController'
 
@@ -38,6 +39,7 @@ export function App() {
           <ScreenComponent />
           <TutorialOverlay />
           <AchievementToast />
+          <RandomEventDialog />
         </div>
       )}
     </>

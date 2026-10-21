@@ -23,6 +23,7 @@ import {
 } from '../core/staff'
 import { startCampaign as coreStartCampaign } from '../core/marketing'
 import { markAllNewsRead as coreMarkAllNewsRead, postNews } from '../core/news'
+import { resolveRandomEvent } from '../core/randomEvents'
 import { registerTeam as coreRegisterTeam, enterRace as coreEnterRace } from '../core/racing'
 import { upgradeHq as coreUpgradeHq, hqSlotCap } from '../core/hq'
 import {
@@ -125,6 +126,7 @@ interface GameStore {
    * events that happen on player action rather than the daily tick - mirrors notifyResearchProgressed's
    * split between world.ts's daily-tick hooks and this store's action-triggered ones. */
   markAllNewsRead: () => void
+  resolveRandomEvent: (choiceId: string) => void
 }
 
 export const useGameStore = create<GameStore>((set, get) => {
@@ -396,6 +398,12 @@ export const useGameStore = create<GameStore>((set, get) => {
       postNews(world.news, 'LoanTaken', world.time.currentDate, { principal: tier.principal })
       bump()
       return true
+    },
+
+    resolveRandomEvent: (choiceId) => {
+      const { world } = get()
+      resolveRandomEvent(world, choiceId, world.time.currentDate)
+      bump()
     },
 
     markAllNewsRead: () => {

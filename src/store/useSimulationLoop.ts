@@ -30,7 +30,7 @@ export function useSimulationLoop(): void {
     const frame = (timestampMs: number) => {
       const { world } = useGameStore.getState()
       const screen = useUiStore.getState().currentScreen
-      world.time.isPaused = !RUNNING_SCREENS.includes(screen) || world.time.manuallyPaused
+      world.time.isPaused = world.randomEvents.pending !== null || !RUNNING_SCREENS.includes(screen) || world.time.manuallyPaused
 
       if (lastTimestampMs !== null) {
         const deltaSeconds = Math.min(MAX_DELTA_SECONDS, (timestampMs - lastTimestampMs) / 1000)

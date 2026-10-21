@@ -86,6 +86,16 @@ export function renderNewsHeadline(entry: NewsEntry, t: ReturnType<typeof useT>[
         quote: t(`review.quote.${entry.params.aspect}.${entry.params.tone}` as MessageKey),
       })
     }
+    case 'RandomEvent':
+      return t('news.randomEvent', { title: t(`data.randomEvent.${entry.params.eventId}.title` as MessageKey) })
+    case 'RandomEventResolved': {
+      const outcome = String(entry.params.outcome)
+      const suffix = outcome === 'win' ? 'resultWin' : outcome === 'lose' ? 'resultLose' : 'result'
+      return t('news.randomEventResolved', {
+        title: t(`data.randomEvent.${entry.params.eventId}.title` as MessageKey),
+        result: t(`data.randomEvent.${entry.params.eventId}.${entry.params.choiceId}.${suffix}` as MessageKey),
+      })
+    }
     case 'AchievementUnlocked':
       return t('news.achievementUnlocked', {
         name: t(`data.achievement.${entry.params.achievementId}.name` as MessageKey),
