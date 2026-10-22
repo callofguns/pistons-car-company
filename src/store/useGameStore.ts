@@ -85,7 +85,7 @@ interface GameStore {
 
   beginNewDesign: () => void
   beginRestyling: (modelId: string) => void
-  selectBody: (bodyId: string) => boolean
+  selectBody: (bodyId: string, convertible?: boolean) => boolean
   toggleClassificationTag: (tagId: string) => void
   setComponentSelection: (slotId: string, optionId: string) => void
   setEnginePreset: (presetId: string) => void
@@ -209,11 +209,11 @@ export const useGameStore = create<GameStore>((set, get) => {
       bump()
     },
 
-    selectBody: (bodyId) => {
+    selectBody: (bodyId, convertible = false) => {
       const { world, catalog } = get()
       const body = catalog.bodies.find((b) => b.id === bodyId)
       if (!body) return false
-      const ok = coreSelectBody(world.vehicles, body, world.bank, world.ledger, unlockedByResearch(world.research), world.time.currentDate)
+      const ok = coreSelectBody(world.vehicles, body, world.bank, world.ledger, unlockedByResearch(world.research), world.time.currentDate, convertible)
       bump()
       return ok
     },

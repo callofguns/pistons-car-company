@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { bodyItem, unlockedByResearch } from '../core/unlocks'
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Lock, Wrench } from 'lucide-react'
+import { BODY_STYLE_ORDER, designsOfStyle } from '../data/bodies'
+import { toolingCost, toolingKey } from '../core/vehicleService'
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, FlaskConical, Lock, Wrench, X } from 'lucide-react'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { useActiveTutorialStep } from '../store/useTutorialStore'
@@ -19,9 +21,11 @@ import styles from './BodySelectionScreen.module.css'
 const MAX_BAY_LITERS = Math.max(...CATALOG.bodies.map((b) => b.engineBayCapacityLiters))
 
 /** Step 1 of the design wizard, laid out like the reference: the bare body shell on jack stands on
- * the factory line, the one-time tooling cost above it, big side arrows to browse, and the
- * body's class + engine-bay capacity below. CONTINUE charges the tooling cost (first time only per
- * body) and advances to Car Design. Bodies not yet available this year are shown locked. */
+ * the factory line and the one-time tooling cost above it. Two sets of arrows: the big outer ones
+ * change the body DESIGN (the shell itself), the small ones under the car change the body STYLE
+ * (sedan, coupe, SUV...). A switch at the top right takes the roof off. CONTINUE charges the
+ * tooling cost (first time only per body) and advances to the classification step; a body that
+ * has not been researched yet shows GO TO RESEARCH instead. */
 export function BodySelectionScreen() {
   const show = useUiStore((s) => s.show)
   useGameStore((s) => s.revision)
@@ -29,20 +33,29 @@ export function BodySelectionScreen() {
   const tooledBodyIds = useGameStore((s) => s.world.vehicles.tooledBodyIds)
   const research = useGameStore((s) => s.world.research)
 
-  const [index, setIndex] = useState(0)
+  const [styleIndex, setStyleIndex] = useState(0)
+  const [designIndex, setDesignIndex] = useState(0)
+  const [convertible, setConvertible] = useState(false)
   const [error, setError] = useState(false)
   const tutorialStep = useActiveTutorialStep()
   const { t, fmt } = useT()
 
-  const bodies = CATALOG.bodies
-  const body = bodies[index]
-  const alreadyTooled = tooledBodyIds.includes(body.id)
+  const style = BODY_STYLE_ORDER[styleIndex]
+  const designs = designsOfStyle(style)
+  const body = designs[designIndex]
+  const alreadyTooled = tooledBodyIds.includes(toolingKey(body.id, convertible))
   const locked = !unlockedByResearch(research)(bodyItem(body))
-  const bodyName = t(`data.body.${body.id}.name` as MessageKey)
+  const designName = t(`data.body.${body.id}.name` as MessageKey)
+  const styleName = t(CAR_CLASS_KEY[style])
 
-  const go = (delta: number) => {
+  const changeDesign = (delta: number) => {
     setError(false)
-    setIndex((i) => Math.min(bodies.length - 1, Math.max(0, i + delta)))
+    setDesignIndex((i) => (i + delta + designs.length) % designs.length)
+  }
+  const changeStyle = (delta: number) => {
+    setError(false)
+    setDesignIndex(0)
+    setStyleIndex((i) => (i + delta + BODY_STYLE_ORDER.length) % BODY_STYLE_ORDER.length)
   }
 
   return (
@@ -63,78 +76,108 @@ export function BodySelectionScreen() {
             <span className={styles.costLabel}>{t('bodySelection.equipmentCostLabel')}</span>
             <span className={styles.costValue}>
               <Wrench size={22} />
-              {fmt.money(body.productionEquipmentCost)}
+              {fmt.money(toolingCost(body, convertible))}
             </span>
           </>
         )}
       </div>
 
+      <button
+        type="button"
+        role="switch"
+        aria-checked={convertible}
+        className={styles.convertible}
+        onClick={() => setConvertible(!convertible)}
+      >
+        <span className={`${styles.switchBox} ${convertible ? styles.switchOn : ''}`}>{convertible ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}</span>
+        {t('bodySelection.convertible')}
+      </button>
+
       <div className={styles.stage}>
-        <span className={styles.watermark} aria-hidden="true">
-          {bodyName}
-        </span>
-        <CarArt bodyId={body.id} variant="bare" className={`${styles.car} ${locked ? styles.carLocked : ''}`} title={bodyName} />
-        {locked && (
-          <span className={styles.lockBadge}>
-            <Lock size={16} />
-            {t('bodySelection.unlocksIn', { year: body.unlockYear })}
+        {locked ? (
+          <>
+            <Lock className={styles.lockIcon} size={34} />
+            <span className={styles.watermark} aria-hidden="true">
+              {t('bodySelection.notResearched')}
+            </span>
+          </>
+        ) : (
+          <span className={styles.watermark} aria-hidden="true">
+            {designName}
           </span>
         )}
+        <CarArt
+          bodyId={body.id}
+          variant="bare"
+          convertible={convertible}
+          className={`${styles.car} ${locked ? styles.carLocked : ''}`}
+          title={designName}
+        />
       </div>
 
-      <Button className={`${styles.sideArrow} ${styles.sideArrowLeft}`} onClick={() => go(-1)} disabled={index === 0} aria-label={t('common.previous')}>
+      <Button
+        className={`${styles.sideArrow} ${styles.sideArrowLeft}`}
+        onClick={() => changeDesign(-1)}
+        disabled={designs.length < 2}
+        aria-label={t('bodySelection.previousDesign')}
+      >
         <ArrowLeft size={26} strokeWidth={2.5} />
       </Button>
       <Button
         className={`${styles.sideArrow} ${styles.sideArrowRight}`}
-        onClick={() => go(1)}
-        disabled={index === bodies.length - 1}
-        aria-label={t('common.next')}
+        onClick={() => changeDesign(1)}
+        disabled={designs.length < 2}
+        aria-label={t('bodySelection.nextDesign')}
       >
         <ArrowRight size={26} strokeWidth={2.5} />
       </Button>
 
       <div className={styles.info}>
         <span className={styles.counter}>
-          {index + 1} / {bodies.length}
+          {styleIndex + 1} / {BODY_STYLE_ORDER.length}
         </span>
         <div className={styles.classRow}>
-          <Button className={styles.smallArrow} onClick={() => go(-1)} disabled={index === 0} aria-label={t('common.previous')}>
+          <Button className={styles.smallArrow} onClick={() => changeStyle(-1)} aria-label={t('bodySelection.previousStyle')}>
             <ChevronLeft size={18} />
           </Button>
           <div className={styles.className}>
-            <span className={styles.bodyName}>{bodyName}</span>
-            <span className={styles.carClass}>{t(CAR_CLASS_KEY[body.carClass])}</span>
+            <span className={styles.carClass}>{styleName}</span>
           </div>
-          <Button className={styles.smallArrow} onClick={() => go(1)} disabled={index === bodies.length - 1} aria-label={t('common.next')}>
+          <Button className={styles.smallArrow} onClick={() => changeStyle(1)} aria-label={t('bodySelection.nextStyle')}>
             <ChevronRight size={18} />
           </Button>
         </div>
         <div className={styles.dots} aria-hidden="true">
-          {bodies.map((b, i) => (
-            <span key={b.id} className={`${styles.dot} ${i === index ? styles.dotActive : ''}`} />
+          {BODY_STYLE_ORDER.map((s, i) => (
+            <span key={s} className={`${styles.dot} ${i === styleIndex ? styles.dotActive : ''}`} />
           ))}
         </div>
       </div>
 
       <div className={styles.footer}>
         {error && <span className={styles.error}>{t('bodySelection.notEnoughCash')}</span>}
-        <Button
-          variant="primary"
-          data-tutorial-target="body-continue"
-          className={`${styles.continue} ${tutorialStep?.step.targetId === 'body-continue' && !locked ? 'tutorial-target-highlight' : ''}`}
-          disabled={locked}
-          onClick={() => {
-            if (selectBody(body.id)) {
-              setError(false)
-              show('CarDesign')
-            } else {
-              setError(true)
-            }
-          }}
-        >
-          {t('common.continue')}
-        </Button>
+        {locked ? (
+          <Button className={styles.continue} onClick={() => show('Research')}>
+            <FlaskConical size={18} />
+            {t('bodySelection.goToResearch')}
+          </Button>
+        ) : (
+          <Button
+            variant="primary"
+            data-tutorial-target="body-continue"
+            className={`${styles.continue} ${tutorialStep?.step.targetId === 'body-continue' ? 'tutorial-target-highlight' : ''}`}
+            onClick={() => {
+              if (selectBody(body.id, convertible)) {
+                setError(false)
+                show('CarDesign')
+              } else {
+                setError(true)
+              }
+            }}
+          >
+            {t('common.continue')}
+          </Button>
+        )}
       </div>
 
       <div className={styles.capacity}>

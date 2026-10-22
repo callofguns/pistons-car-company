@@ -1,7 +1,7 @@
 import { developmentDaysFor } from './development'
 
 const RESTYLE_MIN_DEVELOPMENT_DAYS = 10
-import { calculateCarSpecs, type DesignChoices } from './carSpecsCalculator'
+import { applyConvertible, calculateCarSpecs, CONVERTIBLE, type DesignChoices } from './carSpecsCalculator'
 import { tryWithdrawRecorded, type BankState } from './economy'
 import type { LedgerState } from './ledger'
 import type { TechModifiers } from './techModifiers'
@@ -33,8 +33,17 @@ export function resolveBody(bodies: BodyStyleDefinition[], model: CarModel): Bod
   return bodies.find((b) => b.id === model.bodyStyleId)
 }
 
-export function isBodyTooled(vehicles: VehicleState, bodyId: string): boolean {
-  return vehicles.tooledBodyIds.includes(bodyId)
+/** What the tooling is saved under: the roof-off version needs its own equipment. */
+export function toolingKey(bodyId: string, convertible = false): string {
+  return convertible ? `${bodyId}+convertible` : bodyId
+}
+
+export function toolingCost(body: BodyStyleDefinition, convertible = false): number {
+  return Math.round(body.productionEquipmentCost * (convertible ? CONVERTIBLE.toolingMultiplier : 1))
+}
+
+export function isBodyTooled(vehicles: VehicleState, bodyId: string, convertible = false): boolean {
+  return vehicles.tooledBodyIds.includes(toolingKey(bodyId, convertible))
 }
 
 export function beginNewDesign(vehicles: VehicleState): void {
@@ -45,6 +54,7 @@ export function beginRestyling(vehicles: VehicleState, source: CarModel): void {
   vehicles.currentSession = {
     ...createDesignSession(),
     selectedBodyId: source.bodyStyleId,
+    convertible: source.convertible,
     engine: { ...source.engine },
     enginePresetId: source.enginePresetId,
     classificationTagIds: [...source.classificationTagIds],
@@ -81,22 +91,24 @@ export function selectBody(
   ledger: LedgerState,
   isUnlocked: UnlockCheck,
   today: GameDate,
+  convertible = false,
 ): boolean {
   if (!vehicles.currentSession) beginNewDesign(vehicles)
   // Newer bodies have to be researched first (see core/unlocks.ts).
   if (!isUnlocked(bodyItem(body))) return false
 
-  if (!isBodyTooled(vehicles, body.id)) {
+  if (!isBodyTooled(vehicles, body.id, convertible)) {
     // Was a bare tryWithdraw() - tooling spend never touched the ledger, even though 'Production'
     // has always been a real TransactionCategory (ledger.ts) with an already-translated
     // Finance-screen row (BankScreen.tsx) that simply never lit up for this charge. Same bug as
     // registerTeam's (core/racing.ts) and now startCampaign's/startResearch's.
-    if (!tryWithdrawRecorded(bank, ledger, body.productionEquipmentCost, 'Production', today)) return false
-    vehicles.tooledBodyIds.push(body.id)
+    if (!tryWithdrawRecorded(bank, ledger, toolingCost(body, convertible), 'Production', today)) return false
+    vehicles.tooledBodyIds.push(toolingKey(body.id, convertible))
   }
 
   const session = vehicles.currentSession!
   session.selectedBodyId = body.id
+  session.convertible = convertible
 
   for (const step of DESIGN_STEPS) {
     for (const slot of step.slots) {
@@ -203,7 +215,8 @@ export function previewCurrentStats(
   if (!session?.selectedBodyId) return null
   const body = bodies.find((b) => b.id === session.selectedBodyId)
   if (!body) return null
-  return calculateCarSpecs(body, session.engine, tech, resolveDesignChoices(session))
+  const stats = calculateCarSpecs(body, session.engine, tech, resolveDesignChoices(session))
+  return session.convertible ? applyConvertible(stats) : stats
 }
 
 let modelIdCounter = 0
@@ -229,7 +242,8 @@ export function finalizeDesign(
   const body = bodies.find((b) => b.id === session.selectedBodyId)
   if (!body) return null
 
-  const stats = calculateCarSpecs(body, session.engine, tech, resolveDesignChoices(session))
+  const baseStats = calculateCarSpecs(body, session.engine, tech, resolveDesignChoices(session))
+  const stats = session.convertible ? applyConvertible(baseStats) : baseStats
   if (qualityBonusPercent > 0) {
     stats.reliabilityPercent = Math.min(99, stats.reliabilityPercent + qualityBonusPercent)
   }
@@ -245,6 +259,7 @@ export function finalizeDesign(
     stats,
     issueDate: today,
     unitCost: stats.unitCost,
+    convertible: session.convertible ? true : undefined,
     salePrice: session.customPrice ?? stats.suggestedPrice,
     inventory: 0,
     totalProduced: 0,

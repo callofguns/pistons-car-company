@@ -93,6 +93,28 @@ const PROFILES: Record<string, CarProfile> = {
     headlight: [214, 58],
     taillight: [43, 56],
   },
+  'sport-sedan': {
+    body: 'M16,76 L18,62 Q20,58 28,57 L74,54 L104,36 Q112,31 124,31 L152,31 Q166,32 184,52 L234,56 Q246,58 246,68 L246,80 Q246,84 240,84 L210,84 A19,19 0 0 0 172,84 L92,84 A19,19 0 0 0 54,84 L22,84 Q16,84 16,78 Z',
+    windows: ['M82,54 L106,38 L130,36 L130,54 Z', 'M136,36 L152,35 Q164,36 176,53 L136,54 Z'],
+    lines: ['M133,36 L133,82', 'M18,66 L244,66'],
+    bodyExtras: ['M16,58 L32,56 L32,53 L16,55 Z'],
+    wheelsX: [73, 191],
+    wheelY: 84,
+    wheelR: 16,
+    headlight: [240, 64],
+    taillight: [20, 64],
+  },
+  supercar: {
+    body: 'M10,76 Q12,66 26,64 L70,60 Q104,36 134,36 L150,37 Q166,40 190,56 L236,60 Q252,62 252,72 L252,78 Q252,83 244,83 L218,83 A19,19 0 0 0 180,83 L78,83 A19,19 0 0 0 40,83 L16,83 Q10,83 10,77 Z',
+    windows: ['M84,58 Q106,42 132,40 L134,58 Z', 'M140,40 L150,40 Q166,44 182,58 L140,58 Z'],
+    bodyExtras: ['M10,66 L34,62 L34,58 L10,62 Z'],
+    lines: ['M137,40 L137,80'],
+    wheelsX: [60, 192],
+    wheelY: 83,
+    wheelR: 16,
+    headlight: [246,68],
+    taillight: [14, 70],
+  },
   pickup: {
     body: 'M14,82 L14,48 L112,48 L112,24 Q112,18 118,18 L168,18 Q174,18 178,24 L192,46 L232,50 Q246,52 246,64 L246,84 Q246,88 240,88 L216,88 A21,21 0 0 0 174,88 L92,88 A21,21 0 0 0 50,88 L20,88 Q14,88 14,82 Z',
     windows: ['M120,24 L166,24 L180,46 L120,46 Z'],
@@ -124,16 +146,29 @@ interface CarArtProps {
   variant?: 'finished' | 'bare'
   className?: string
   title?: string
+  /** Roof off: the cabin above the beltline is cut away and replaced by an open interior. */
+  convertible?: boolean
+}
+
+/** The top and sides of a profile's glass area, used to cut a convertible's roof off. */
+function cabinBounds(profile: CarProfile) {
+  const points = profile.windows.flatMap((d) => [...d.matchAll(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g)].map((m) => [Number(m[1]), Number(m[2])] as const))
+  return {
+    belt: Math.max(...points.map((p) => p[1])),
+    rear: Math.min(...points.map((p) => p[0])),
+    front: Math.max(...points.map((p) => p[0])),
+  }
 }
 
 /** Side-view vector drawing of a body style. */
-export function CarArt({ bodyId, color, variant = 'finished', className, title }: CarArtProps) {
+export function CarArt({ bodyId, color, variant = 'finished', className, title, convertible = false }: CarArtProps) {
   const uid = useId().replace(/:/g, '')
   const profile = PROFILES[bodyId] ?? PROFILES['classic-saloon']
   const paint = color ?? (variant === 'bare' ? BARE_METAL : '#c9473a')
   const outline = shade(paint, 0.45)
   const groundY = profile.wheelY + profile.wheelR
   const bare = variant === 'bare'
+  const cabin = convertible ? cabinBounds(profile) : null
 
   return (
     <svg className={className} viewBox="0 0 260 112" role="img" aria-label={title} preserveAspectRatio="xMidYMid meet">
@@ -143,6 +178,9 @@ export function CarArt({ bodyId, color, variant = 'finished', className, title }
           <stop offset="0.55" stopColor={paint} />
           <stop offset="1" stopColor={shade(paint, 0.72)} />
         </linearGradient>
+        <clipPath id={`${uid}-open`}>
+          <rect x={0} y={cabin ? cabin.belt - 1 : 0} width={260} height={112} />
+        </clipPath>
         <linearGradient id={`${uid}-glass`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#c8dcf2" />
           <stop offset="1" stopColor="#5f7da3" />
@@ -155,11 +193,25 @@ export function CarArt({ bodyId, color, variant = 'finished', className, title }
         <circle cx={profile.spare[0]} cy={profile.spare[1]} r={profile.spare[2]} fill="#24262c" stroke="#111" strokeWidth={1} />
       )}
 
-      <path d={profile.body} fill={`url(#${uid}-paint)`} stroke={outline} strokeWidth={1.4} strokeLinejoin="round" />
+      <path
+        d={profile.body}
+        fill={`url(#${uid}-paint)`}
+        stroke={outline}
+        strokeWidth={1.4}
+        strokeLinejoin="round"
+        clipPath={cabin ? `url(#${uid}-open)` : undefined}
+      />
       {profile.bodyExtras?.map((d) => <path key={d} d={d} fill={`url(#${uid}-paint)`} stroke={outline} strokeWidth={1.2} strokeLinejoin="round" />)}
-      {profile.windows.map((d) => (
-        <path key={d} d={d} fill={`url(#${uid}-glass)`} stroke={outline} strokeWidth={1.2} strokeLinejoin="round" />
-      ))}
+      {cabin ? (
+        <g>
+          <rect x={cabin.rear + 2} y={cabin.belt - 3} width={cabin.front - cabin.rear - 4} height={7} rx={2} fill="#20232c" stroke={outline} strokeWidth={1} />
+          <rect x={cabin.rear + 10} y={cabin.belt - 14} width={14} height={12} rx={4} fill="#33384a" />
+          <rect x={cabin.rear + 32} y={cabin.belt - 14} width={14} height={12} rx={4} fill="#33384a" />
+          <path d={`M${cabin.front - 2},${cabin.belt - 1} L${cabin.front - 16},${cabin.belt - 17} L${cabin.front - 11},${cabin.belt - 17} L${cabin.front + 4},${cabin.belt - 1} Z`} fill={`url(#${uid}-glass)`} stroke={outline} strokeWidth={1.1} strokeLinejoin="round" />
+        </g>
+      ) : (
+        profile.windows.map((d) => <path key={d} d={d} fill={`url(#${uid}-glass)`} stroke={outline} strokeWidth={1.2} strokeLinejoin="round" />)
+      )}
       {profile.lines?.map((d) => <path key={d} d={d} stroke={outline} strokeWidth={0.9} fill="none" opacity={0.7} />)}
 
       {/* Wheel arch shadows read as "the wheels go here" even on a bare shell. */}

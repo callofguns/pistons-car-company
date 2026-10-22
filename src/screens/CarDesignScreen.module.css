@@ -200,3 +200,123 @@
     font-size: 0.85rem;
   }
 }
+
+/* ---------- classification: a full-width board instead of the three columns ---------- */
+
+.fullPage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.floatingContinue {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-3);
+  transform: translateX(-50%);
+  width: min(380px, 46%);
+  height: 52px;
+  z-index: 2;
+}
+
+.tutorialCorner {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-5);
+  width: min(360px, 40%);
+  z-index: 3;
+}
+
+/* ---------- safety: car and part strip on the left, parts + meters on the right ---------- */
+
+.safetyPage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 31%);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  column-gap: var(--space-4);
+  padding: var(--space-2) var(--space-5) var(--space-4);
+  overflow: hidden;
+}
+
+.safetyHeader,
+.safetyStage,
+.safetyStrip,
+.safetySide {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.safetyHeader {
+  grid-column: 1;
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  text-align: center;
+  text-shadow: 0 2px 6px rgba(3, 8, 28, 0.8);
+}
+
+.safetyHeader > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.safetyStage {
+  grid-column: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.safetyStrip {
+  grid-column: 1;
+  padding-bottom: 10px;
+}
+
+.safetySide {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.safetyTitle {
+  flex: 1;
+  text-align: center;
+}
+
+.safetyList {
+  flex: 1 1 0;
+}
+
+.safetyMeters {
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.safetyMeter {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.safetyContinue {
+  flex: none;
+  height: 48px;
+}

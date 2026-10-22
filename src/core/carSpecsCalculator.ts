@@ -150,3 +150,22 @@ function computeRating(powerHp: number, reliability: number, fuelConsumption: nu
   const composite = powerScore * 0.35 + reliabilityScore * 0.3 + economyScore * 0.15 + accelScore * 0.2
   return clamp(Math.round(composite * 10), 1, 10)
 }
+
+/** A convertible costs more to build and tool, weighs a little more, is less safe and better looking. */
+export const CONVERTIBLE = { unitCostMultiplier: 1.08, toolingMultiplier: 1.15, extraWeightKg: 60, safety: -6, attractiveness: 8 }
+
+/** The same stats for the roof-off version of a design. */
+export function applyConvertible(stats: CarPerformanceStats): CarPerformanceStats {
+  const keep = (v: number) => clamp(v, 0, 100)
+  return {
+    ...stats,
+    unitCost: stats.unitCost * CONVERTIBLE.unitCostMultiplier,
+    suggestedPrice: stats.suggestedPrice * CONVERTIBLE.unitCostMultiplier * 1.05,
+    weightKg: stats.weightKg + CONVERTIBLE.extraWeightKg,
+    designStats: {
+      ...stats.designStats,
+      safety: keep(stats.designStats.safety + CONVERTIBLE.safety),
+      attractiveness: keep(stats.designStats.attractiveness + CONVERTIBLE.attractiveness),
+    },
+  }
+}

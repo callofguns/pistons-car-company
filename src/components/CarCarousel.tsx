@@ -27,7 +27,7 @@ export function CarCarousel({ indexOneBased, total, onPrevious, onNext, model, f
       </Button>
       <div className={styles.previewArea}>
         <div className={styles.previewBox}>
-          <CarArt bodyId={model.bodyStyleId} color={modelPaint(model.id)} className={styles.car} title={model.name} />
+          <CarArt bodyId={model.bodyStyleId} color={modelPaint(model.id)} convertible={model.convertible} className={styles.car} title={model.name} />
         </div>
         <span className={styles.index}>
           {indexOneBased} / {total}

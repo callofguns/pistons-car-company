@@ -71,7 +71,7 @@
   left: 0;
   right: 0;
   text-align: center;
-  font-size: clamp(2rem, 7vw, 5.5rem);
+  font-size: clamp(1.6rem, 5.4vw, 4.5rem);
   font-weight: 600;
   color: rgba(255, 255, 255, 0.16);
   white-space: nowrap;
@@ -339,4 +339,47 @@
     left: var(--space-2);
     width: min(300px, 36%);
   }
+}
+
+/* Roof-off switch, top right: a red cross when off, a green tick when on. */
+.convertible {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-5);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-shadow: 0 2px 6px rgba(3, 8, 28, 0.8);
+}
+
+.switchBox {
+  width: 34px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: #e8453c;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.switchOn {
+  background: var(--color-green);
+}
+
+.lockIcon {
+  position: absolute;
+  top: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.75);
+  z-index: 1;
 }

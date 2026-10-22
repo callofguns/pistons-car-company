@@ -101,7 +101,7 @@ function LineCard({ line, number, models, highlightOrder }: { line: ProductionLi
         <div className={`${factoryStyles.modelBox} ${building ? factoryStyles.building : ''}`}>
           {model ? (
             <>
-              <CarArt bodyId={model.bodyStyleId} color={modelPaint(model.id)} className={`${factoryStyles.car} ${building ? factoryStyles.carBuilding : ''}`} />
+              <CarArt bodyId={model.bodyStyleId} color={modelPaint(model.id)} convertible={model.convertible} className={`${factoryStyles.car} ${building ? factoryStyles.carBuilding : ''}`} />
               <span className={factoryStyles.modelName}>{model.name}</span>
             </>
           ) : (

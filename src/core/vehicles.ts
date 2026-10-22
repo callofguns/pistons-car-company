@@ -87,6 +87,8 @@ export interface CarModel {
   stats: CarPerformanceStats
   issueDate: GameDate
   unitCost: number
+  /** Built without a roof. Missing in older saves (a normal car). */
+  convertible?: boolean
   salePrice: number
   inventory: number
   totalProduced: number
@@ -134,6 +136,8 @@ export interface ModelDesignSession {
   customPrice: number | null
   /** The model being restyled, if this session originated from "Create Restyling"; null for a from-scratch design. */
   sourceModelId: string | null
+  /** Roof-off version of the chosen body (costs more, see CONVERTIBLE in carSpecsCalculator). */
+  convertible?: boolean
 }
 
 export function createDesignSession(): ModelDesignSession {

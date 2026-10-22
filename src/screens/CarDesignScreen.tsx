@@ -11,6 +11,7 @@ import { ENGINE_PRESETS } from '../data/enginePresets'
 import { findClassificationTag } from '../data/classifications'
 import { starRating, type DesignStatKey } from '../core/designStats'
 import { plainCurrency } from '../core/numberFormat'
+import { toolingCost } from '../core/vehicleService'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
 import { CAR_CLASS_KEY } from '../i18n/vehicles'
@@ -19,8 +20,9 @@ import { MeterBar } from '../components/MeterBar'
 import { Button } from '../components/Primitives'
 import { ComponentSlotCard } from '../components/design/ComponentSlotCard'
 import { engineItem, partItem, unlockedByResearch } from '../core/unlocks'
-import { ClassificationPicker } from '../components/design/ClassificationPicker'
-import { RatingResult } from '../components/design/RatingResult'
+import { ClassificationBoard } from '../components/design/ClassificationBoard'
+import { OptionStrip } from '../components/design/OptionStrip'
+import { SafetyRatingScene } from '../components/design/SafetyRatingScene'
 import { PriceSlider } from '../components/design/PriceSlider'
 import { TutorialCard } from '../components/TutorialCard'
 import { SpecRow } from '../components/SpecRow'
@@ -93,6 +95,24 @@ function stepMeta(stepId: WizardStepId, t: ReturnType<typeof useT>['t']) {
   return { breadcrumb: step.breadcrumb, title: step.title }
 }
 
+/** What the engineer says: the first thing that would raise the score, or a general verdict. */
+function safetyAdvice(
+  stars: number,
+  selections: Record<string, string>,
+  t: ReturnType<typeof useT>['t'],
+): string {
+  if (stars < 3.5) {
+    const slotIsBasic = (slotId: string) => {
+      const slot = findDesignStep('Safety')?.slots.find((s) => s.id === slotId)
+      return !slot || selections[slotId] === slot.options[0].id
+    }
+    if (slotIsBasic('body-material')) return t('carDesign.safetyAdvice.material')
+    if (slotIsBasic('airbags')) return t('carDesign.safetyAdvice.airbags')
+    if (slotIsBasic('passive-safety')) return t('carDesign.safetyAdvice.passive')
+  }
+  return safetyFeedback(stars, t)
+}
+
 function safetyFeedback(stars: number, t: ReturnType<typeof useT>['t']): string {
   if (stars < 1.5) return t('carDesign.safetyFeedback.dangerous')
   if (stars < 3) return t('carDesign.safetyFeedback.decent')
@@ -132,7 +152,7 @@ export function CarDesignScreen() {
   const setCustomPrice = useGameStore((s) => s.setCustomPrice)
   const finalizeDesign = useGameStore((s) => s.finalizeDesign)
   const previewCurrentStats = useGameStore((s) => s.previewCurrentStats)
-  const { t } = useT()
+  const { t, fmt } = useT()
 
   const body = CATALOG.bodies.find((b) => b.id === session?.selectedBodyId)
   const isUnlocked = unlockedByResearch(research)
@@ -224,6 +244,121 @@ export function CarDesignScreen() {
   const previousTitle = stepIndex > 0 ? stepMeta(WIZARD_STEPS[stepIndex - 1], t).title : null
   const nextTitle = stepIndex < WIZARD_STEPS.length - 1 ? stepMeta(WIZARD_STEPS[stepIndex + 1], t).title : null
 
+  if (stepId === 'Classification') {
+    return (
+      <div className={wizardStyles.fullPage}>
+        <ClassificationBoard selectedTagIds={session.classificationTagIds} onToggle={toggleClassificationTag} />
+        <Button
+          variant="primary"
+          data-tutorial-target="wizard-continue"
+          className={`${wizardStyles.floatingContinue} ${canContinue && tutorialStep?.step.targetId === 'wizard-continue' ? 'tutorial-target-highlight' : ''}`}
+          onClick={handleContinue}
+          disabled={!canContinue}
+        >
+          {t('common.continue')}
+        </Button>
+        {tutorialStep && (
+          <div className={wizardStyles.tutorialCorner}>
+            <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (stepId === 'SafetyRating' && stats) {
+    return (
+      <SafetyRatingScene
+        bodyId={body.id}
+        convertible={session.convertible}
+        stars={safetyStars}
+        advice={safetyAdvice(safetyStars, session.componentSelections, t)}
+        onContinue={handleContinue}
+        tutorial={tutorialStep ? <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} /> : undefined}
+      />
+    )
+  }
+
+  if (stepId === 'Safety' && genericStep && genericStep.slots.length > 0) {
+    const [mainSlot, ...otherSlots] = genericStep.slots
+    const weight = stats?.weightKg ?? body.baseWeightKg
+    return (
+      <div className={wizardStyles.safetyPage}>
+        <FactoryBackdrop className={layout.backdrop} />
+
+        <div className={wizardStyles.safetyHeader}>
+          <div>
+            <span className={wizardStyles.costPriceLabel}>{t('carDesign.costPrice')}</span>
+            <span className={wizardStyles.costPriceValue}>
+              <Banknote size={15} />
+              {plainCurrency(stats?.unitCost ?? 0)}
+            </span>
+          </div>
+          <div>
+            <span className={wizardStyles.costPriceLabel}>{t('carDesign.production')}</span>
+            <span className={wizardStyles.costPriceValue}>
+              <Banknote size={15} />
+              {fmt.money(toolingCost(body, session.convertible))}
+            </span>
+          </div>
+        </div>
+
+        <div className={wizardStyles.safetyStage}>
+          <CarArt bodyId={body.id} color={BARE_METAL} variant="bare" convertible={session.convertible} className={wizardStyles.car} />
+          {tutorialStep && (
+            <div className={wizardStyles.tutorial}>
+              <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />
+            </div>
+          )}
+        </div>
+
+        <div className={wizardStyles.safetyStrip}>
+          <OptionStrip
+            slot={mainSlot}
+            selectedOptionId={session.componentSelections[mainSlot.id]}
+            isOptionUnlocked={(option) => isUnlocked(partItem(mainSlot.id, option))}
+            onSelect={(optionId) => setComponentSelection(mainSlot.id, optionId)}
+          />
+        </div>
+
+        <aside className={wizardStyles.safetySide}>
+          <div className={layout.partsHeader}>
+            <span className={wizardStyles.safetyTitle}>{meta.title}</span>
+          </div>
+          <div className={`${layout.sideList} ${wizardStyles.safetyList}`}>
+            {otherSlots.map((slot) => (
+              <ComponentSlotCard
+                key={slot.id}
+                slot={slot}
+                selectedOptionId={session.componentSelections[slot.id]}
+                isOptionUnlocked={(option) => isUnlocked(partItem(slot.id, option))}
+                onSelect={(optionId) => setComponentSelection(slot.id, optionId)}
+              />
+            ))}
+          </div>
+          <div className={wizardStyles.safetyMeters}>
+            <div className={wizardStyles.safetyMeter}>
+              <span>{t('carDesign.safetyMeter')}</span>
+              <MeterBar value01={(stats?.designStats.safety ?? 0) / 100} displayValue={t('carDesign.meterPercent', { value: Math.round(stats?.designStats.safety ?? 0) })} />
+            </div>
+            <div className={wizardStyles.safetyMeter}>
+              <span>{t('carDesign.baseBodyWeight')}</span>
+              <MeterBar value01={(weight - 800) / 1600} displayValue={`${Math.round(weight)}`} />
+            </div>
+          </div>
+          <Button
+            variant="primary"
+            data-tutorial-target="wizard-continue"
+            className={`${wizardStyles.safetyContinue} ${tutorialStep?.step.targetId === 'wizard-continue' ? 'tutorial-target-highlight' : ''}`}
+            onClick={handleContinue}
+          >
+            {t('common.continue')}
+          </Button>
+        </aside>
+      </div>
+    )
+  }
+
   return (
     <div className={layout.page}>
       <FactoryBackdrop className={layout.backdrop} />
@@ -269,7 +404,7 @@ export function CarDesignScreen() {
         </div>
 
         <div className={wizardStyles.stage}>
-          <CarArt bodyId={body.id} color={BARE_METAL} className={wizardStyles.car} />
+          <CarArt bodyId={body.id} color={BARE_METAL} convertible={session.convertible} className={wizardStyles.car} />
           {tutorialStep && (
             <div className={wizardStyles.tutorial}>
               <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />
@@ -311,19 +446,6 @@ export function CarDesignScreen() {
         </div>
 
         <div className={layout.sideList}>
-          {stepId === 'Classification' && (
-            <ClassificationPicker selectedTagIds={session.classificationTagIds} onToggle={toggleClassificationTag} />
-          )}
-
-          {stepId === 'SafetyRating' && stats && (
-            <RatingResult
-              title={t('carDesign.safetyRatingTitle')}
-              value0to5={safetyStars}
-              advisorName={t('carDesign.engineerAdvisor')}
-              message={safetyFeedback(safetyStars, t)}
-            />
-          )}
-
           {stepId === 'Engine' && (
             <ComponentSlotCard
               slot={enginePresetSlot(body.engineBayCapacityLiters, t('carDesign.step.engine.title'), t)}
