@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { CarModel } from '../core/vehicles'
 import { useT } from '../i18n/useT'
-import { CarArt, modelPaint } from '../art/CarArt'
+import { CarArt, modelColor } from '../art/CarArt'
 import { Button } from './Primitives'
 import styles from './CarCarousel.module.css'
 
@@ -27,7 +27,7 @@ export function CarCarousel({ indexOneBased, total, onPrevious, onNext, model, f
       </Button>
       <div className={styles.previewArea}>
         <div className={styles.previewBox}>
-          <CarArt bodyId={model.bodyStyleId} color={modelPaint(model.id)} convertible={model.convertible} className={styles.car} title={model.name} />
+          <CarArt bodyId={model.bodyStyleId} color={modelColor(model)} convertible={model.convertible} className={styles.car} title={model.name} />
         </div>
         <span className={styles.index}>
           {indexOneBased} / {total}

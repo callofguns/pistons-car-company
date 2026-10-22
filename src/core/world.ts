@@ -14,9 +14,12 @@ import { checkAchievements, createAchievementsState, type AchievementsState } fr
 import { createRivalsState, onRivalsDayTick, rivalStrength, type RivalsState } from './rivals'
 import { createNewsState, postNews, type NewsState } from './news'
 import { isInDevelopment, onDevelopmentDayTick } from './development'
-import { autoAssignReleasedModel, carsOnOrder, createFactoryState, onFactoryDayTick, onFactoryMonthTick, type FactoryState } from './factory'
+import { addOrder, autoAssignReleasedModel, carsOnOrder, createFactoryState, onFactoryDayTick, onFactoryMonthTick, type FactoryState } from './factory'
 import { difficultySettings } from './difficulty'
 import type { CarClass } from './vehicles'
+import { regionDemandFactor } from './salesRegions'
+import { PRESENTATION } from './carTuning'
+import { BODIES } from '../data/bodies'
 import { createRacingState, onRacingMonthTick, type RacingState } from './racing'
 import { onResearchDayTick, createResearchState, type ResearchState } from './research'
 import {
@@ -129,7 +132,16 @@ export function marketConditionsFor(world: World, events: EventEffects): MarketC
     classDemandMultiplier: mergeClassDemand(events.classDemandMultiplier, hqClassDemand(world.company.founder)),
     rivalStrength: rivalStrength(world.rivals, world.time.currentDate.year),
     // Laws in force x how fresh the design still is.
-    modelMultiplier: (model) => events.modelMultiplier(model) * freshness(model, world.time.currentDate) * reviewDemandMultiplier(model),
+    modelMultiplier: (model) =>
+      events.modelMultiplier(model) *
+      freshness(model, world.time.currentDate) *
+      reviewDemandMultiplier(model) *
+      regionDemandFactor(
+        model.salesRegions,
+        BODIES.find((b) => b.id === model.bodyStyleId)?.carClass,
+        model.stats.emissionsGKm,
+        world.time.currentDate.year,
+      ),
   }
 }
 
@@ -154,7 +166,16 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
   for (const model of onDevelopmentDayTick(world.vehicles.models)) {
     // A newly released model goes straight onto an idle line, if any - the player still decides
     // how many to build.
-    autoAssignReleasedModel(world.factory, model.id)
+    const line = autoAssignReleasedModel(world.factory, model.id)
+    // The first production run the player chose, ordered on the line the car just got.
+    if (line && (model.circulation ?? 0) > 0) addOrder(world.factory, line.id, model.circulation ?? 0)
+    // A launch presentation: a burst of advertising when the car appears.
+    if (model.presentation) {
+      model.marketingActive = true
+      model.marketingDaysRemaining = PRESENTATION.days
+      model.marketingEfficiencyMultiplier = PRESENTATION.efficiency
+      model.marketingReachPerDay = PRESENTATION.reachPerDay
+    }
     postNews(world.news, 'ModelReleased', today, { modelName: model.name, price: model.salePrice })
 
     // The motoring press tests every new car. Good reviews help sales and the company's name.

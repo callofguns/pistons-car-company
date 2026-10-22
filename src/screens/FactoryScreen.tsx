@@ -9,7 +9,7 @@ import { difficultySettings } from '../core/difficulty'
 import type { CarModel } from '../core/vehicles'
 import { grouped } from '../core/numberFormat'
 import { useT } from '../i18n/useT'
-import { CarArt, modelPaint } from '../art/CarArt'
+import { CarArt, modelColor } from '../art/CarArt'
 import { Button } from '../components/Primitives'
 import styles from './screen.module.css'
 import factoryStyles from './FactoryScreen.module.css'
@@ -101,7 +101,7 @@ function LineCard({ line, number, models, highlightOrder }: { line: ProductionLi
         <div className={`${factoryStyles.modelBox} ${building ? factoryStyles.building : ''}`}>
           {model ? (
             <>
-              <CarArt bodyId={model.bodyStyleId} color={modelPaint(model.id)} convertible={model.convertible} className={`${factoryStyles.car} ${building ? factoryStyles.carBuilding : ''}`} />
+              <CarArt bodyId={model.bodyStyleId} color={modelColor(model)} convertible={model.convertible} className={`${factoryStyles.car} ${building ? factoryStyles.carBuilding : ''}`} />
               <span className={factoryStyles.modelName}>{model.name}</span>
             </>
           ) : (

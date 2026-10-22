@@ -4,6 +4,7 @@ import type { CriticReview } from './reviews'
 
 /** The five body classes the player can design in, per the game brief. */
 import type { EngineBuild } from './engineBuilder'
+import type { DesignTuning, PaintChoice } from './carTuning'
 
 export type CarClass = 'Sedan' | 'SUV' | 'Sports' | 'Coupe' | 'Truck'
 
@@ -93,6 +94,13 @@ export interface CarModel {
   convertible?: boolean
   /** The engine this car was built with (missing for cars made with the old preset engines). */
   engineBuild?: EngineBuild
+  tuning?: DesignTuning
+  paint?: PaintChoice
+  /** Where it is sold. Missing in older saves: sold everywhere. */
+  salesRegions?: string[]
+  /** The first production run, ordered at release. */
+  circulation?: number
+  presentation?: boolean
   salePrice: number
   inventory: number
   totalProduced: number
@@ -144,6 +152,16 @@ export interface ModelDesignSession {
   convertible?: boolean
   /** The engine picked from the engine library for this design (null until one is chosen). */
   engineBuild?: EngineBuild | null
+  /** Brake sizes and downforce. */
+  tuning?: DesignTuning
+  /** Body paint colour. */
+  paint?: PaintChoice
+  /** The sales regions chosen for this car. */
+  salesRegions?: string[]
+  /** How many cars to build first, put on an idle production line when the car is released. */
+  circulation?: number
+  /** Pay for a launch presentation when the car is released. */
+  presentation?: boolean
 }
 
 export function createDesignSession(): ModelDesignSession {

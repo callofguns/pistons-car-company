@@ -23,6 +23,9 @@ import {
 } from '../core/staff'
 import { marketingDiscountFromFounder, type FounderProfile } from '../core/foundation'
 import type { EngineBuild } from '../core/engineBuilder'
+import { PRESENTATION, type DesignTuning, type PaintChoice } from '../core/carTuning'
+import { regionFees } from '../core/salesRegions'
+import { canAfford, tryWithdrawRecorded } from '../core/economy'
 import { startCampaign as coreStartCampaign } from '../core/marketing'
 import { markAllNewsRead as coreMarkAllNewsRead, postNews } from '../core/news'
 import { resolveRandomEvent } from '../core/randomEvents'
@@ -44,6 +47,10 @@ import {
   finalizeDesign as coreFinalizeDesign,
   previewCurrentStats as corePreviewCurrentStats,
   saveEngine as coreSaveEngine,
+  setDesignTuning as coreSetDesignTuning,
+  setPaint as coreSetPaint,
+  setSalesRegions as coreSetSalesRegions,
+  setProductionPlan as coreSetProductionPlan,
   deleteEngine as coreDeleteEngine,
   applyEngineBuild as coreApplyEngineBuild,
   selectBody as coreSelectBody,
@@ -97,6 +104,11 @@ interface GameStore {
   setNameAndCategory: (name: string, categoryTag: string) => void
   setCustomPrice: (price: number) => void
   finalizeDesign: () => string | null // returns the new model's id, or null on failure
+  /** The designer's slider numbers, paint colour, sales regions and first production run. */
+  setDesignTuning: (patch: Partial<DesignTuning>) => void
+  setPaint: (paint: PaintChoice) => void
+  setSalesRegions: (regionIds: string[]) => void
+  setProductionPlan: (circulation: number, presentation: boolean) => void
   /** The engine library (see core/engineBuilder.ts). */
   saveEngine: (build: EngineBuild) => void
   deleteEngine: (engineId: string) => void
@@ -256,8 +268,32 @@ export const useGameStore = create<GameStore>((set, get) => {
       bump()
     },
 
+    setDesignTuning: (patch) => {
+      coreSetDesignTuning(get().world.vehicles, patch)
+      bump()
+    },
+
+    setPaint: (paint) => {
+      coreSetPaint(get().world.vehicles, paint)
+      bump()
+    },
+
+    setSalesRegions: (regionIds) => {
+      coreSetSalesRegions(get().world.vehicles, regionIds)
+      bump()
+    },
+
+    setProductionPlan: (circulation, presentation) => {
+      coreSetProductionPlan(get().world.vehicles, circulation, presentation)
+      bump()
+    },
+
     finalizeDesign: () => {
       const { world, catalog } = get()
+      // Opening sales regions and a launch presentation are paid for when the design is signed off.
+      const session = world.vehicles.currentSession
+      const launchCost = regionFees(session?.salesRegions ?? []) + (session?.presentation ? PRESENTATION.cost : 0)
+      if (launchCost > 0 && !canAfford(world.bank, launchCost)) return null
       const model = coreFinalizeDesign(
         world.vehicles,
         catalog.bodies,
@@ -266,6 +302,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         qualityBonusPercent(world.staff, catalog.employeePerks),
       )
       if (model) {
+        if (launchCost > 0) tryWithdrawRecorded(world.bank, world.ledger, launchCost, 'Marketing', world.time.currentDate)
         postNews(world.news, 'ModelDevelopmentStarted', world.time.currentDate, {
           modelName: model.name,
           days: model.developmentDaysRemaining ?? 0,

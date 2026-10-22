@@ -1,6 +1,7 @@
 import { developmentDaysFor } from './development'
 
 const RESTYLE_MIN_DEVELOPMENT_DAYS = 10
+import { DEFAULT_PAINT, DEFAULT_TUNING, tuningOption, type DesignTuning, type PaintChoice } from './carTuning'
 import { BOOST_SLOT_IDS, extraBuildOption, selectionsOfBuild, specOfBuild, type EngineBuild } from './engineBuilder'
 import { applyConvertible, calculateCarSpecs, CONVERTIBLE, type DesignChoices } from './carSpecsCalculator'
 import { tryWithdrawRecorded, type BankState } from './economy'
@@ -59,6 +60,9 @@ export function beginRestyling(vehicles: VehicleState, source: CarModel): void {
     selectedBodyId: source.bodyStyleId,
     convertible: source.convertible,
     engineBuild: source.engineBuild ?? null,
+    tuning: source.tuning,
+    paint: source.paint,
+    salesRegions: source.salesRegions,
     engine: { ...source.engine },
     enginePresetId: source.enginePresetId,
     classificationTagIds: [...source.classificationTagIds],
@@ -209,6 +213,7 @@ function resolveDesignChoices(session: ModelDesignSession): DesignChoices {
   // The engine builder's sliders and fuel grade.
   const extra = session.engineBuild ? extraBuildOption(session.engineBuild) : null
   if (extra) componentOptions.push(extra)
+  componentOptions.push(tuningOption(session.tuning ?? DEFAULT_TUNING))
 
   const classificationTags = session.classificationTagIds
     .map((id) => findClassificationTag(id))
@@ -272,6 +277,11 @@ export function finalizeDesign(
     unitCost: stats.unitCost,
     convertible: session.convertible ? true : undefined,
     engineBuild: session.engineBuild ?? undefined,
+    tuning: session.tuning,
+    paint: session.paint,
+    salesRegions: session.salesRegions,
+    circulation: session.circulation,
+    presentation: session.presentation ? true : undefined,
     salePrice: session.customPrice ?? stats.suggestedPrice,
     inventory: 0,
     totalProduced: 0,
@@ -334,4 +344,31 @@ export function applyEngineBuild(vehicles: VehicleState, build: EngineBuild): vo
   session.engine = specOfBuild(build)
   session.enginePresetId = null
   Object.assign(session.componentSelections, selectionsOfBuild(build))
+}
+
+/** Sets one of the designer's slider numbers (brake sizes, downforce). */
+export function setDesignTuning(vehicles: VehicleState, patch: Partial<DesignTuning>): void {
+  if (!vehicles.currentSession) beginNewDesign(vehicles)
+  const session = vehicles.currentSession!
+  session.tuning = { ...(session.tuning ?? DEFAULT_TUNING), ...patch }
+}
+
+export function setPaint(vehicles: VehicleState, paint: PaintChoice): void {
+  if (!vehicles.currentSession) beginNewDesign(vehicles)
+  vehicles.currentSession!.paint = { ...paint }
+}
+
+export function currentPaint(vehicles: VehicleState): PaintChoice {
+  return vehicles.currentSession?.paint ?? DEFAULT_PAINT
+}
+
+export function setSalesRegions(vehicles: VehicleState, regionIds: string[]): void {
+  if (!vehicles.currentSession) beginNewDesign(vehicles)
+  vehicles.currentSession!.salesRegions = [...regionIds]
+}
+
+export function setProductionPlan(vehicles: VehicleState, circulation: number, presentation: boolean): void {
+  if (!vehicles.currentSession) beginNewDesign(vehicles)
+  vehicles.currentSession!.circulation = Math.max(0, Math.round(circulation))
+  vehicles.currentSession!.presentation = presentation
 }

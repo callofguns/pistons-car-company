@@ -24,6 +24,8 @@ export interface EngineEffects {
 
 export interface ComponentOption {
   id: string
+  /** Picked when a new design starts, when it is not the first option (e.g. a 4-seat car). */
+  isDefault?: boolean
   label: string
   description?: string
   unlockYear: number
@@ -420,6 +422,108 @@ export const DESIGN_STEPS: DesignStepDefinition[] = [
       },
     ],
   },
+  {
+    id: 'ChassisBuild',
+    title: 'Chassis Parts',
+    breadcrumb: 'Engine',
+    meters: [],
+    slots: [
+      {
+        id: 'gears',
+        label: 'Gears',
+        options: [
+          { id: 'g3', label: '3 speeds', description: 'Simple and cheap.', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'g4', label: '4 speeds', description: 'Better acceleration and fuel use.', unlockYear: 1950, costDelta: 120, weightDeltaKg: 6, effects: {}, engine: { fuelPct: -0.03, powerPct: 0.01 } },
+          { id: 'g5', label: '5 speeds', description: 'A relaxed cruising gear.', unlockYear: 1975, costDelta: 260, weightDeltaKg: 10, effects: {}, engine: { fuelPct: -0.06, powerPct: 0.01 } },
+          { id: 'g6', label: '6 speeds', description: 'Always in the right gear.', unlockYear: 1990, costDelta: 450, weightDeltaKg: 14, effects: {}, engine: { fuelPct: -0.09, powerPct: 0.02 } },
+          { id: 'g7', label: '7 speeds', description: 'The thriftiest way to drive.', unlockYear: 2005, costDelta: 800, weightDeltaKg: 18, effects: {}, engine: { fuelPct: -0.11, powerPct: 0.02 } },
+        ],
+      },
+      {
+        id: 'differential',
+        label: 'Differential',
+        options: [
+          { id: 'normal', label: 'Normal', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'limited-slip', label: 'Limited Slip', description: 'Puts the power down in corners.', unlockYear: 1975, costDelta: 300, weightDeltaKg: 6, effects: { handling: 6 } },
+          { id: 'locking', label: 'Locking', description: 'Grips on any surface.', unlockYear: 1990, costDelta: 700, weightDeltaKg: 12, effects: { handling: 8, offroad: 10 } },
+        ],
+      },
+      {
+        id: 'traction-aids',
+        label: 'Traction Aids',
+        options: [
+          { id: 'none', label: 'None', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'traction-control', label: 'Traction Control', description: 'Stops the wheels spinning.', unlockYear: 1992, costDelta: 500, weightDeltaKg: 3, effects: { handling: 8, safety: 5 } },
+          { id: 'stability-control', label: 'Stability Control', description: 'Keeps the car on the road.', unlockYear: 1998, costDelta: 900, weightDeltaKg: 5, effects: { handling: 12, safety: 12 } },
+        ],
+      },
+      {
+        id: 'caliper',
+        label: 'Brake Calipers',
+        options: [
+          { id: 'none', label: 'None', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'fixed', label: 'Fixed Calipers', description: 'Firmer, more even braking.', unlockYear: 1975, costDelta: 250, weightDeltaKg: 2, effects: { handling: 4 } },
+          { id: 'multi-piston', label: 'Multi-Piston Calipers', description: 'Race-style stopping power.', unlockYear: 1990, costDelta: 700, weightDeltaKg: 3, effects: { handling: 9 } },
+        ],
+      },
+      {
+        id: 'tire-type',
+        label: 'Tires',
+        options: [
+          { id: 'ordinary', label: 'Ordinary', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'all-terrain', label: 'All-Terrain', description: 'Copes with dirt and gravel.', unlockYear: 1950, costDelta: 200, weightDeltaKg: 6, effects: { offroad: 15, handling: -5 } },
+          { id: 'sport-tires', label: 'Sport', description: 'Sticky rubber for the road.', unlockYear: 1975, costDelta: 250, weightDeltaKg: 0, effects: { handling: 10, offroad: -5 } },
+          { id: 'low-profile', label: 'Low Profile', description: 'The best grip, a harsher ride.', unlockYear: 1995, costDelta: 600, weightDeltaKg: 2, effects: { handling: 18, comfort: -5 } },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'InteriorBuild',
+    title: 'Interior Parts',
+    breadcrumb: 'Appearance',
+    meters: [],
+    slots: [
+      {
+        id: 'interior-level',
+        label: 'Interior',
+        options: [
+          { id: 'basic', label: 'Basic', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'comfort', label: 'Comfort', description: 'Better seats and trim.', unlockYear: 1975, costDelta: 300, weightDeltaKg: 6, effects: { comfort: 10 } },
+          { id: 'luxury', label: 'Luxury', description: 'A proper lounge on wheels.', unlockYear: 1995, costDelta: 1200, weightDeltaKg: 12, effects: { comfort: 20, prestige: 15 } },
+        ],
+      },
+      {
+        id: 'seats',
+        label: 'Number of Seats',
+        options: [
+          { id: 's2', label: '2', description: 'A two-seater: light and cheap.', unlockYear: 1950, costDelta: -250, weightDeltaKg: -60, effects: { comfort: -5 } },
+          { id: 's4', label: '4', isDefault: true, unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 's5', label: '5', description: 'Room for the whole family.', unlockYear: 1960, costDelta: 120, weightDeltaKg: 25, effects: { comfort: 3 } },
+          { id: 's7', label: '7', description: 'Room for everyone.', unlockYear: 1985, costDelta: 500, weightDeltaKg: 80, effects: { comfort: 5 } },
+        ],
+      },
+      {
+        id: 'entertainment',
+        label: 'Entertainment',
+        options: [
+          { id: 'basic', label: 'Basic', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'radio', label: 'Radio', description: 'Music on the move.', unlockYear: 1950, costDelta: 80, weightDeltaKg: 1, effects: { comfort: 3 } },
+          { id: 'stereo', label: 'Stereo', description: 'A proper sound system.', unlockYear: 1975, costDelta: 220, weightDeltaKg: 3, effects: { comfort: 6, prestige: 3 } },
+          { id: 'infotainment', label: 'Infotainment', description: 'Screens, maps and phones.', unlockYear: 2000, costDelta: 900, weightDeltaKg: 4, effects: { comfort: 10, prestige: 15 } },
+        ],
+      },
+      {
+        id: 'acoustics',
+        label: 'Acoustics',
+        options: [
+          { id: 'basic', label: 'Basic', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'insulated', label: 'Insulated', description: 'Quieter on the motorway.', unlockYear: 1975, costDelta: 250, weightDeltaKg: 12, effects: { comfort: 8 } },
+          { id: 'premium', label: 'Premium', description: 'Almost silent inside.', unlockYear: 1995, costDelta: 600, weightDeltaKg: 18, effects: { comfort: 15, prestige: 8 } },
+        ],
+      },
+    ],
+  },
 ]
 
 export function findDesignStep(id: string): DesignStepDefinition | undefined {
@@ -427,5 +531,5 @@ export function findDesignStep(id: string): DesignStepDefinition | undefined {
 }
 
 export function defaultOptionId(slot: ComponentSlot): string {
-  return slot.options[0].id
+  return (slot.options.find((o) => o.isDefault) ?? slot.options[0]).id
 }

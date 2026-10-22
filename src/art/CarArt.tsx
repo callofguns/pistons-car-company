@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import { shade } from './iso'
+import { paintHex } from '../core/carTuning'
 
 /** One body style's side profile, front facing right, drawn in a 260 x 112 box. */
 interface CarProfile {
@@ -133,6 +134,10 @@ const MODEL_COLORS = ['#c9473a', '#2f6ee6', '#f2b53c', '#3f9a55', '#e8e8ec', '#2
 
 /** A stable paint color for a finished model, derived from its id so it never changes between
  * visits (models don't store a paint color of their own). */
+export function modelColor(model: { id: string; paint?: { hue: number; light: number } }): string {
+  return model.paint ? paintHex(model.paint) : modelPaint(model.id)
+}
+
 export function modelPaint(modelId: string): string {
   let hash = 0
   for (const ch of modelId) hash = (hash * 31 + ch.charCodeAt(0)) | 0
@@ -148,6 +153,8 @@ interface CarArtProps {
   title?: string
   /** Roof off: the cabin above the beltline is cut away and replaced by an open interior. */
   convertible?: boolean
+  /** See-through body with the seats showing (the Interior step). */
+  cutaway?: boolean
 }
 
 /** The top and sides of a profile's glass area, used to cut a convertible's roof off. */
@@ -161,7 +168,7 @@ function cabinBounds(profile: CarProfile) {
 }
 
 /** Side-view vector drawing of a body style. */
-export function CarArt({ bodyId, color, variant = 'finished', className, title, convertible = false }: CarArtProps) {
+export function CarArt({ bodyId, color, variant = 'finished', className, title, convertible = false, cutaway = false }: CarArtProps) {
   const uid = useId().replace(/:/g, '')
   const profile = PROFILES[bodyId] ?? PROFILES['classic-saloon']
   const paint = color ?? (variant === 'bare' ? BARE_METAL : '#c9473a')
@@ -195,6 +202,7 @@ export function CarArt({ bodyId, color, variant = 'finished', className, title, 
 
       <path
         d={profile.body}
+        opacity={cutaway ? 0.5 : 1}
         fill={`url(#${uid}-paint)`}
         stroke={outline}
         strokeWidth={1.4}
@@ -228,6 +236,24 @@ export function CarArt({ bodyId, color, variant = 'finished', className, title, 
             <rect x={x - 6} y={profile.wheelY - 9} width={12} height={4} rx={1} />
           </g>
         ))}
+
+      {cutaway && !convertible && (
+        <g>
+          {[0, 1].map((i) => {
+            const cabin = cabinBounds(profile)
+            const x = cabin.rear + 14 + i * Math.max(30, (cabin.front - cabin.rear) * 0.42)
+            return (
+              <path
+                key={i}
+                d={`M${x},${cabin.belt - 22} q-4,0 -5,6 l-3,16 h24 q4,0 4,-4 l-1,-6 h-12 l2,-10 q1,-4 -3,-4 Z`}
+                fill="#8a5a36"
+                stroke="#4a2c14"
+                strokeWidth={1}
+              />
+            )
+          })}
+        </g>
+      )}
 
       {!bare && (
         <>

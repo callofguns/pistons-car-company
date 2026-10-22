@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Banknote, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, CircleCheck, Star } from 'lucide-react'
+import { Banknote } from 'lucide-react'
+import { BARE_METAL, CarArt } from '../art/CarArt'
 import { useUiStore } from '../store/useUiStore'
 import { useGameStore } from '../store/useGameStore'
 import { useActiveTutorialStep, useTutorialStore } from '../store/useTutorialStore'
 import { CATALOG } from '../data/catalog'
-import { BARE_METAL, CarArt } from '../art/CarArt'
 import { FactoryBackdrop } from '../art/FactoryBackdrop'
 import { findDesignStep } from '../data/designSteps'
 import { findClassificationTag } from '../data/classifications'
-import { starRating, type DesignStatKey } from '../core/designStats'
+import { starRating } from '../core/designStats'
 import { plainCurrency } from '../core/numberFormat'
 import { toolingCost } from '../core/vehicleService'
 import { buildLiters } from '../core/engineBuilder'
@@ -17,6 +17,8 @@ import type { MessageKey } from '../i18n/keys'
 import { CAR_CLASS_KEY } from '../i18n/vehicles'
 import { translateDesignStep } from '../i18n/designSteps'
 import { MeterBar } from '../components/MeterBar'
+import { DEFAULT_PAINT, paintHex } from '../core/carTuning'
+import { developmentDaysFor } from '../core/development'
 import { Button } from '../components/Primitives'
 import { ComponentSlotCard } from '../components/design/ComponentSlotCard'
 import { partItem, unlockedByResearch } from '../core/unlocks'
@@ -24,10 +26,12 @@ import { ClassificationBoard } from '../components/design/ClassificationBoard'
 import { OptionStrip } from '../components/design/OptionStrip'
 import { EngineStepView, type BuilderHud } from '../components/design/EngineStepView'
 import { SafetyRatingScene } from '../components/design/SafetyRatingScene'
-import { PriceSlider } from '../components/design/PriceSlider'
+import { PriceScreen } from '../components/design/PriceScreen'
+import { ProductionScreen } from '../components/design/ProductionScreen'
+import { SalesRegionsView } from '../components/design/SalesRegionsView'
+import { WizardTabs } from '../components/design/WizardTabs'
+import { AeroStep, AppearanceStep, FinishStep, InteriorStep, PartsStep } from '../components/design/DesignSteps'
 import { TutorialCard } from '../components/TutorialCard'
-import { SpecRow } from '../components/SpecRow'
-import { SpecSheet } from '../components/SpecSheet'
 import styles from './screen.module.css'
 import layout from './showroom.module.css'
 import wizardStyles from './CarDesignScreen.module.css'
@@ -44,7 +48,9 @@ type WizardStepId =
   | 'Interior'
   | 'Aerodynamics'
   | 'Finish'
+  | 'SalesRegions'
   | 'Pricing'
+  | 'Production'
 
 const WIZARD_STEPS: WizardStepId[] = [
   'Classification',
@@ -58,7 +64,9 @@ const WIZARD_STEPS: WizardStepId[] = [
   'Interior',
   'Aerodynamics',
   'Finish',
+  'SalesRegions',
   'Pricing',
+  'Production',
 ]
 
 /** Overrides for steps with bespoke content (Classification/SafetyRating/Engine/Finish/Pricing).
@@ -69,23 +77,10 @@ const STEP_META_KEYS: Partial<Record<WizardStepId, { breadcrumbKey: MessageKey; 
   SafetyRating: { breadcrumbKey: 'carDesign.step.safetyRating.breadcrumb', titleKey: 'carDesign.step.safetyRating.title' },
   Engine: { breadcrumbKey: 'carDesign.step.engine.breadcrumb', titleKey: 'carDesign.step.engine.title' },
   Finish: { breadcrumbKey: 'carDesign.step.finish.breadcrumb', titleKey: 'carDesign.step.finish.title' },
+  SalesRegions: { breadcrumbKey: 'carDesign.step.salesRegions.breadcrumb', titleKey: 'carDesign.step.salesRegions.title' },
   Pricing: { breadcrumbKey: 'carDesign.step.pricing.breadcrumb', titleKey: 'carDesign.step.pricing.title' },
+  Production: { breadcrumbKey: 'carDesign.step.production.breadcrumb', titleKey: 'carDesign.step.production.title' },
 }
-
-const DESIGN_STAT_LABEL_KEY: Record<DesignStatKey, MessageKey> = {
-  safety: 'data.designStat.safety',
-  handling: 'data.designStat.handling',
-  offroad: 'data.designStat.offroad',
-  comfort: 'data.designStat.comfort',
-  prestige: 'data.designStat.prestige',
-  attractiveness: 'data.designStat.attractiveness',
-}
-
-/** Steps with no meaningful Cost Price header (Classification hasn't touched a component;
- * SafetyRating and Finish are full-bleed interstitials; Pricing already shows Cost Price as part
- * of its own PriceSlider, so repeating it in the header would be redundant) - everything else
- * shows it, matching the reference's persistent COST PRICE header on every customization screen. */
-const HIDES_COST_PRICE = new Set<WizardStepId>(['Classification', 'SafetyRating', 'Finish', 'Pricing'])
 
 function stepMeta(stepId: WizardStepId, t: ReturnType<typeof useT>['t']) {
   const meta = STEP_META_KEYS[stepId]
@@ -149,6 +144,12 @@ export function CarDesignScreen() {
   const setNameAndCategory = useGameStore((s) => s.setNameAndCategory)
   const setCustomPrice = useGameStore((s) => s.setCustomPrice)
   const finalizeDesign = useGameStore((s) => s.finalizeDesign)
+  const setSalesRegions = useGameStore((s) => s.setSalesRegions)
+  const setProductionPlan = useGameStore((s) => s.setProductionPlan)
+  const company = useGameStore((s) => s.world.company)
+  const bank = useGameStore((s) => s.world.bank)
+  const today = useGameStore((s) => s.world.time.currentDate)
+  const catalog = useGameStore((s) => s.catalog)
   const previewCurrentStats = useGameStore((s) => s.previewCurrentStats)
   const { t, fmt } = useT()
 
@@ -158,7 +159,10 @@ export function CarDesignScreen() {
   const [stepIndex, setStepIndex] = useState(0)
   const [name, setName] = useState(() => generateDefaultName(body?.carClass, t))
   const [price, setPrice] = useState<number | null>(null)
-  const [specsOpen, setSpecsOpen] = useState(true)
+  const [circulation, setCirculation] = useState(1000)
+  const [autoProduction, setAutoProduction] = useState(true)
+  const [presentation, setPresentation] = useState(false)
+  const [launchError, setLaunchError] = useState(false)
   // Set by the engine builder while it is open, so the top bar follows its sections.
   const [builderHud, setBuilderHud] = useState<BuilderHud | null>(null)
 
@@ -224,20 +228,24 @@ export function CarDesignScreen() {
     else setStepIndex((i) => i - 1)
   }
 
-  const handleContinue = () => {
-    if (stepId === 'Pricing') {
+  const handleContinue = (finalCirculation?: number | unknown) => {
+    if (stepId === 'Production') {
       // Legacy field (see core/vehicles.ts's @deprecated doc comment on CarModel.categoryTag) -
       // still written in English for save round-tripping, but no display site reads it anymore;
       // every display derives the tag live via i18n/vehicles.ts's formatCategoryTag() instead.
       const tagLabel = selectedTags.map((tag) => tag.label.toUpperCase()).join(' + ')
       setNameAndCategory(name.trim(), tagLabel)
-      setCustomPrice(price ?? stats?.suggestedPrice ?? 0)
+      setCustomPrice(price ?? Math.round(stats?.suggestedPrice ?? 0))
+      setProductionPlan(typeof finalCirculation === 'number' ? finalCirculation : circulation, presentation)
       const modelId = finalizeDesign()
       if (modelId) {
+        setLaunchError(false)
         // Drop the Body Selection / wizard screens from the back-stack, so Back on the new model's
         // page returns to the Office instead of re-entering a design session that no longer exists.
         goHome('OfficeHub')
         show('ModelLineup', modelId)
+      } else {
+        setLaunchError(true)
       }
       return
     }
@@ -246,9 +254,6 @@ export function CarDesignScreen() {
 
   const rawGenericStep = findDesignStep(stepId)
   const genericStep = rawGenericStep ? translateDesignStep(rawGenericStep, t) : undefined
-  const meters: DesignStatKey[] = genericStep?.meters ?? (stepId === 'SafetyRating' ? ['safety'] : [])
-  const previousTitle = stepIndex > 0 ? stepMeta(WIZARD_STEPS[stepIndex - 1], t).title : null
-  const nextTitle = stepIndex < WIZARD_STEPS.length - 1 ? stepMeta(WIZARD_STEPS[stepIndex + 1], t).title : null
 
   if (stepId === 'Classification') {
     return (
@@ -365,143 +370,98 @@ export function CarDesignScreen() {
     )
   }
 
+  const tabs = (
+    <WizardTabs
+      titles={WIZARD_STEPS.map((id) => stepMeta(id, t).title)}
+      index={stepIndex}
+      maxIndex={canContinue ? stepIndex + 1 : stepIndex}
+      onJump={setStepIndex}
+    />
+  )
+  const highlight = canContinue && tutorialStep?.step.targetId === 'wizard-continue'
+  const tutorialNode = tutorialStep ? <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} /> : undefined
+  const stepProps = { stepId, body, tabs, onContinue: handleContinue, highlightContinue: highlight, tutorial: tutorialNode }
+
   if (stepId === 'Engine') {
-    const wizardTabs = (
-      <div className={wizardStyles.tabs}>
-        <button className={wizardStyles.tab} onClick={handleBack} disabled={!previousTitle}>
-          {previousTitle && <CircleCheck size={13} className={wizardStyles.tabCheck} />}
-          <span>{previousTitle ?? ''}</span>
-        </button>
-        <span className={`${wizardStyles.tab} ${wizardStyles.tabActive}`}>{meta.title}</span>
-        <button className={wizardStyles.tab} onClick={handleContinue} disabled={!nextTitle || !canContinue}>
-          <span>{nextTitle ?? ''}</span>
-        </button>
-      </div>
-    )
     return (
       <EngineStepView
         bayLiters={body.engineBayCapacityLiters}
-        tabs={wizardTabs}
+        tabs={tabs}
         canContinue={canContinue}
         onContinue={handleContinue}
         onBuilderHud={setBuilderHud}
-        tutorial={tutorialStep ? <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} /> : undefined}
+        tutorial={tutorialNode}
       />
     )
   }
 
+  if (stepId === 'Transmission' || stepId === 'Undercarriage' || stepId === 'Tires') return <PartsStep key={stepId} {...stepProps} />
+  if (stepId === 'Interior') return <InteriorStep key={stepId} {...stepProps} />
+  if (stepId === 'Appearance') return <AppearanceStep key={stepId} {...stepProps} />
+  if (stepId === 'Aerodynamics') return <AeroStep key={stepId} {...stepProps} />
+  if (stepId === 'Finish') return <FinishStep key={stepId} {...stepProps} name={name} onName={setName} canContinue={canContinue} />
+
+  if (stepId === 'SalesRegions') {
+    return (
+      <SalesRegionsView
+        chosen={session.salesRegions ?? []}
+        onChange={setSalesRegions}
+        emissionsGKm={stats?.emissionsGKm ?? 0}
+        year={today.year}
+        carClass={body.carClass}
+        onContinue={handleContinue}
+        tutorial={tutorialNode}
+      />
+    )
+  }
+
+  if (stepId === 'Pricing') {
+    const marketPrice = company.hqLevel >= 2 ? Math.round(catalog.marketSegments.reduce((sum, seg) => sum + seg.populationShare * seg.expectedPrice, 0)) : null
+    return (
+      <PriceScreen
+        costPrice={stats?.unitCost ?? 0}
+        price={price ?? Math.round(stats?.suggestedPrice ?? 0)}
+        onPrice={setPrice}
+        marketPrice={marketPrice}
+        onConfirm={() => {
+          setCustomPrice(price ?? Math.round(stats?.suggestedPrice ?? 0))
+          handleContinue()
+        }}
+        onBack={handleBack}
+        tutorial={tutorialNode}
+      />
+    )
+  }
+
+  // Production
+  const unitCost = stats?.unitCost ?? 0
+  const maxCirculation = unitCost > 0 ? Math.min(100_000, Math.floor(bank.balance / unitCost)) : 0
+  const autoCirculation = Math.max(100, Math.round(Math.min(maxCirculation * 0.3, 5000) / 50) * 50)
+  const shownCirculation = autoProduction ? autoCirculation : Math.min(circulation, maxCirculation)
+  const fullDays = developmentDaysFor(unitCost, session.classificationTagIds)
+  const developmentDays = session.sourceModelId ? Math.max(10, Math.round(fullDays / 2)) : fullDays
   return (
-    <div className={layout.page}>
-      <FactoryBackdrop className={layout.backdrop} />
-
-      {/* Left: the live spec sheet - only this list scrolls. */}
-      <aside className={layout.side}>
-        <button className={layout.sideHeader} onClick={() => setSpecsOpen((open) => !open)} aria-expanded={specsOpen}>
-          {specsOpen ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-          <span>{t('carDesign.specifications')}</span>
-          {specsOpen ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-        </button>
-        {specsOpen && stats && (
-          <div className={layout.sideList}>
-            <SpecSheet stats={stats} engineLiters={session.engine.displacementLiters} />
-            <SpecRow Icon={Star} label={t('carDesign.designFit')} value={`${Math.round(stats.designFitPercent)}%`} />
-          </div>
-        )}
-      </aside>
-
-      {/* Center: step tabs, cost price, the car on the line, the step's meters and CONTINUE. */}
-      <section className={`${layout.center} ${wizardStyles.center}`}>
-        <div className={wizardStyles.tabs}>
-          <button className={wizardStyles.tab} onClick={handleBack} disabled={!previousTitle}>
-            {previousTitle && <CircleCheck size={13} className={wizardStyles.tabCheck} />}
-            <span>{previousTitle ?? ''}</span>
-          </button>
-          <span className={`${wizardStyles.tab} ${wizardStyles.tabActive}`}>{meta.title}</span>
-          <button className={wizardStyles.tab} onClick={handleContinue} disabled={!nextTitle || !canContinue}>
-            <span>{nextTitle ?? ''}</span>
-          </button>
-        </div>
-
-        <div className={wizardStyles.costPrice}>
-          {stats && !HIDES_COST_PRICE.has(stepId) && (
-            <>
-              <span className={wizardStyles.costPriceLabel}>{t('carDesign.costPrice')}</span>
-              <span className={wizardStyles.costPriceValue}>
-                <Banknote size={16} />
-                {plainCurrency(stats.unitCost)}
-              </span>
-            </>
-          )}
-        </div>
-
-        <div className={wizardStyles.stage}>
-          <CarArt bodyId={body.id} color={BARE_METAL} convertible={session.convertible} className={wizardStyles.car} />
-          {tutorialStep && (
-            <div className={wizardStyles.tutorial}>
-              <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} />
-            </div>
-          )}
-        </div>
-
-        <div className={wizardStyles.meters}>
-          {stats &&
-            meters.map((key) => (
-              <div key={key} className={wizardStyles.meter}>
-                <span className={wizardStyles.meterLabel}>{t(DESIGN_STAT_LABEL_KEY[key])}</span>
-                <MeterBar value01={stats.designStats[key] / 100} displayValue={t('carDesign.meterPercent', { value: Math.round(stats.designStats[key]) })} />
-              </div>
-            ))}
-        </div>
-
-        <Button
-          variant="primary"
-          data-tutorial-target="wizard-continue"
-          className={`${wizardStyles.continueButton} ${canContinue && tutorialStep?.step.targetId === 'wizard-continue' ? 'tutorial-target-highlight' : ''}`}
-          onClick={handleContinue}
-          disabled={!canContinue}
-        >
-          {stepId === 'Pricing' ? t('carDesign.finish') : t('common.continue')}
-        </Button>
-      </section>
-
-      {/* Right: this step's choices - only this list scrolls. */}
-      <aside className={layout.side}>
-        <div className={layout.partsHeader}>
-          <button className={layout.partsArrow} onClick={handleBack} aria-label={t('carDesign.previousStep')}>
-            <ChevronLeft size={18} />
-          </button>
-          <span>{meta.title}</span>
-          <button className={layout.partsArrow} onClick={handleContinue} disabled={!canContinue} aria-label={t('carDesign.nextStep')}>
-            <ChevronRight size={18} />
-          </button>
-        </div>
-
-        <div className={layout.sideList}>
-          {genericStep?.slots.map((slot) => (
-            <ComponentSlotCard
-              key={slot.id}
-              slot={slot}
-              selectedOptionId={session.componentSelections[slot.id]}
-              isOptionUnlocked={(option) => isUnlocked(partItem(slot.id, option))}
-              onSelect={(optionId) => setComponentSelection(slot.id, optionId)}
-            />
-          ))}
-
-          {stepId === 'Finish' && (
-            <label className={wizardStyles.nameField}>
-              {t('carDesign.modelName')}
-              <input value={name} onChange={(e) => setName(e.target.value)} />
-            </label>
-          )}
-
-          {stepId === 'Pricing' && stats && (
-            <>
-              <PriceSlider costPrice={stats.unitCost} price={price ?? Math.round(stats.suggestedPrice)} onChange={setPrice} />
-              <div className={wizardStyles.comingSoon}>{t('carDesign.comingSoon')}</div>
-            </>
-          )}
-        </div>
-      </aside>
-    </div>
+    <ProductionScreen
+      name={name.trim()}
+      bodyId={body.id}
+      color={paintHex(session.paint ?? DEFAULT_PAINT)}
+      convertible={session.convertible}
+      circulation={shownCirculation}
+      maxCirculation={maxCirculation}
+      onCirculation={setCirculation}
+      auto={autoProduction}
+      onAuto={(on) => {
+        if (!on) setCirculation(shownCirculation)
+        setAutoProduction(on)
+      }}
+      presentation={presentation}
+      onPresentation={setPresentation}
+      equipmentCost={toolingCost(body, session.convertible)}
+      unitCost={unitCost}
+      developmentDays={developmentDays}
+      error={launchError}
+      onStart={() => handleContinue(shownCirculation)}
+      tutorial={tutorialNode}
+    />
   )
 }

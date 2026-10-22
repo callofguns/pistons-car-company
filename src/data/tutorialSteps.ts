@@ -144,6 +144,15 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     messageKey: 'tutorial.wizardFinish.message',
   },
   {
+    id: 'wizard-regions',
+    condition: firstCarNotDesigned,
+    screen: 'CarDesign',
+    wizardStepId: 'SalesRegions',
+    targetId: 'wizard-continue',
+    titleKey: 'tutorial.wizardRegions.title',
+    messageKey: 'tutorial.wizardRegions.message',
+  },
+  {
     id: 'wizard-pricing',
     condition: firstCarNotDesigned,
     screen: 'CarDesign',
@@ -151,6 +160,15 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     targetId: 'wizard-continue',
     titleKey: 'tutorial.wizardPricing.title',
     messageKey: 'tutorial.wizardPricing.message',
+  },
+  {
+    id: 'wizard-production',
+    condition: firstCarNotDesigned,
+    screen: 'CarDesign',
+    wizardStepId: 'Production',
+    targetId: 'wizard-continue',
+    titleKey: 'tutorial.wizardProduction.title',
+    messageKey: 'tutorial.wizardProduction.message',
   },
   {
     id: 'lineup-finale',

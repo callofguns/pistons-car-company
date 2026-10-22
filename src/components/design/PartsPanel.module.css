@@ -1,0 +1,92 @@
+.title {
+  flex: 1;
+  text-align: center;
+}
+
+.pager {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.dash {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.dashActive {
+  background: var(--color-accent-hover);
+}
+
+.card {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: rgba(10, 18, 48, 0.72);
+  color: var(--color-text-primary);
+  text-align: left;
+}
+
+.cardSelected {
+  border: 2px solid var(--color-accent-hover);
+  background: rgba(24, 40, 96, 0.85);
+}
+
+.brand {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+.brand_pireri {
+  color: #e8453c;
+  text-transform: uppercase;
+}
+
+.brand_michelin {
+  align-self: flex-start;
+  padding: 0 8px;
+  background: #f5d33a;
+  color: #1f3a8a;
+  font-size: 0.95rem;
+}
+
+.brand_ridgestones {
+  color: #f3f6ff;
+  text-transform: uppercase;
+}
+
+.brand_yoody-gear {
+  color: #f5d33a;
+  text-transform: uppercase;
+}
+
+.traits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px var(--space-3);
+  font-size: 0.7rem;
+}
+
+.traits span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.good {
+  color: var(--color-green);
+}
+
+.bad {
+  color: var(--color-danger);
+}
