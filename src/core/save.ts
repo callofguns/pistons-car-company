@@ -13,6 +13,7 @@ import { checkAchievements, type AchievementsState } from './achievements'
 import { type RandomEventsState } from './randomEvents'
 import type { Difficulty } from './difficulty'
 import type { FounderProfile } from './foundation'
+import type { EngineBuild } from './engineBuilder'
 
 /** One research node's saved progress. Effects aren't serialized - on load they're re-applied to a fresh TechModifiers from the catalog definition, same as ResearchService.RestoreState did in the C# port. */
 export interface ResearchNodeSaveEntry {
@@ -58,6 +59,8 @@ export interface SaveGameData {
 
   models: CarModel[]
   tooledBodyIds: string[]
+  /** The engine library. Missing in older saves. */
+  engines?: EngineBuild[]
 
   racingRegistered: boolean
   racingTeamName: string
@@ -138,6 +141,7 @@ export function buildSaveData(world: World): SaveGameData {
 
     models: world.vehicles.models,
     tooledBodyIds: world.vehicles.tooledBodyIds,
+    engines: world.vehicles.engines,
 
     racingRegistered: world.racing.isRegistered,
     racingTeamName: world.racing.teamName,
@@ -211,6 +215,7 @@ export function loadWorld(config: GameConfig, catalog: Catalog, data: SaveGameDa
 
   world.vehicles.models = data.models
   world.vehicles.tooledBodyIds = data.tooledBodyIds
+  world.vehicles.engines = data.engines ?? []
 
   world.racing.isRegistered = data.racingRegistered
   world.racing.teamName = data.racingTeamName

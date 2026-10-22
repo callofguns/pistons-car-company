@@ -3,6 +3,8 @@ import type { DesignStats } from './designStats'
 import type { CriticReview } from './reviews'
 
 /** The five body classes the player can design in, per the game brief. */
+import type { EngineBuild } from './engineBuilder'
+
 export type CarClass = 'Sedan' | 'SUV' | 'Sports' | 'Coupe' | 'Truck'
 
 export type Aspiration = 'NaturallyAspirated' | 'Turbocharged' | 'Supercharged'
@@ -89,6 +91,8 @@ export interface CarModel {
   unitCost: number
   /** Built without a roof. Missing in older saves (a normal car). */
   convertible?: boolean
+  /** The engine this car was built with (missing for cars made with the old preset engines). */
+  engineBuild?: EngineBuild
   salePrice: number
   inventory: number
   totalProduced: number
@@ -138,6 +142,8 @@ export interface ModelDesignSession {
   sourceModelId: string | null
   /** Roof-off version of the chosen body (costs more, see CONVERTIBLE in carSpecsCalculator). */
   convertible?: boolean
+  /** The engine picked from the engine library for this design (null until one is chosen). */
+  engineBuild?: EngineBuild | null
 }
 
 export function createDesignSession(): ModelDesignSession {

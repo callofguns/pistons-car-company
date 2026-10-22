@@ -6,12 +6,12 @@ import { useActiveTutorialStep, useTutorialStore } from '../store/useTutorialSto
 import { CATALOG } from '../data/catalog'
 import { BARE_METAL, CarArt } from '../art/CarArt'
 import { FactoryBackdrop } from '../art/FactoryBackdrop'
-import { findDesignStep, type ComponentSlot } from '../data/designSteps'
-import { ENGINE_PRESETS } from '../data/enginePresets'
+import { findDesignStep } from '../data/designSteps'
 import { findClassificationTag } from '../data/classifications'
 import { starRating, type DesignStatKey } from '../core/designStats'
 import { plainCurrency } from '../core/numberFormat'
 import { toolingCost } from '../core/vehicleService'
+import { buildLiters } from '../core/engineBuilder'
 import { useT } from '../i18n/useT'
 import type { MessageKey } from '../i18n/keys'
 import { CAR_CLASS_KEY } from '../i18n/vehicles'
@@ -19,9 +19,10 @@ import { translateDesignStep } from '../i18n/designSteps'
 import { MeterBar } from '../components/MeterBar'
 import { Button } from '../components/Primitives'
 import { ComponentSlotCard } from '../components/design/ComponentSlotCard'
-import { engineItem, partItem, unlockedByResearch } from '../core/unlocks'
+import { partItem, unlockedByResearch } from '../core/unlocks'
 import { ClassificationBoard } from '../components/design/ClassificationBoard'
 import { OptionStrip } from '../components/design/OptionStrip'
+import { EngineStepView, type BuilderHud } from '../components/design/EngineStepView'
 import { SafetyRatingScene } from '../components/design/SafetyRatingScene'
 import { PriceSlider } from '../components/design/PriceSlider'
 import { TutorialCard } from '../components/TutorialCard'
@@ -36,7 +37,6 @@ type WizardStepId =
   | 'Safety'
   | 'SafetyRating'
   | 'Engine'
-  | 'EngineTuning'
   | 'Transmission'
   | 'Undercarriage'
   | 'Tires'
@@ -51,7 +51,6 @@ const WIZARD_STEPS: WizardStepId[] = [
   'Safety',
   'SafetyRating',
   'Engine',
-  'EngineTuning',
   'Transmission',
   'Undercarriage',
   'Tires',
@@ -147,7 +146,6 @@ export function CarDesignScreen() {
   const research = useGameStore((s) => s.world.research)
   const toggleClassificationTag = useGameStore((s) => s.toggleClassificationTag)
   const setComponentSelection = useGameStore((s) => s.setComponentSelection)
-  const setEnginePreset = useGameStore((s) => s.setEnginePreset)
   const setNameAndCategory = useGameStore((s) => s.setNameAndCategory)
   const setCustomPrice = useGameStore((s) => s.setCustomPrice)
   const finalizeDesign = useGameStore((s) => s.finalizeDesign)
@@ -161,6 +159,8 @@ export function CarDesignScreen() {
   const [name, setName] = useState(() => generateDefaultName(body?.carClass, t))
   const [price, setPrice] = useState<number | null>(null)
   const [specsOpen, setSpecsOpen] = useState(true)
+  // Set by the engine builder while it is open, so the top bar follows its sections.
+  const [builderHud, setBuilderHud] = useState<BuilderHud | null>(null)
 
   // stepId is local state, so TutorialOverlay (rendered at the App level) can't see it directly -
   // report it into useTutorialStore instead. Cleared on unmount so leaving this screen doesn't
@@ -178,12 +178,14 @@ export function CarDesignScreen() {
   const setHudOverride = useUiStore((s) => s.setHudOverride)
   useEffect(() => {
     const stepMetaNow = stepMeta(WIZARD_STEPS[stepIndex], t)
-    setHudOverride({
-      menuLabel: stepMetaNow.breadcrumb,
-      title: stepMetaNow.title,
-      onBack: () => (stepIndex === 0 ? back() : setStepIndex(stepIndex - 1)),
-    })
-  }, [stepIndex, back, setHudOverride, t])
+    setHudOverride(
+      builderHud ?? {
+        menuLabel: stepMetaNow.breadcrumb,
+        title: stepMetaNow.title,
+        onBack: () => (stepIndex === 0 ? back() : setStepIndex(stepIndex - 1)),
+      },
+    )
+  }, [stepIndex, back, setHudOverride, t, builderHud])
   useEffect(() => () => setHudOverride(null), [setHudOverride])
 
   if (!session || !body) {
@@ -210,8 +212,12 @@ export function CarDesignScreen() {
     .map((id) => findClassificationTag(id))
     .filter((tag): tag is NonNullable<typeof tag> => tag !== undefined)
 
+  const engineFits = !session.engineBuild || buildLiters(session.engineBuild) <= body.engineBayCapacityLiters + 0.001
+  const engineChosen = session.engineBuild != null || session.sourceModelId !== null
   const canContinue =
-    (stepId !== 'Classification' || selectedTags.length === 2) && (stepId !== 'Finish' || name.trim().length > 0)
+    (stepId !== 'Classification' || selectedTags.length === 2) &&
+    (stepId !== 'Engine' || (engineChosen && engineFits)) &&
+    (stepId !== 'Finish' || name.trim().length > 0)
 
   const handleBack = () => {
     if (stepIndex === 0) back()
@@ -359,6 +365,31 @@ export function CarDesignScreen() {
     )
   }
 
+  if (stepId === 'Engine') {
+    const wizardTabs = (
+      <div className={wizardStyles.tabs}>
+        <button className={wizardStyles.tab} onClick={handleBack} disabled={!previousTitle}>
+          {previousTitle && <CircleCheck size={13} className={wizardStyles.tabCheck} />}
+          <span>{previousTitle ?? ''}</span>
+        </button>
+        <span className={`${wizardStyles.tab} ${wizardStyles.tabActive}`}>{meta.title}</span>
+        <button className={wizardStyles.tab} onClick={handleContinue} disabled={!nextTitle || !canContinue}>
+          <span>{nextTitle ?? ''}</span>
+        </button>
+      </div>
+    )
+    return (
+      <EngineStepView
+        bayLiters={body.engineBayCapacityLiters}
+        tabs={wizardTabs}
+        canContinue={canContinue}
+        onContinue={handleContinue}
+        onBuilderHud={setBuilderHud}
+        tutorial={tutorialStep ? <TutorialCard step={tutorialStep.step} onNext={tutorialStep.next} onSkip={tutorialStep.skip} /> : undefined}
+      />
+    )
+  }
+
   return (
     <div className={layout.page}>
       <FactoryBackdrop className={layout.backdrop} />
@@ -446,15 +477,6 @@ export function CarDesignScreen() {
         </div>
 
         <div className={layout.sideList}>
-          {stepId === 'Engine' && (
-            <ComponentSlotCard
-              slot={enginePresetSlot(body.engineBayCapacityLiters, t('carDesign.step.engine.title'), t)}
-              selectedOptionId={session.enginePresetId ?? undefined}
-              isOptionUnlocked={(option) => isUnlocked(engineItem(option))}
-              onSelect={setEnginePreset}
-            />
-          )}
-
           {genericStep?.slots.map((slot) => (
             <ComponentSlotCard
               key={slot.id}
@@ -482,34 +504,4 @@ export function CarDesignScreen() {
       </aside>
     </div>
   )
-}
-
-const FUEL_TYPE_KEY: Record<string, MessageKey> = {
-  Petrol: 'data.fuelType.Petrol',
-  Diesel: 'data.fuelType.Diesel',
-  Electric: 'data.fuelType.Electric',
-}
-
-function enginePresetSlot(engineBayCapacityLiters: number, label: string, t: ReturnType<typeof useT>['t']): ComponentSlot {
-  return {
-    id: 'engine-preset',
-    label,
-    options: ENGINE_PRESETS.filter((p) => p.spec.displacementLiters <= engineBayCapacityLiters).map((p) => {
-      const fuelTypeLabel = t(FUEL_TYPE_KEY[p.spec.fuelType])
-      const aspirationPrefix = p.spec.aspiration === 'Turbocharged' ? `${t('carDesign.turbo')} ` : ''
-      return {
-        id: p.id,
-        label: t(`data.enginePreset.${p.id}.name` as MessageKey),
-        description: t('carDesign.engineSpecDescription', {
-          liters: p.spec.displacementLiters,
-          cylinders: p.spec.cylinders,
-          fuelType: aspirationPrefix + fuelTypeLabel,
-        }),
-        unlockYear: p.unlockYear,
-        costDelta: 0,
-        weightDeltaKg: 0,
-        effects: {},
-      }
-    }),
-  }
 }

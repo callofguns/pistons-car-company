@@ -22,6 +22,7 @@ import {
   qualityBonusPercent,
 } from '../core/staff'
 import { marketingDiscountFromFounder, type FounderProfile } from '../core/foundation'
+import type { EngineBuild } from '../core/engineBuilder'
 import { startCampaign as coreStartCampaign } from '../core/marketing'
 import { markAllNewsRead as coreMarkAllNewsRead, postNews } from '../core/news'
 import { resolveRandomEvent } from '../core/randomEvents'
@@ -42,6 +43,9 @@ import {
   beginRestyling as coreBeginRestyling,
   finalizeDesign as coreFinalizeDesign,
   previewCurrentStats as corePreviewCurrentStats,
+  saveEngine as coreSaveEngine,
+  deleteEngine as coreDeleteEngine,
+  applyEngineBuild as coreApplyEngineBuild,
   selectBody as coreSelectBody,
   setComponentSelection as coreSetComponentSelection,
   setCustomPrice as coreSetCustomPrice,
@@ -93,6 +97,10 @@ interface GameStore {
   setNameAndCategory: (name: string, categoryTag: string) => void
   setCustomPrice: (price: number) => void
   finalizeDesign: () => string | null // returns the new model's id, or null on failure
+  /** The engine library (see core/engineBuilder.ts). */
+  saveEngine: (build: EngineBuild) => void
+  deleteEngine: (engineId: string) => void
+  useEngine: (build: EngineBuild) => void
   previewCurrentStats: () => ReturnType<typeof corePreviewCurrentStats>
 
   setOnSale: (modelId: string, onSale: boolean) => void
@@ -265,6 +273,21 @@ export const useGameStore = create<GameStore>((set, get) => {
       }
       bump()
       return model?.id ?? null
+    },
+
+    saveEngine: (build) => {
+      coreSaveEngine(get().world.vehicles, build)
+      bump()
+    },
+
+    deleteEngine: (engineId) => {
+      coreDeleteEngine(get().world.vehicles, engineId)
+      bump()
+    },
+
+    useEngine: (build) => {
+      coreApplyEngineBuild(get().world.vehicles, build)
+      bump()
     },
 
     previewCurrentStats: () => {

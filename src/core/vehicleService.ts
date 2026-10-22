@@ -1,6 +1,7 @@
 import { developmentDaysFor } from './development'
 
 const RESTYLE_MIN_DEVELOPMENT_DAYS = 10
+import { BOOST_SLOT_IDS, extraBuildOption, selectionsOfBuild, specOfBuild, type EngineBuild } from './engineBuilder'
 import { applyConvertible, calculateCarSpecs, CONVERTIBLE, type DesignChoices } from './carSpecsCalculator'
 import { tryWithdrawRecorded, type BankState } from './economy'
 import type { LedgerState } from './ledger'
@@ -21,12 +22,14 @@ import { findClassificationTag } from '../data/classifications'
 /** Owns the player's model lineup and the in-progress design wizard. Direct port of VehicleService.cs. */
 export interface VehicleState {
   models: CarModel[]
+  /** The engines the player has built; any car design can use one. */
+  engines: EngineBuild[]
   tooledBodyIds: string[]
   currentSession: ModelDesignSession | null
 }
 
 export function createVehicleState(): VehicleState {
-  return { models: [], tooledBodyIds: [], currentSession: null }
+  return { models: [], engines: [], tooledBodyIds: [], currentSession: null }
 }
 
 export function resolveBody(bodies: BodyStyleDefinition[], model: CarModel): BodyStyleDefinition | undefined {
@@ -55,6 +58,7 @@ export function beginRestyling(vehicles: VehicleState, source: CarModel): void {
     ...createDesignSession(),
     selectedBodyId: source.bodyStyleId,
     convertible: source.convertible,
+    engineBuild: source.engineBuild ?? null,
     engine: { ...source.engine },
     enginePresetId: source.enginePresetId,
     classificationTagIds: [...source.classificationTagIds],
@@ -127,7 +131,7 @@ export function selectBody(
     existingPreset !== undefined &&
     existingPreset.spec.displacementLiters <= body.engineBayCapacityLiters &&
     isUnlocked(engineItem(existingPreset))
-  if (!existingPresetStillFits) {
+  if (!existingPresetStillFits && !session.engineBuild) {
     const preset = defaultEnginePresetFor(body, isUnlocked)
     session.enginePresetId = preset.id
     session.engine = { ...preset.spec }
@@ -191,13 +195,20 @@ export function setCustomPrice(vehicles: VehicleState, price: number): void {
  * definitions calculateCarSpecs needs. Unrecognized/unset ids are simply skipped. */
 function resolveDesignChoices(session: ModelDesignSession): DesignChoices {
   const componentOptions: ComponentOption[] = []
+  const boosted = (session.componentSelections['forced-induction'] ?? 'none') !== 'none'
   for (const step of DESIGN_STEPS) {
     for (const slot of step.slots) {
+      // The boost setup only matters with a turbo or supercharger fitted.
+      if (BOOST_SLOT_IDS.has(slot.id) && !boosted) continue
       const optionId = session.componentSelections[slot.id]
       const option = slot.options.find((o) => o.id === optionId)
       if (option) componentOptions.push(option)
     }
   }
+
+  // The engine builder's sliders and fuel grade.
+  const extra = session.engineBuild ? extraBuildOption(session.engineBuild) : null
+  if (extra) componentOptions.push(extra)
 
   const classificationTags = session.classificationTagIds
     .map((id) => findClassificationTag(id))
@@ -260,6 +271,7 @@ export function finalizeDesign(
     issueDate: today,
     unitCost: stats.unitCost,
     convertible: session.convertible ? true : undefined,
+    engineBuild: session.engineBuild ?? undefined,
     salePrice: session.customPrice ?? stats.suggestedPrice,
     inventory: 0,
     totalProduced: 0,
@@ -293,3 +305,33 @@ export function setSalePrice(model: CarModel, price: number): void {
   model.salePrice = price
 }
 
+
+let engineIdCounter = 0
+export function nextEngineId(): string {
+  engineIdCounter += 1
+  return `engine-${Date.now().toString(36)}-${engineIdCounter}`
+}
+
+/** Saves an engine in the library: replaces the one with the same id, or adds it. */
+export function saveEngine(vehicles: VehicleState, build: EngineBuild): void {
+  const copy: EngineBuild = { ...build, parts: { ...build.parts } }
+  const index = vehicles.engines.findIndex((e) => e.id === copy.id)
+  if (index >= 0) vehicles.engines[index] = copy
+  else vehicles.engines.push(copy)
+}
+
+export function deleteEngine(vehicles: VehicleState, engineId: string): void {
+  vehicles.engines = vehicles.engines.filter((e) => e.id !== engineId)
+  if (vehicles.currentSession?.engineBuild?.id === engineId) vehicles.currentSession.engineBuild = null
+}
+
+/** Uses a library engine in the design in progress: sets its size and writes its part choices into
+ * the design's selections so the car's numbers include them. */
+export function applyEngineBuild(vehicles: VehicleState, build: EngineBuild): void {
+  if (!vehicles.currentSession) beginNewDesign(vehicles)
+  const session = vehicles.currentSession!
+  session.engineBuild = { ...build, parts: { ...build.parts } }
+  session.engine = specOfBuild(build)
+  session.enginePresetId = null
+  Object.assign(session.componentSelections, selectionsOfBuild(build))
+}

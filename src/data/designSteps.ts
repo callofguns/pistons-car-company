@@ -299,6 +299,127 @@ export const DESIGN_STEPS: DesignStepDefinition[] = [
       },
     ],
   },
+  {
+    id: 'EngineBuild',
+    title: 'Engine Builder',
+    breadcrumb: 'Engine',
+    meters: [],
+    slots: [
+      {
+        id: 'engine-type',
+        label: 'Engine Type',
+        options: [
+          { id: 'inline', label: 'Inline', description: 'Simple, cheap and reliable.', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'v-type', label: 'V-Type', description: 'Compact and smooth: a little more power for the size.', unlockYear: 1950, costDelta: 250, weightDeltaKg: -8, effects: {}, engine: { powerPct: 0.02 } },
+          { id: 'flat', label: 'Flat (Boxer)', description: 'Low and balanced: better handling, but it costs more.', unlockYear: 1975, costDelta: 450, weightDeltaKg: 6, effects: { handling: 3 }, engine: { reliability: 1 } },
+        ],
+      },
+      {
+        id: 'engine-material',
+        label: 'Engine Material',
+        options: [
+          { id: 'cast-iron', label: 'Cast Iron', description: 'Strong and cheap, but heavy.', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'aluminum', label: 'Aluminum', description: 'Much lighter, but it costs more.', unlockYear: 1975, costDelta: 450, weightDeltaKg: -35, effects: {}, engine: { reliability: -1, fuelPct: -0.02 } },
+        ],
+      },
+      {
+        id: 'head-material',
+        label: 'Cylinder Head Material',
+        options: [
+          { id: 'cast-iron', label: 'Cast Iron', description: 'Cheap and tough.', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'aluminum', label: 'Aluminum', description: 'Sheds heat faster: a little more power.', unlockYear: 1975, costDelta: 250, weightDeltaKg: -12, effects: {}, engine: { powerPct: 0.02 } },
+        ],
+      },
+      {
+        id: 'pistons',
+        label: 'Pistons',
+        options: [
+          { id: 'standard', label: 'Standard', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'forged', label: 'Forged', description: 'Stronger and lighter: the engine revs higher.', unlockYear: 1975, costDelta: 300, weightDeltaKg: -3, effects: {}, engine: { reliability: 2, maxRpm: 300 } },
+        ],
+      },
+      {
+        id: 'conrods',
+        label: 'Conrods',
+        options: [
+          { id: 'standard', label: 'Standard', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'forged', label: 'Forged', description: 'Survives hard use.', unlockYear: 1980, costDelta: 250, weightDeltaKg: 0, effects: {}, engine: { reliability: 2 } },
+        ],
+      },
+      {
+        id: 'crankshaft',
+        label: 'Crankshaft',
+        options: [
+          { id: 'standard', label: 'Standard', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'balanced', label: 'Balanced', description: 'Smoother running and a longer life.', unlockYear: 1950, costDelta: 350, weightDeltaKg: 2, effects: {}, engine: { reliability: 2 } },
+          { id: 'lightweight', label: 'Lightweight', description: 'Spins up quickly.', unlockYear: 1990, costDelta: 900, weightDeltaKg: -6, effects: {}, engine: { powerPct: 0.02, maxRpm: 500 } },
+        ],
+      },
+      {
+        id: 'valves',
+        label: 'Valves per Cylinder',
+        options: [
+          { id: 'v2', label: '2', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'v3', label: '3', description: 'Better breathing.', unlockYear: 1975, costDelta: 200, weightDeltaKg: 0, effects: {}, engine: { powerPct: 0.02 } },
+          { id: 'v4', label: '4', description: 'Much better breathing and a thriftier engine.', unlockYear: 1985, costDelta: 450, weightDeltaKg: 0, effects: {}, engine: { powerPct: 0.05, fuelPct: -0.02 } },
+          { id: 'v5', label: '5', description: 'The most air possible, with a little more to go wrong.', unlockYear: 1995, costDelta: 700, weightDeltaKg: 0, effects: {}, engine: { powerPct: 0.07, fuelPct: -0.03, reliability: -1 } },
+        ],
+      },
+      {
+        id: 'fuel-system',
+        label: 'Fuel System',
+        options: [
+          { id: 'carburetor', label: 'Carburetor', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'injection', label: 'Fuel Injection', description: 'Cleaner and thriftier than a carburetor.', unlockYear: 1975, costDelta: 500, weightDeltaKg: 4, effects: {}, engine: { powerPct: 0.03, fuelPct: -0.08, emissionsPct: -0.05 } },
+          { id: 'direct-injection', label: 'Direct Injection', description: 'The most efficient way to burn fuel.', unlockYear: 1995, costDelta: 1100, weightDeltaKg: 6, effects: {}, engine: { powerPct: 0.06, fuelPct: -0.14, emissionsPct: -0.1 } },
+        ],
+      },
+      {
+        id: 'intake',
+        label: 'Intake',
+        options: [
+          { id: 'standard', label: 'Standard', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'sport-intake', label: 'Sport Intake', description: 'Free-flowing air: more power.', unlockYear: 1950, costDelta: 250, weightDeltaKg: 0, effects: {}, engine: { powerPct: 0.03, emissionsPct: 0.02 } },
+          { id: 'ram-air', label: 'Ram Air', description: 'Forces air in at speed.', unlockYear: 1985, costDelta: 600, weightDeltaKg: 2, effects: {}, engine: { powerPct: 0.05 } },
+        ],
+      },
+      {
+        id: 'turbo-setup',
+        label: 'Boost Setup',
+        options: [
+          { id: 'low', label: 'Low Boost', description: 'Gentle and reliable.', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'medium', label: 'Medium Boost', description: 'More power, a little less reliability.', unlockYear: 1950, costDelta: 200, weightDeltaKg: 0, effects: {}, engine: { powerPct: 0.05, reliability: -2 } },
+          { id: 'high', label: 'High Boost', description: 'Big power and a short life.', unlockYear: 1950, costDelta: 450, weightDeltaKg: 0, effects: {}, engine: { powerPct: 0.1, reliability: -4, fuelPct: 0.04 } },
+        ],
+      },
+      {
+        id: 'turbo-preset',
+        label: 'Turbo Preset',
+        options: [
+          { id: 'street', label: 'Street', description: 'Smooth and dependable.', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {}, engine: { reliability: 2, powerPct: -0.01 } },
+          { id: 'sport', label: 'Sport', description: 'A balanced setup.', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'race', label: 'Race', description: 'All-out boost response.', unlockYear: 1950, costDelta: 300, weightDeltaKg: 0, effects: {}, engine: { powerPct: 0.04, reliability: -3, maxRpm: 200 } },
+        ],
+      },
+      {
+        id: 'manifold',
+        label: 'Exhaust Manifold',
+        options: [
+          { id: 'default', label: 'Default', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'tubular', label: 'Tubular', description: 'Lets the exhaust out more freely.', unlockYear: 1975, costDelta: 350, weightDeltaKg: -4, effects: {}, engine: { powerPct: 0.02, emissionsPct: 0.03 } },
+        ],
+      },
+      {
+        id: 'muffler',
+        label: 'Muffler',
+        options: [
+          { id: 'standard', label: 'Standard', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: {} },
+          { id: 'sport', label: 'Sport', description: 'Louder and freer.', unlockYear: 1950, costDelta: 150, weightDeltaKg: -2, effects: {}, engine: { powerPct: 0.01, emissionsPct: 0.03 } },
+          { id: 'straight-pipe', label: 'Straight Pipe', description: 'Maximum noise, minimal restriction.', unlockYear: 1985, costDelta: 200, weightDeltaKg: -6, effects: {}, engine: { powerPct: 0.03, emissionsPct: 0.1 } },
+        ],
+      },
+    ],
+  },
 ]
 
 export function findDesignStep(id: string): DesignStepDefinition | undefined {

@@ -19,6 +19,7 @@ export const ENGINE_PRESETS: EnginePresetDefinition[] = [
   { id: 'muscle-v8', name: 'Muscle V8 5.0L', unlockYear: 1968, spec: { displacementLiters: 5.0, cylinders: 8, aspiration: 'NaturallyAspirated', fuelType: 'Petrol', valveCount: 16 } },
   { id: 'sport-turbo-i4', name: 'Sport Turbo I4 2.0L', unlockYear: 1975, spec: { displacementLiters: 2.0, cylinders: 4, aspiration: 'Turbocharged', fuelType: 'Petrol', valveCount: 16 } },
   { id: 'rally-turbo-i4', name: 'Rally Turbo I4 2.2L', unlockYear: 1980, spec: { displacementLiters: 2.2, cylinders: 4, aspiration: 'Turbocharged', fuelType: 'Petrol', valveCount: 16 } },
+  { id: 'grand-v12', name: 'Grand V12 6.0L', unlockYear: 1992, spec: { displacementLiters: 6.0, cylinders: 12, aspiration: 'NaturallyAspirated', fuelType: 'Petrol', valveCount: 48 } },
   { id: 'electric-drive', name: 'Electric Drive Unit', unlockYear: 2005, spec: { displacementLiters: 0.3, cylinders: 0, aspiration: 'NaturallyAspirated', fuelType: 'Electric', valveCount: 0 } },
 ]
 
