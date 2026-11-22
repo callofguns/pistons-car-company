@@ -43,8 +43,10 @@ export function CompanyLogo({ logo, size = 96 }: { logo: LogoChoice; size?: numb
           </linearGradient>
         </defs>
         <path d={path} fill={`url(#${id})`} stroke={`hsl(${logo.formHue} 60% 78%)`} strokeWidth="3" strokeLinejoin="round" />
+        {/* Drawn inside the badge's own picture, centred in its 100 x 100 box, so it can't drift
+            off-centre the way a separately laid-out icon did on some phone browsers. */}
+        <Icon x={25} y={25} width={50} height={50} strokeWidth={2.2} color={`hsl(${logo.symbolHue} 90% 80%)`} />
       </svg>
-      <Icon className={styles.symbol} size={size * 0.5} strokeWidth={2.2} color={`hsl(${logo.symbolHue} 90% 80%)`} />
     </span>
   )
 }
