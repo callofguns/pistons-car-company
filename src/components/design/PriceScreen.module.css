@@ -123,9 +123,12 @@
 }
 
 .slider {
+  /* Spans exactly the band the blue/grey split moves through (30%-70% of the screen), so the
+     handle always sits on the split. The extra 44px is the handle's own width. */
   position: absolute;
-  inset: 0;
-  width: 100%;
+  top: 0;
+  left: calc(30% - 22px);
+  width: calc(40% + 44px);
   height: 100%;
   margin: 0;
   appearance: none;

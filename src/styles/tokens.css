@@ -120,6 +120,16 @@ input {
   border-radius: var(--radius);
 }
 
+/* Sliders draw their own track and handle - the text-box frame above only put a box around them. */
+input[type='range'],
+input[type='range']:focus {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 input::placeholder {
   color: var(--color-text-disabled);
 }

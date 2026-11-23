@@ -198,7 +198,7 @@
 /* ---- wind tunnel ---- */
 .aero {
   position: absolute;
-  inset: 0 0 34% 0;
+  inset: 0 0 46% 0;
   pointer-events: none;
 }
 
@@ -234,7 +234,7 @@
   position: absolute;
   left: 4%;
   right: 4%;
-  top: 36%;
+  top: 18%;
   width: 92%;
   height: 40px;
   pointer-events: auto;

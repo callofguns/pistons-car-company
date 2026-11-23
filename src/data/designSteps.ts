@@ -266,7 +266,7 @@ export const DESIGN_STEPS: DesignStepDefinition[] = [
         label: 'Interior Material',
         options: [
           { id: 'basic-vinyl', label: 'Basic Vinyl', unlockYear: 1950, costDelta: 0, weightDeltaKg: 0, effects: { comfort: 10 } },
-          { id: 'fabric', label: 'Fabric', unlockYear: 1950, costDelta: 150, weightDeltaKg: 3, effects: { comfort: 20 } },
+          { id: 'fabric', label: 'Fabric', isDefault: true, unlockYear: 1950, costDelta: 150, weightDeltaKg: 3, effects: { comfort: 20 } },
           { id: 'leatherette', label: 'Leatherette', unlockYear: 1975, costDelta: 400, weightDeltaKg: 4, effects: { comfort: 30, prestige: 10 } },
           { id: 'leather', label: 'Leather', unlockYear: 1985, costDelta: 900, weightDeltaKg: 6, effects: { comfort: 45, prestige: 30 } },
           { id: 'premium-leather', label: 'Premium Leather', unlockYear: 2000, costDelta: 2000, weightDeltaKg: 8, effects: { comfort: 60, prestige: 55 } },
