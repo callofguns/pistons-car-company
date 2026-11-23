@@ -47,3 +47,23 @@ describe('calculateCarSpecs', () => {
     expect(withResearch.powerHp).toBeGreaterThan(baseline.powerHp)
   })
 })
+
+describe('research effects that cut something', () => {
+  it('lower emissions, production cost and repair cost (they used to raise them)', async () => {
+    const { TechModifiers } = await import('../src/core/techModifiers')
+    const { BODIES } = await import('../src/data/bodies')
+    const { DEFAULT_ENGINE_SPEC } = await import('../src/core/vehicles')
+    const body = BODIES[0]
+    const plain = calculateCarSpecs(body, DEFAULT_ENGINE_SPEC, new TechModifiers())
+    const tech = new TechModifiers()
+    tech.apply([
+      { target: 'Emissions', amount: -0.15 },
+      { target: 'ProductionCost', amount: -0.06 },
+      { target: 'RepairCost', amount: -0.02 },
+    ])
+    const researched = calculateCarSpecs(body, DEFAULT_ENGINE_SPEC, tech)
+    expect(researched.emissionsGKm).toBeLessThan(plain.emissionsGKm)
+    expect(researched.unitCost).toBeLessThan(plain.unitCost)
+    expect(researched.repairCost).toBeLessThan(plain.repairCost)
+  })
+})

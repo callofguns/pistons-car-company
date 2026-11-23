@@ -37,8 +37,9 @@ describe('HQ region effects', () => {
     expect(multiplier).toBeLessThan(1)
   })
 
-  it('Mexico City makes every car 10% cheaper', () => {
+  it('Mexico City makes sedans and coupes 10% cheaper, but not SUVs', () => {
     expect(hqCostMultiplier(founder('mexico'), { carClass: 'Coupe', unitCost: 4000, powerHp: 90 })).toBeCloseTo(0.9)
+    expect(hqCostMultiplier(founder('mexico'), { carClass: 'SUV', unitCost: 4000, powerHp: 90 })).toBe(1)
   })
 
   it('London boosts sports and coupe buyers', () => {

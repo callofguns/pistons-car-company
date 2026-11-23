@@ -4,6 +4,9 @@ import { computeDesignStats, designFitPercent } from './designStats'
 import type { ComponentOption } from '../data/designSteps'
 import type { ClassificationTagDefinition } from '../data/classifications'
 
+/** The smallest price-over-cost the designer will suggest. */
+export const MIN_SUGGESTED_MARKUP = 1.25
+
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 const inverseLerp = (a: number, b: number, v: number) => clamp((v - a) / (b - a), 0, 1)
 
@@ -47,9 +50,11 @@ export function calculateCarSpecs(
   const powerMul = 1 + tech.get('Power')
   const reliabilityBonus = tech.get('Reliability')
   const fuelEconomyBonus = tech.get('FuelEconomy')
-  const emissionsCut = tech.get('Emissions')
-  const costCut = tech.get('ProductionCost')
-  const repairCut = tech.get('RepairCost')
+  // Research cards store these as a change: -0.15 means 15% less. (They used to be subtracted, so
+  // research meant to cut costs and emissions raised them instead.)
+  const emissionsFactor = Math.max(0.2, 1 + tech.get('Emissions'))
+  const costFactor = Math.max(0.2, 1 + tech.get('ProductionCost'))
+  const repairFactor = Math.max(0.2, 1 + tech.get('RepairCost'))
 
   const componentWeightDeltaKg = componentOptions.reduce((sum, o) => sum + o.weightDeltaKg, 0)
   const componentCostDelta = componentOptions.reduce((sum, o) => sum + o.costDelta, 0)
@@ -72,11 +77,11 @@ export function calculateCarSpecs(
   )
 
   const emissions =
-    engine.fuelType === 'Electric' ? 0 : Math.max(40, (110 + engine.displacementLiters * 170) * (1 - emissionsCut) * (1 + tuning.emissionsPct))
+    engine.fuelType === 'Electric' ? 0 : Math.max(40, (110 + engine.displacementLiters * 170) * emissionsFactor * (1 + tuning.emissionsPct))
 
   const repairCost = Math.max(
     150,
-    (500 + powerHp * 3.1 + (aspiration !== 'NaturallyAspirated' ? 300 : 0)) * (1 - repairCut),
+    (500 + powerHp * 3.1 + (aspiration !== 'NaturallyAspirated' ? 300 : 0)) * repairFactor,
   )
 
   const maxRpm = clamp(6400 - engine.cylinders * 160 + (aspiration === 'Turbocharged' ? 300 : 0) + tuning.maxRpm, 4500, 9000)
@@ -87,7 +92,7 @@ export function calculateCarSpecs(
 
   const unitCost = Math.max(
     500,
-    (body.baseUnitCost + powerHp * 21 + (aspiration !== 'NaturallyAspirated' ? 1200 : 0)) * (1 - costCut) +
+    (body.baseUnitCost + powerHp * 21 + (aspiration !== 'NaturallyAspirated' ? 1200 : 0)) * costFactor +
       componentCostDelta,
   )
 
@@ -101,7 +106,9 @@ export function calculateCarSpecs(
   // misses badly still keeps 70% of it - fit shapes price, it doesn't gate the design entirely.
   // ~45% markup over cost for a mid-market design - real carmakers work on thin margins, so the
   // money comes from volume.
-  const suggestedPrice = unitCost * 1.3 * tagPriceMultiplier * (0.7 + 0.3 * (fitPercent / 100))
+  // Never suggest less than a 25% markup: a Budget tag's lower price used to leave almost no margin,
+  // so taking the suggestion could quietly bankrupt a new player.
+  const suggestedPrice = Math.max(unitCost * MIN_SUGGESTED_MARKUP, unitCost * 1.3 * tagPriceMultiplier * (0.7 + 0.3 * (fitPercent / 100)))
 
   const rating = computeRating(powerHp, reliability, fuelConsumption, zeroToHundred)
 

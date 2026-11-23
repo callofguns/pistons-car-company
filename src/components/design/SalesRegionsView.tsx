@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowLeft, Check, Leaf, MapPin, X } from 'lucide-react'
 import { SALES_REGIONS, findSalesRegion, type SalesRegionDefinition } from '../../data/salesRegions'
 import { passesEmissions, regionEmissionLimit, regionFees } from '../../core/salesRegions'
@@ -10,7 +10,8 @@ import { Button } from '../Primitives'
 import styles from './SalesRegionsView.module.css'
 
 interface SalesRegionsViewProps {
-  chosen: string[]
+  /** Undefined until the player first reaches this step: then every region the car passes is chosen. */
+  chosen: string[] | undefined
   onChange: (regionIds: string[]) => void
   emissionsGKm: number
   year: number
@@ -31,9 +32,18 @@ const CONTINENTS = [
 
 /** Choose which parts of the world the car is sold in: a world map with a pin per region, and a
  * panel for each with its emission rules, price and how much it likes this kind of car. */
-export function SalesRegionsView({ chosen, onChange, emissionsGKm, year, carClass, onContinue, tutorial }: SalesRegionsViewProps) {
+export function SalesRegionsView({ chosen: chosenOrNone, onChange, emissionsGKm, year, carClass, onContinue, tutorial }: SalesRegionsViewProps) {
   const { t, fmt } = useT()
+  const chosen = chosenOrNone ?? []
   const [openId, setOpenId] = useState<string | null>(null)
+
+  // Start with every region the car is allowed in, so a new player sells to the whole world unless
+  // they decide to leave a region out.
+  useEffect(() => {
+    if (chosenOrNone === undefined) onChange(SALES_REGIONS.filter((r) => passesEmissions(r, emissionsGKm, year)).map((r) => r.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const open = openId ? findSalesRegion(openId) : undefined
   const total = regionFees(chosen)
 
@@ -117,6 +127,10 @@ export function SalesRegionsView({ chosen, onChange, emissionsGKm, year, carClas
                 <X size={14} /> {t('salesRegions.fail')}
               </>
             )}
+          </div>
+          <div className={styles.row}>
+            <span>{t('salesRegions.buyers')}</span>
+            <b>{t('salesRegions.buyersValue', { value: Math.round(open.weight * 100) })}</b>
           </div>
           <div className={styles.row}>
             <span>{t('salesRegions.priceRow')}</span>

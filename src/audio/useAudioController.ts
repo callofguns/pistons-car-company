@@ -14,6 +14,7 @@ const NEWS_SOUNDS: Partial<Record<NewsEventType, Parameters<typeof playSfx>[0]>>
   BankruptcyWarning: 'warning',
   HistoryEventStarted: 'warning',
   ModelSoldOut: 'error',
+  EmissionRulesTightened: 'warning',
   RaceCompleted: 'chime',
 }
 

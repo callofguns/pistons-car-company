@@ -17,7 +17,8 @@ import { isInDevelopment, onDevelopmentDayTick } from './development'
 import { addOrder, autoAssignReleasedModel, carsOnOrder, createFactoryState, onFactoryDayTick, onFactoryMonthTick, type FactoryState } from './factory'
 import { difficultySettings } from './difficulty'
 import type { CarClass } from './vehicles'
-import { regionDemandFactor } from './salesRegions'
+import { passesEmissions, regionDemandFactor, worldEmissionLimit } from './salesRegions'
+import { findSalesRegion } from '../data/salesRegions'
 import { PRESENTATION } from './carTuning'
 import { BODIES } from '../data/bodies'
 import { createRacingState, onRacingMonthTick, type RacingState } from './racing'
@@ -162,6 +163,19 @@ export function advanceOneDay(world: World, catalog: Catalog, config: GameConfig
   const researchPointsToday = developing ? config.researchPointsPerDay + researchPointsBonus(world.staff, catalog.employeePerks) : 0
   const completedResearch = onResearchDayTick(world.research, catalog.researchNodes, researchPointsToday)
   for (const nodeId of completedResearch) postNews(world.news, 'ResearchCompleted', today, { nodeId })
+
+  // New emission rules come in on 1 January of some years: tell the player which of their cars
+  // just got shut out of which regions.
+  if (today.month === 1 && today.day === 1 && worldEmissionLimit(today.year) !== worldEmissionLimit(today.year - 1)) {
+    for (const model of world.vehicles.models) {
+      if (!model.salesRegions || !model.isOnSale || isInDevelopment(model)) continue
+      const lost = model.salesRegions.filter((id) => {
+        const region = findSalesRegion(id)
+        return region && passesEmissions(region, model.stats.emissionsGKm, today.year - 1) && !passesEmissions(region, model.stats.emissionsGKm, today.year)
+      })
+      if (lost.length > 0) postNews(world.news, 'EmissionRulesTightened', today, { modelName: model.name, regionIds: lost.join(',') })
+    }
+  }
 
   for (const model of onDevelopmentDayTick(world.vehicles.models)) {
     // A newly released model goes straight onto an idle line, if any - the player still decides

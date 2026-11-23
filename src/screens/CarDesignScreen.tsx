@@ -404,7 +404,7 @@ export function CarDesignScreen() {
   if (stepId === 'SalesRegions') {
     return (
       <SalesRegionsView
-        chosen={session.salesRegions ?? []}
+        chosen={session.salesRegions}
         onChange={setSalesRegions}
         emissionsGKm={stats?.emissionsGKm ?? 0}
         year={today.year}

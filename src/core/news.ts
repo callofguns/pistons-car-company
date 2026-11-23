@@ -34,6 +34,7 @@ export type NewsEventType =
   | 'ModelReviewed'
   | 'RandomEvent'
   | 'RandomEventResolved'
+  | 'EmissionRulesTightened'
 
 export interface NewsEntry {
   id: string

@@ -229,7 +229,7 @@ export function computeEngineStats(build: EngineBuild, tech: TechModifiers): Eng
   const costDelta = options.reduce((sum, o) => sum + o.costDelta, 0)
   const weightDelta = options.reduce((sum, o) => sum + o.weightDeltaKg, 0)
   const forced = options.some((o) => o.engine?.aspiration && o.engine.aspiration !== 'NaturallyAspirated')
-  const costCut = tech.get('ProductionCost')
+  const costFactor = Math.max(0.2, 1 + tech.get('ProductionCost'))
   return {
     powerHp: car.powerHp,
     torqueNm: car.torqueNm,
@@ -241,7 +241,7 @@ export function computeEngineStats(build: EngineBuild, tech: TechModifiers): Eng
     repairCost: car.repairCost,
     weightKg: Math.max(25, spec.cylinders * 22 + spec.displacementLiters * 45 + weightDelta),
     maxRpm: car.maxRpm,
-    costPrice: Math.max(100, (car.powerHp * 21 + (forced ? 1200 : 0)) * (1 - costCut) + costDelta),
+    costPrice: Math.max(100, (car.powerHp * 21 + (forced ? 1200 : 0)) * costFactor + costDelta),
   }
 }
 

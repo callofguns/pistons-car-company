@@ -103,3 +103,25 @@ describe('the first production run and the launch presentation', () => {
     expect(model.marketingActive).toBe(true)
   })
 })
+
+describe('emission news', () => {
+  it('tells the player when new rules shut a car out of a region', async () => {
+    const { createNewWorld, advanceOneDay } = await import('../src/core/world')
+    const { DEFAULT_GAME_CONFIG } = await import('../src/core/gameConfig')
+    const { CATALOG } = await import('../src/data/catalog')
+    const { makeDate } = await import('../src/core/gameDate')
+    const world = createNewWorld(DEFAULT_GAME_CONFIG, CATALOG, 'Eco', 'normal')
+    const { beginNewDesign, selectBody, setNameAndCategory, finalizeDesign, setSalesRegions } = await import('../src/core/vehicleService')
+    const { unlockedByYear } = await import('../src/core/unlocks')
+    beginNewDesign(world.vehicles)
+    selectBody(world.vehicles, CATALOG.bodies[0], world.bank, world.ledger, unlockedByYear(1970), makeDate(1970, 1, 1))
+    setSalesRegions(world.vehicles, ['europe', 'africa'])
+    setNameAndCategory(world.vehicles, 'Smoky', 'X')
+    const model = finalizeDesign(world.vehicles, CATALOG.bodies, world.research.modifiers, makeDate(1970, 1, 1))!
+    model.developmentDaysRemaining = 0
+    model.stats.emissionsGKm = 600
+    advanceOneDay(world, CATALOG, DEFAULT_GAME_CONFIG, makeDate(1975, 1, 1))
+    const news = world.news.entries.find((e) => e.type === 'EmissionRulesTightened')
+    expect(news?.params.regionIds).toBe('europe')
+  })
+})

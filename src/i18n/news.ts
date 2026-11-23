@@ -88,6 +88,14 @@ export function renderNewsHeadline(entry: NewsEntry, t: ReturnType<typeof useT>[
     }
     case 'RandomEvent':
       return t('news.randomEvent', { title: t(`data.randomEvent.${entry.params.eventId}.title` as MessageKey) })
+    case 'EmissionRulesTightened':
+      return t('news.emissionRulesTightened', {
+        modelName: String(entry.params.modelName),
+        regions: String(entry.params.regionIds)
+          .split(',')
+          .map((id) => t(`data.region.${id}.name` as MessageKey))
+          .join(', '),
+      })
     case 'RandomEventResolved': {
       const outcome = String(entry.params.outcome)
       const suffix = outcome === 'win' ? 'resultWin' : outcome === 'lose' ? 'resultLose' : 'result'

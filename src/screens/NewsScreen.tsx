@@ -15,8 +15,7 @@ import {
   TriangleAlert,
   Trophy,
   Wrench,
-  type LucideProps,
-} from 'lucide-react'
+  type LucideProps, Leaf } from 'lucide-react'
 import { useUiStore } from '../store/useUiStore'
 import type { NewsEventType } from '../core/news'
 import { useGameStore } from '../store/useGameStore'
@@ -102,6 +101,7 @@ const NEWS_ICONS: Partial<Record<NewsEventType, { Icon: ComponentType<LucideProp
   ModelDevelopmentStarted: { Icon: Wrench, color: '#8fb4ff' },
   ModelReleased: { Icon: Car, color: 'var(--color-accent-hover)' },
   ModelSoldOut: { Icon: PackageCheck, color: 'var(--color-green)' },
+  EmissionRulesTightened: { Icon: Leaf, color: 'var(--color-danger)' },
   ResearchCompleted: { Icon: FlaskConical, color: '#8fb4ff' },
   LoanTaken: { Icon: Landmark, color: 'var(--color-trim)' },
   LoanPaidOff: { Icon: Banknote, color: 'var(--color-green)' },

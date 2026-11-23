@@ -22,7 +22,7 @@ export interface HqRegionDefinition {
 }
 
 export const HQ_REGIONS: HqRegionDefinition[] = [
-  { id: 'mexico', flag: 'mexico', city: 'Mexico City', allCostMultiplier: 0.9 },
+  { id: 'mexico', flag: 'mexico', city: 'Mexico City', classCostMultiplier: { classes: ['Sedan', 'Coupe'], multiplier: 0.9 } },
   { id: 'brazil', flag: 'brazil', city: 'Brasilia', engineCostMultiplier: 0.92 },
   { id: 'usa', flag: 'usa', city: 'Washington', classCostMultiplier: { classes: ['SUV', 'Truck'], multiplier: 0.5 } },
   { id: 'uk', flag: 'uk', city: 'London', classDemandMultiplier: { Sports: 1.15, Coupe: 1.15 } },
